@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>مكتبة الأكواد والملفات | But_Seven_7</title>
+    <style>
+        /* الأنماط الأساسية الموحدة */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+            direction: rtl;
+            text-align: right;
+        }
+
+        header {
+            background-color: #fff;
+            color: #666;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            text-align: center;
+        }
+
+        header .logo {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #666;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        /* أدوات الرفع والتحكم */
+        .toolbar {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .toolbar h2 { 
+            margin-right: 30px;
+            color: #666; }
+
+        .upload-btn-wrapper {
+            position: relative;
+     margin-right: 80px;
+            overflow: hidden;
+            display: inline-block;
+            
+        }
+
+        .btn-upload {
+       width: 100%;
+            border: 2px dashed #888;
+            color: #007bff;
+            background-color: #f8f9fa;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn-wrapper:hover .btn-upload {
+            background-color: #fff;
+            color: #007bff;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        /* شبكة الملفات */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .file-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            border-top: 4px solid #007bff;
+        }
+
+        .file-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .file-icon {
+            font-size: 2.5rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .file-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .file-meta {
+            font-size: 0.85rem;
+            color: #888;
+            text-align: center;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view { background-color: #17a2b8; }
+        .btn-view:hover { background-color: #138496; }
+        
+        .btn-download { background-color: #28a745; }
+        .btn-download:hover { background-color: #218838; }
+
+        .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #c82333; }
+
+        /* النافذة المنبثقة (Modal) لعرض الكود */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #282a36; /* لون متوافق مع محررات الأكواد */
+            margin: auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background-color: #1e1f29;
+            color: #f8f8f2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .modal-header h3 { margin: 0; font-size: 1.2rem; }
+        
+        .close-modal {
+            color: #ff5555;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-modal:hover { color: #ff9999; }
+
+        .modal-body {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        pre {
+            margin: 0;
+            color: #f8f8f2;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            direction: ltr; /* اتجاه الأكواد من اليسار لليمين دائماً */
+            text-align: left;
+        }
+
+        /* رسالة حالة فارغة */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            color: #777;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        /* تنسيق زر المعاينة الجديد */
+.btn-preview {
+    background-color: #28a745; /* اللون الأخضر للمعاينة */
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-preview:hover {
+    background-color: #218838;
+}
+/* --- تنسيقات نافذة المعاينة المدمجة --- */
+.preview-modal {
+    display: none; /* مخفية افتراضياً */
+    position: fixed; 
+    z-index: 2000; /* لتكون فوق كل شيء */
+    left: 0px; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: #fff; 
+    flex-direction: column;
+}
+
+.preview-modal.show {
+    display: flex;
+}
+
+.preview-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.preview-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.close-preview-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.close-preview-btn:hover {
+    background-color: #c82333;
+}
+
+.preview-iframe {
+    width: 100%;
+    flex: 1; /* ليأخذ الطول الكامل المتبقي من الشاشة */
+    border: none;
+    background-color: #fff;
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <p class="logo">But_Seven</p>
+        <a href="indexs.html" style="color: #666; text-decoration: none; font-weight: bold;"><?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24"><path d="M23.121,9.069,15.536,1.483a5.008,5.008,0,0,0-7.072,0L.879,9.069A2.978,2.978,0,0,0,0,11.19v9.817a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V11.19A2.978,2.978,0,0,0,23.121,9.069ZM15,22.007H9V18.073a3,3,0,0,1,6,0Zm7-1a1,1,0,0,1-1,1H17V18.073a5,5,0,0,0-10,0v3.934H3a1,1,0,0,1-1-1V11.19a1.008,1.008,0,0,1,.293-.707L9.878,2.9a3.008,3.008,0,0,1,4.244,0l7.585,7.586A1.008,1.008,0,0,1,22,11.19Z" fill="#666"/></svg></a>
+    </header>
+
+    <div class="container">
+        <div class="toolbar">
+            <h2> My uploaded files</h2>
+            
+            <div class="upload-btn-wrapper">
+                <button class="btn-upload">  <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Bold" viewBox="0 0 24 24" width="52" height="25"><path d="M22.419,10a8.269,8.269,0,0,0-4.442-3.063A8.185,8.185,0,0,0,8.258,1.111,8.174,8.174,0,0,0,2.6,12.375,5.781,5.781,0,0,0,.188,18.694,5.85,5.85,0,0,0,5.944,23H8.5A1.5,1.5,0,0,0,10,21.5h0A1.5,1.5,0,0,0,8.5,20H5.944A2.893,2.893,0,0,1,3.1,17.958a2.8,2.8,0,0,1,2-3.446,1.5,1.5,0,0,0,.83-2.346A5.2,5.2,0,0,1,5.119,7.6a5.1,5.1,0,0,1,3.7-3.539,5.589,5.589,0,0,1,1.264-.147,5.14,5.14,0,0,1,3.118,1.042,5.216,5.216,0,0,1,2.014,3.442,1.508,1.508,0,0,0,1.288,1.3A5.227,5.227,0,0,1,20,11.774a5.155,5.155,0,0,1,.92,3.958,5.031,5.031,0,0,1-2.246,3.319A1.5,1.5,0,0,0,18,20.307h0a1.515,1.515,0,0,0,2.313,1.3,8.016,8.016,0,0,0,3.565-5.363A8.127,8.127,0,0,0,22.419,10Z"/><path d="M15.5,22.5V17h1.663a1,1,0,0,0,.707-1.707L14.707,12.13a1,1,0,0,0-1.414,0L10.13,15.293A1,1,0,0,0,10.837,17H12.5v5.5a1.5,1.5,0,0,0,3,0Z"/></svg></button>
+                <input type="file" id="fileInput" accept=".html,.css,.js,.txt,.json,.xml" multiple />
+            </div>
+        </div>
+
+        <div class="files-grid" id="filesContainer">
+            </div>
+    </div>
+
+    <div id="codeModal" class="modal">
+        
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalFileName">اسم الملف.js</h3>
+                <i class="fas fa-times close-modal" onclick="closePopup()"></i>
+            </div>
+            <div class="modal-body">
+                <pre><code id="codeContent"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تعريف المتغيرات الأساسية
+        const fileInput = document.getElementById('fileInput');
+        const filesContainer = document.getElementById('filesContainer');
+        const codeModal = document.getElementById('codeModal');
+        const codeContent = document.getElementById('codeContent');
+        const modalFileName = document.getElementById('modalFileName');
+
+        // استدعاء الملفات المحفوظة من LocalStorage أو إنشاء مصفوفة جديدة
+        let libraryFiles = JSON.parse(localStorage.getItem('libraryFiles')) || [];
+
+        // تشغيل دالة العرض عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', renderFiles);
+
+        // التعامل مع رفع الملفات الجديدة
+        fileInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            let filesProcessed = 0;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                        name: file.name,
+                        size: (file.size / 1024).toFixed(2) + ' KB', // الحجم بالكيلوبايت
+                        type: file.type || 'text/plain',
+                        content: e.target.result, // محتوى الكود
+                        date: new Date().toLocaleDateString('ar-EG')
+                    };
+
+                    libraryFiles.push(newFile);
+                    filesProcessed++;
+
+                    // تحديث الواجهة والحفظ بعد الانتهاء من قراءة كل الملفات
+                    if (filesProcessed === files.length) {
+                        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
+                        renderFiles();
+                        fileInput.value = ''; // تصفير الحقل
+                        alert('تم رفع الملفات بنجاح للمكتبة!');
+                    }
+                };
+
+                // قراءة محتوى الملف كنص (Text) لأنه ملف برمجي
+                reader.readAsText(file);
+            });
+        });
+
+        // بناء وعرض الكروت الخاصة بالملفات
+        function renderFiles() {
+            filesContainer.innerHTML = '';
+
+            if (libraryFiles.length === 0) {
+                filesContainer.innerHTML = `
+                    <div class="empty-state">
+                       
+            <h3>The library is empty</h3>
+    <p>Upload your code files (HTML, CSS, JS) to save and browse later.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // ترتيب الملفات من الأحدث للأقدم
+            libraryFiles.slice().reverse().forEach(file => {
+                // تحديد أيقونة تناسب نوع الملف
+                let iconClass = 'fa-file-code';
+                if (file.name.endsWith('.html')) iconClass = 'fa-html5';
+                else if (file.name.endsWith('.css')) iconClass = 'fa-css3-alt';
+                else if (file.name.endsWith('.js')) iconClass = 'fa-js-square';
+
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.innerHTML = `
+                    <div class="file-icon"><i class="${iconClass.includes('fa-') && iconClass !== 'fa-file-code' ? 'fab' : 'fas'} ${iconClass}" style="color: #007bff;"></i></div>
+                    <div class="file-name" title="${file.name}">${file.name.length > 20 ? file.name.substring(0, 20) + '...' : file.name}</div>
+                    <div class="file-meta">
+                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span> <br>
+                        <span><i class="far fa-calendar-alt"></i> ${file.date}</span>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn-view" onclick="viewCode('${file.id}')" title="View code">    <?xml version="1.0" encoding="UTF-8"?>
+  <?xml version="1.0" encoding="UTF-8"?>
+  <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="24" height="24">
+      <path d="m15.941,8c.036-.329.059-.662.059-1s-.022-.671-.059-1h1.559c.534,0,1.034.13,1.485.347-.678.256-1.304.644-1.831,1.171l-.482.482h-.731Zm3.059,14H5v-6.231c-.702-.16-1.371-.403-2-.716v8.947h18v-5.672l-2,2v1.672Zm4.068-8.568l-6.569,6.568h-4.5v-4.5l6.568-6.568c1.24-1.24,3.259-1.24,4.5,0,1.24,1.24,1.24,3.26,0,4.5Zm-1.415-3.086c-.46-.461-1.21-.461-1.671,0l-5.982,5.982v1.672h1.671l5.982-5.982c.46-.461.46-1.211,0-1.672Zm-14.653,3.654c-3.86,0-7-3.141-7-7S3.14,0,7,0s7,3.141,7,7-3.14,7-7,7Zm0-2c2.757,0,5-2.243,5-5s-2.243-5-5-5S2,4.243,2,7s2.243,5,5,5Zm3.992-5.882l-1.402-1.426-3.229,3.175-1.63-1.58-1.393,1.436,1.846,1.789c.315.315.733.488,1.179.488s.864-.174,1.172-.482l3.457-3.399Z" fill="#666"/>
+  </svg>
+</button>
+<button onclick="previewFile('${file.id}')" class="btn-preview">
+        <?xml version="1.0" encoding="UTF-8"?>
+    <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24">
+        <path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#666"/>
+    </svg>
+</button>
+                        <button class="btn-download" onclick="downloadFile('${file.id}')" title="Download  file">    <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#666"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z"fill="#666"/></svg></button>
+                        <button class="btn-delete" onclick="deleteFile('${file.id}')" title="Delete">    <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><g id="_01_align_center" data-name="01 align center"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#666"/><rect x="9" y="10" width="2" height="8" fill="#666"/><rect x="13" y="10" width="2" height="8" fill="#666"/></g></svg></button>
+                    </div>
+                `;
+                filesContainer.appendChild(card);
+            });
+        }
+
+        // دالة عرض الكود في النافذة المنبثقة
+        window.viewCode = function(id) {
+            const file = libraryFiles.find(f => f.id === id);
+            if (file) {
+                modalFileName.textContent = file.name;
+                // استخدام textContent لضمان طباعة الأوسام كـ Text وليس كـ HTML فعلي
+                codeContent.textContent = file.content;
+                codeModal.style.display = 'flex';
+            }
+        };
+
+        // إغلاق النافذة المنبثقة
+        window.closePopup = function() {
+            codeModal.style.display = 'none';
+        };
+
+        // إغلاق النافذة عند الضغط في أي مكان خارجها
+        window.onclick = function(event) {
+            if (event.target === codeModal) {
+                closePopup();
+            }
+        };
+
+        // دالة تنزيل الملف (إنشاء ملف وهمي للتحميل)
+        window.downloadFile = function(id) {
+            const file = libraryFiles.find(f => f.id === id);
+            if (file) {
+                const blob = new Blob([file.content], { type: file.type });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name; // تعيين اسم الملف الأصلي
+                document.body.appendChild(a);
+                a.click(); // محاكاة الضغط للتحميل
+                
+                // تنظيف الذاكرة بعد التحميل
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);  
+                }, 0); 
+            }
+        };
+
+        // دالة حذف الملف
+        window.deleteFile = function(id) {
+            if (confirm('هل أنت متأكد من رغبتك في حذف هذا الملف من المكتبة؟')) {
+                libraryFiles = libraryFiles.filter(f => f.id !== id);
+                localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
+                renderFiles();
+            }
+        };
+
+        // دالة تشغيل معاينة الملف في علامة تبويب جديدة
+window.previewFile = function(id) {
+    const file = libraryFiles.find(f => f.id === id);
+    if (file) {
+        // إنشاء كائن Blob يحتوي على كود الملف وتحديد نوعه كـ HTML
+        const blob = new Blob([file.content], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        // فتح الرابط المباشر للمعاينة في صفحة جديدة
+        window.open(url, '_blank');
+        
+        // تنظيف الذاكرة بعد فتح الصفحة بوقت قصير
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }
+};
+    </script>
+</body>
+</html>
