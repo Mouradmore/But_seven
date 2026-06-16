@@ -1209,9 +1209,12 @@ window.resetToCodes = function() {
                     }
                     
                     // نجاح تسجيل الدخول
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('currentUser', data.username);
-                    
+                    // داخل كود نجاح تسجيل الدخول في indexs.html
+localStorage.setItem('token', data.token);
+localStorage.setItem('currentUser', data.username);
+if (data.profilePic) {
+    localStorage.setItem('profilePic', data.profilePic); // حفظ الصورة القادمة من السيرفر عند الدخول
+}
                     alert(`أهلاً بك مجدداً، ${data.username}!`);
                     closeModal(loginModal);
                     loginForm.reset();
