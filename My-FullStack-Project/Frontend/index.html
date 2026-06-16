@@ -466,6 +466,15 @@
                 loggedInUserDisplay.style.display = 'none';
                 loggedOutButtons.style.display = 'inline-block';
             }
+			// جلب الصورة المحفوظة من ذاكرة المتصفح
+const savedProfilePic = localStorage.getItem('profilePic');
+// ابحث عن عنصر الصورة الخاص بالهيدر في ملف الـ HTML لديك (تأكد من الـ id الخاص به)
+const headerAvatar = document.getElementById('headerAvatar') || document.querySelector('.user-avatar'); 
+
+if (savedProfilePic && headerAvatar) {
+    headerAvatar.src = savedProfilePic;
+    headerAvatar.style.display = 'block'; // إظهار الصورة إذا كانت مخفية
+}
         }
 
         function getUserAvatar(username) {
