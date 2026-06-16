@@ -138,7 +138,7 @@
                         // حفظ البيانات في المتصفح بعد النجاح
                         localStorage.setItem('token', data.token);
                         localStorage.setItem('currentUser', data.username || username);
-                        
+                        localStorage.setItem('profilePic', base64Image);
                         alert("🎉 تم إنشاء الحساب بنجاح!");
                         
                         // 🛑 تنبيه هام: إذا قمت بتغيير اسم الملف في Vercel إلى index.html احذف حرف الـ s من هنا
