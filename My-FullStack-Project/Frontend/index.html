@@ -466,14 +466,16 @@
                 loggedInUserDisplay.style.display = 'none';
                 loggedOutButtons.style.display = 'inline-block';
             }
-			// جلب الصورة المحفوظة من ذاكرة المتصفح
+			// 1. جلب الصورة المشفرة من ذاكرة المتصفح
 const savedProfilePic = localStorage.getItem('profilePic');
-// ابحث عن عنصر الصورة الخاص بالهيدر في ملف الـ HTML لديك (تأكد من الـ id الخاص به)
-const headerAvatar = document.getElementById('headerAvatar') || document.querySelector('.user-avatar'); 
 
+// 2. تحديد عنصر الصورة باستخدام الـ id الصحيح الخاص بملفك
+const headerAvatar = document.getElementById('headerProfilePic'); 
+
+// 3. إذا كانت الصورة موجودة والعنصر موجود، يتم عرضها فوراً
 if (savedProfilePic && headerAvatar) {
     headerAvatar.src = savedProfilePic;
-    headerAvatar.style.display = 'block'; // إظهار الصورة إذا كانت مخفية
+    headerAvatar.style.display = 'inline-block'; // لضمان ظهورها بشكل سليم بجانب اسمك
 }
         }
 
