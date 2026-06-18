@@ -977,8 +977,10 @@ editor.on("inputRead", function(cm, change) {
     }
     
     try {
-        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects?page', {
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
             method: 'POST',
+            // ... باقي الكود كما هو
+         
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}` // إرسال التوكن لتوثيق المستخدم
