@@ -977,7 +977,7 @@ editor.on("inputRead", function(cm, change) {
     }
     
     try {
-        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects?page', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
