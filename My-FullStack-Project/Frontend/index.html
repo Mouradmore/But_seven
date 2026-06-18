@@ -741,21 +741,43 @@ alert("You cannot follow yourself.");
             displayFilteredProjects(filtered);
         }
 
-        function displayFilteredProjects(projects) {
-            projectsListDiv.innerHTML = '';
-            projectsListDiv.style.display = 'grid';
-            if (projects.length === 0) {
-                projectsListDiv.innerHTML = '<p style="text-align: center; margin-top: 50px; color: #555; grid-column: 1/-1;">No results matched search.</p>';
-                return;
-            }
-            projects.forEach(project => {
-                projectsListDiv.innerHTML += createCardHTML(project, false);
-            });
-            document.querySelectorAll('.view-code-btn').forEach(b => b.addEventListener('click', (e) => {
-                window.location.href = `view.html?id=${e.target.dataset.projectId}`;
-            }));
-            attachDeleteHandlers();
-        }
+        function createCardHTML(project, isTrending = false) {
+    const authorAvatar = getUserAvatar(project.author);
+    const badgeHTML = isTrending ? `<div class="trending-badge">...</div>` : '';
+    const cardClass = isTrending ? 'project-card trending-card' : 'project-card';
+    
+    // 🚨 التعديل السحري هنا: تنظيف الوصف من أي أكواد CSS أو HTML لمنع التشوه
+    let rawDescription = project.description || "لا يوجد وصف لهذا المشروع";
+    
+    // هذا السطر يحذف أي وسوم برمجية (مثل <style> أو <div>) ليعرض النص فقط بأمان
+    let cleanDescription = rawDescription.replace(/<[^>]*>?/gm, ''); 
+    
+    // قص النص ليكون 100 حرف فقط لتنسيق الكارت
+    let safeDescription = cleanDescription.substring(0, 100) + (cleanDescription.length > 100 ? '...' : '');
+
+    const currentUser = getCurrentUser();
+    let followBtnHTML = '';
+    
+    // ... (باقي كود أزرار المتابعة يظل كما هو بدون تغيير) ...
+    if (!currentUser || currentUser !== project.author) {
+         // كود زر followBtnHTML
+    }
+    
+    return `
+        <div class="${cardClass}">
+            ${badgeHTML}
+            <h4>${project.title || "مشروع جديد"}</h4>
+            
+            <p>${safeDescription}</p>
+            
+            <div class="author" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <img src="${authorAvatar}" alt="${project.author}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                <span>By: ${project.author || "مجهول"}</span>
+                ${followBtnHTML}
+            </div>
+            
+            `;
+}
 
 // 7. العرض المباشر للوسائط بملء الشاشة مع أزرار التفاعل وميزة السحب لإخفاء الأزرار وإيقاف الميديا عند التمرير
 function displayMediaDirectly(keyword) {
