@@ -742,41 +742,30 @@ alert("You cannot follow yourself.");
         }
 
         function createCardHTML(project, isTrending = false) {
-    const authorAvatar = getUserAvatar(project.author);
-    const badgeHTML = isTrending ? `<div class="trending-badge">...</div>` : '';
-    const cardClass = isTrending ? 'project-card trending-card' : 'project-card';
-    
-    // 🚨 التعديل السحري هنا: تنظيف الوصف من أي أكواد CSS أو HTML لمنع التشوه
+    // 1. تنظيف الوصف من أي أكواد وتقليصه لـ 100 حرف لمنع تشوه الكارت
     let rawDescription = project.description || "لا يوجد وصف لهذا المشروع";
-    
-    // هذا السطر يحذف أي وسوم برمجية (مثل <style> أو <div>) ليعرض النص فقط بأمان
-    let cleanDescription = rawDescription.replace(/<[^>]*>?/gm, ''); 
-    
-    // قص النص ليكون 100 حرف فقط لتنسيق الكارت
+    let cleanDescription = rawDescription.replace(/<[^>]*>?/gm, ''); // حذف أي وسوم HTML متبقية
     let safeDescription = cleanDescription.substring(0, 100) + (cleanDescription.length > 100 ? '...' : '');
 
-    const currentUser = getCurrentUser();
-    let followBtnHTML = '';
-    
-    // ... (باقي كود أزرار المتابعة يظل كما هو بدون تغيير) ...
-    if (!currentUser || currentUser !== project.author) {
-         // كود زر followBtnHTML
-    }
-    
+    // 2. تجهيز رابط الصورة الشخصية للمؤلف (إذا لم تكن له صورة نضع صورة تلقائية بأول حرف من اسمه)
+    let authorAvatar = project.authorAvatar || `https://ui-avatars.com/api/?name=${project.author || 'U'}&background=random&color=fff`;
+
+    // 3. بناء هيكل الكارت (HTML) بشكل سليم 100% بدون أي أقواس زائدة
     return `
-        <div class="${cardClass}">
-            ${badgeHTML}
+        <div class="project-card ${isTrending ? 'trending-card' : ''}">
             <h4>${project.title || "مشروع جديد"}</h4>
+            <p class="project-desc" style="color: #666; font-size: 14px; margin: 8px 0;">${safeDescription}</p>
             
-            <p>${safeDescription}</p>
-            
-            <div class="author" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <img src="${authorAvatar}" alt="${project.author}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
-                <span>By: ${project.author || "مجهول"}</span>
-                ${followBtnHTML}
+            <div class="author" style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+                <img src="${authorAvatar}" alt="${project.author || 'user'}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                <span style="font-size: 13px; color: #333;">By: ${project.author || "مجهول"}</span>
             </div>
             
-            `;
+            <div style="margin-top: 15px; text-align: left;">
+                <button class="view-code-btn" data-project-id="${project._id}">معاينة الكود</button>
+            </div>
+        </div>
+    `;
 }
 
 // 7. العرض المباشر للوسائط بملء الشاشة مع أزرار التفاعل وميزة السحب لإخفاء الأزرار وإيقاف الميديا عند التمرير
