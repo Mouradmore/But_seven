@@ -651,42 +651,85 @@ alert("You cannot follow yourself.");
     displayCodeProjects();
 };
         // 5. عرض قائمة المشاريع مع ميزة "الأكثر مشاهدة"
-         async function displayCodeProjects() {
-    // تأكد من اسم الـ ID الخاص بالحاوية في ملف الـ HTML لديك
-    const container = document.getElementById('projectsContainer') || document.getElementById('projects-list'); 
-    if (!container) return;
-
+           async function displayCodeProjects() {
     try {
-        // 🚨 تأكد من تعديل هذا الرابط ليكون رابط الـ Render الخاص بك
-        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects'); 
+        // 1. جلب المشاريع من السيرفر باستخدام الترقيم الحالي (currentPage و projectsPerPage)
+       const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects?page=${currentPage}&limit=${projectsPerPage}`);
+        if (!response.ok) throw new Error('فشل في جلب البيانات من السيرفر');
         
-        if (!response.ok) {
-            console.error("فشل جلب المشاريع من السيرفر");
+        const data = await response.json();
+        
+        // 2. تحويل المعرف _id الخاص بـ MongoDB إلى id ليتوافق مع كروت التصميم الخاصة بك
+        let projects = data.projects.map(p => ({ ...p, id: p._id }));
+        
+        // إعادة تهيئة الحاوية وتجهيز شبكة العرض
+        projectsListDiv.innerHTML = '';
+        projectsListDiv.style.display = 'grid';
+        
+        // إذا كانت قاعدة البيانات فارغة تماماً ولا توجد مشاريع في الصفحة الأولى
+        if (projects.length === 0 && currentPage === 1) {
+            projectsListDiv.innerHTML = '<p style="text-align: center; margin-top: 50px; font-size: 1.1em; color: #555; grid-column: 1/-1;">There are no projects to display yet. <a href="#" onclick="checkAndGoToCodes()">Start your first business!</a></p>';
+            if (prevPageBtn) prevPageBtn.disabled = true;
+            if (nextPageBtn) nextPageBtn.disabled = true;
+            if (currentPageDisplay) currentPageDisplay.textContent = 'page 0 Of 0';
             return;
         }
-
-        const projects = await response.json();
-        container.innerHTML = ""; // تفريغ الحاوية قبل العرض لمنع التكرار
-
-        if (projects.length === 0) {
-            container.innerHTML = "<p class='no-projects'>لا توجد مشاريع منشورة حتى الآن.</p>";
-            return;
+        
+        let topProject = null;
+        let otherProjects = projects;
+        
+        // 3. عزل وتحديد المشروع الأكثر مشاهدة (فقط في الصفحة الأولى ومن بين المشاريع المعروضة)
+        if (currentPage === 1 && projects.length > 0) {
+            let sortedByViews = [...projects].sort((a, b) => (b.views || 0) - (a.views || 0));
+            topProject = sortedByViews[0];
+            
+            if (topProject && topProject.views > 0) { // فقط إذا كان هناك تفاعل مشاهدات حقيقي
+                otherProjects = projects.filter(p => p.id !== topProject.id);
+            } else {
+                topProject = null; // نلغيه إذا كانت كل المشاهدات صفر لتظهر كروت عادية
+            }
         }
-
-        // بناء كروت المشاريع (تأكد من مطابقة الكود لتصميمك الخاص)
-        projects.forEach(project => {
-            const card = document.createElement('div');
-            card.className = 'project-card'; 
-            card.innerHTML = `
-                <h3>${project.title}</h3>
-                <p>المؤلف: ${project.author || 'مجهول'}</p>
-                <a href="view.html?id=${project._id}" class="btn">معاينة الكود</a>
-            `;
-            container.appendChild(card);
+        
+        // 💡 ملحوظة: السيرفر يقوم بترتيب باقي المشاريع تلقائياً حسب الأحدث بواسطة (.sort({ createdAt: -1 }))
+        // لذلك قمنا بالاستغناء عن كود الترتيب القديم بـ timestamp.
+        
+        // 🛑 التعديل الأهم: قمنا بإلغاء كود الـ .slice() لأن السيرفر أرسل لنا المشاريع مقصوصة وجاهزة للمشاهدة
+        const projectsToDisplay = otherProjects;
+        
+        // 4. طباعة المشروع الأكثر مشاهدة في الأعلى (Featured Card) إذا وُجد
+        if (topProject && currentPage === 1) {
+            projectsListDiv.innerHTML += createCardHTML(topProject, true);
+        }
+        
+        // 5. طباعة باقي المشاريع الخاصة بالصفحة الحالية
+        projectsToDisplay.forEach(project => {
+            projectsListDiv.innerHTML += createCardHTML(project, false);
         });
-
+        
+        if (prevPageBtn) prevPageBtn.style.display = 'inline-block';
+        if (nextPageBtn) nextPageBtn.style.display = 'inline-block';
+        
+        // 6. حساب وإدارة الصفحات بناءً على البيانات الحقيقية القادمة من السيرفر (data.totalPages)
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage >= data.totalPages;
+        currentPageDisplay.innerHTML = `page ${currentPage} Of ${data.totalPages || 1}`;
+        
+        // 7. إعادة تفعيل أحداث الضغط لفتح المشاريع ومعاينتها
+        document.querySelectorAll('.view-code-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const projectId = event.target.dataset.projectId;
+                window.location.href = `view.html?id=${projectId}`;
+            });
+        });
+        
+        // استدعاء دالة إدارة الحذف إن وجدت
+        if (typeof attachDeleteHandlers === 'function') {
+            attachDeleteHandlers();
+        }
+        
     } catch (error) {
-        console.error("خطأ أثناء جلب المشاريع:", error);
+        console.error('خطأ أثناء جلب وعرض المشاريع:', error);
+        projectsListDiv.innerHTML = '<p style="text-align: center; color: red; margin-top: 30px; grid-column: 1/-1;">فشل الاتصال بالخادم، تأكد من تشغيل السيرفر وقاعدة البيانات.</p>';
     }
 }
         // 6. حساب وإدارة الصفحات بناءً على البيانات الحقيقية القادمة من السيرفر (data.totalPages)
