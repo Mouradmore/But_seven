@@ -986,12 +986,12 @@ editor.on("inputRead", function(cm, change) {
                 'Authorization': `Bearer ${token}` // إرسال التوكن لتوثيق المستخدم
             },
             body: JSON.stringify({
-                title: title,
-                html: finalBundle,
-                css: "", // أو يمكنك فصل الأكواد هنا
-                js: ""
-            })
-        });
+    title: title,
+    description: description || "لا يوجد وصف لهذا المشروع.", // تمت إضافة الوصف هنا
+    html: finalBundle,
+    css: "", 
+    js: ""
+})
         
         if (response.ok) {
             alert("🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح وبشكل مستقل داخل مجتمع الأكواد.");
