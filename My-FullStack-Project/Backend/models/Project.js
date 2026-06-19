@@ -8,7 +8,6 @@ const CommentSchema = new mongoose.Schema({
 
 const ProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: { type: String, default: "" },
   html: { type: String, default: "" },
   css: { type: String, default: "" },
   js: { type: String, default: "" },
