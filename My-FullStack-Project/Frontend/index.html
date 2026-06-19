@@ -516,14 +516,16 @@ const badgeHTML = isTrending ? `<div class="trending-badge">  <?xml version="1.0
             </button>`;
     }
     
-    return `
-        <div class="${cardClass}">
-            ${badgeHTML}
-            <h4>${project.title}</h4>
-            <p>${project.description.substring(0, 100)}${project.description.length > 100 ? '...' : ''}</p>
-            
-            <div class="author" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <img src="${authorAvatar}" alt="${project.author}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+    const safeDescription = project.description ? project.description : "لا يوجد وصف لهذا المشروع.";
+
+return `
+    <div class="${cardClass}">
+        ${badgeHTML}
+        <h4>${project.title}</h4>
+        <p>${safeDescription.substring(0, 100)}${safeDescription.length > 100 ? '...' : ''}</p>
+        
+        <div class="author" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+		<img src="${authorAvatar}" alt="${project.author}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
                 <span>By: ${project.author}</span>
                 ${followBtnHTML}
             </div>
