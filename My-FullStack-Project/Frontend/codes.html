@@ -977,19 +977,24 @@ editor.on("inputRead", function(cm, change) {
     }
     
     try {
-        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // إرسال التوكن لتوثيق المستخدم
-            },
-            body: JSON.stringify({
-                title: title,
-                html: finalBundle,
-                css: "", // أو يمكنك فصل الأكواد هنا
-                js: ""
-            })
-        });
+        // 1. أضف هذا السطر قبل الـ fetch ليطلب الوصف من المستخدم
+const projectDescription = prompt("أدخل وصفاً مختصراً لمشروعك (اختياري):") || "";
+
+// 2. داخل جسم طلب الـ fetch أرسل الوصف الجديد للسيرفر
+const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({
+        title: projectTitle,
+        description: projectDescription, // 👈 هذا هو السطر الذي كان ناقصاً لإرسال الوصف
+        html: finalBundle,
+        css: "", 
+        js: ""
+    })
+});
         
         if (response.ok) {
             alert("🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح وبشكل مستقل داخل مجتمع الأكواد.");
