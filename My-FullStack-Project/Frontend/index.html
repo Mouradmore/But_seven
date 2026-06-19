@@ -666,14 +666,20 @@ alert("You cannot follow yourself.");
     displayCodeProjects();
 };
         // 5. عرض قائمة المشاريع مع ميزة "الأكثر مشاهدة"
-        async function displayCodeProjects() {
+        async function syncProjectsFromBackend() {
     try {
-        // 1. جلب المشاريع من السيرفر باستخدام الترقيم الحالي (currentPage و projectsPerPage)
-       const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects?page=${currentPage}&limit=${projectsPerPage}`);
-        if (!response.ok) throw new Error('فشل في جلب البيانات من السيرفر');
-        
-        const data = await response.json();
-        
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects');
+        if (response.ok) {
+            const serverProjects = await response.json();
+            // تحديث التخزين المحلي ببيانات السيرفر
+            localStorage.setItem('codeProjects', JSON.stringify(serverProjects));
+            // تحديث واجهة العرض بعد وصول البيانات
+            displayCodeProjects();
+        }
+    } catch (error) {
+        console.error("تعذر جلب المشاريع من السيرفر، سيتم عرض المشاريع المخزنة محلياً.", error);
+    }
+}
         // 2. تحويل المعرف _id الخاص بـ MongoDB إلى id ليتوافق مع كروت التصميم الخاصة بك
         let projects = data.projects.map(p => ({ ...p, id: p._id }));
         
