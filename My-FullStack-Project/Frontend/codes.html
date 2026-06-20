@@ -968,7 +968,7 @@ async function exportToCommunityProjects() {
     if (!title || title.trim() === "") return;
 
     // 2. طلب الوصف
-    let description = prompt("أدخل وصفاً مبسطاً للمشروع:");
+    const description = prompt("أدخل وصفاً مبسطاً للمشروع:");
     if (!description || description.trim() === "") {
         description = "لا يوجد وصف متوفر لهذا المشروع.";
     }
