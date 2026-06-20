@@ -968,10 +968,8 @@ async function exportToCommunityProjects() {
     if (!title || title.trim() === "") return;
 
     // 2. طلب الوصف
-    const description = prompt("أدخل وصفاً مبسطاً للمشروع:");
-    if (!description || description.trim() === "") {
-        description = "لا يوجد وصف متوفر لهذا المشروع.";
-    }
+    const title = prompt("أدخل وصفاً مبسطاً للمشروع:");
+    if (!title || title.trim() === "") return;
     
     // 3. التحقق من تسجيل الدخول
     const token = localStorage.getItem('token');
@@ -998,7 +996,7 @@ async function exportToCommunityProjects() {
             },
             body: JSON.stringify({
                 title: title.trim(),
-                description: description.trim(), // 👈 تم حل المشكلة: إرسال الوصف هنا
+                title: title.trim(), // 👈 تم حل المشكلة: إرسال الوصف هنا
                 author: author,                  // 👈 إرسال اسم صاحب المشروع
                 html: finalBundle,
                 css: "", 
