@@ -963,55 +963,60 @@ editor.on("inputRead", function(cm, change) {
         function closeFullscreenPreview() { document.getElementById('fullscreenPreview').classList.remove('active'); }
 
 async function exportToCommunityProjects() {
-    // 1. التحقق من تسجيل الدخول والتوكن
+    // 1. طلب العنوان
+    const title = prompt("أدخل عنواناً للمشروع لنشره في المجتمع:");
+    if (!title || title.trim() === "") return;
+
+    // 2. طلب الوصف
+    let description = prompt("أدخل وصفاً مبسطاً للمشروع:");
+    if (!description || description.trim() === "") {
+        description = "لا يوجد وصف متوفر لهذا المشروع.";
+    }
+    
+    // 3. التحقق من تسجيل الدخول
     const token = localStorage.getItem('token');
     const author = localStorage.getItem('currentUser');
     if (!token || !author) { 
         alert("خطأ: يجب تسجيل الدخول أولاً لنشر المشروعات."); 
         return; 
     }
-
-    // 2. طلب البيانات من المستخدم
-    const title = prompt("أدخل عنواناً للمشروع لنشره في المجتمع:");
-    if (!title || !title.trim()) return;
     
-    let description = prompt("أدخل وصفاً مبسطاً للمشروع (اختياري):") || "";
-    if (!description.trim()) description = "لا يوجد وصف متوفر لهذا المشروع.";
-
-    // 3. تجميع المشروع
+    // 4. تجميع الكود
     const finalBundle = compileVirtualProject();
     if (!finalBundle) {
         alert("خطأ: لا يوجد ملف HTML صالح ليتم حزمه ونشره.");
         return;
     }
-
+    
     try {
-        // 4. إرسال البيانات للسيرفر
+        // 5. إرسال البيانات إلى سيرفر Render مع تضمين الوصف واسم الكاتب
         const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}` // إرسال التوكن لتوثيق المستخدم
             },
             body: JSON.stringify({
                 title: title.trim(),
-                description: description.trim(),
-                author: author,
+                description: description.trim(), // 👈 تم حل المشكلة: إرسال الوصف هنا
+                author: author,                  // 👈 إرسال اسم صاحب المشروع
                 html: finalBundle,
                 css: "", 
                 js: ""
             })
         });
-
+        
+        // 6. التعامل مع النتيجة
         if (response.ok) {
-            alert("🎉 تهانينا! تم نشر مشروعك بنجاح في مجتمع الأكواد.");
-            window.location.href = "index.html";
+            alert("🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح في مجتمع الأكواد.");
+            window.location.href = "index.html"; // التوجيه الصحيح للصفحة الرئيسية
         } else {
-            const data = await response.json().catch(()=>({}));
-            alert("فشل النشر: " + (data.msg || data.message || "خطأ في السيرفر"));
+            const data = await response.json().catch(() => ({}));
+            alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل النشر"));
         }
     } catch (error) {
-        alert("فشل الاتصال بالسيرفر أثناء الرفع. تأكد من اتصالك بالإنترنت.");
+        console.error(error);
+        alert("فشل الاتصال بالسيرفر أثناء الرفع. يرجى التأكد من اتصالك بالإنترنت.");
     }
 }
 
