@@ -74,13 +74,20 @@ app.post('/api/auth/login', async (req, res) => {
 // نشر مشروع جديد (Create Project) -> متوافق مع codes.html
 app.post('/api/projects', auth, async (req, res) => {
     try {
-        const { title, html, css, js } = req.body;
+        const { title, description, html, css, js } = req.body;
+
         const newProject = new Project({
-            title, html, css, js,
-            author: req.user.username // جلب اسم الكاتب تلقائياً من التوكن الآمن
+            title,
+            description,
+            html,
+            css,
+            js,
+            author: req.user.username
         });
+
         await newProject.save();
         res.json(newProject);
+
     } catch (err) {
         res.status(500).send('خطأ أثناء حفظ المشروع');
     }
