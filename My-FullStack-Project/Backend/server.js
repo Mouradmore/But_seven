@@ -1,5 +1,4 @@
 const connectDB = require('./config/db');
-
 // تشغيل دالة الاتصال بقاعدة البيانات
 connectDB();
 require('dotenv').config();
