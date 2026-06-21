@@ -466,16 +466,27 @@
 
         // 💡 التعديل 2: تحديث دالة الحذف لتقوم بإرسال طلب (DELETE) حقيقي للسيرفر
         async function deleteMyProject(projectId) {
-            if (confirm("Are you absolutely sure that you want to permanently delete this project from the code community?")) {
-                const token = localStorage.getItem('token');
+            if (confirm("هل أنت متأكد من أنك تريد حذف هذا المشروع نهائياً من مجتمع الأكواد؟")) {
                 
+                // 1. التعامل مع المشاريع المحلية القديمة (التي تبدأ بـ proj_)
+                if (String(projectId).startsWith('proj_')) {
+                    let allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
+                    allProjects = allProjects.filter(p => p.id !== projectId);
+                    localStorage.setItem('codeProjects', JSON.stringify(allProjects));
+                    
+                    renderProfilePage();
+                    alert("تم حذف المشروع المحلي بنجاح.");
+                    return; // نوقف الكود هنا حتى لا نرسل طلباً خاطئاً للسيرفر
+                }
+
+                // 2. التعامل مع المشاريع الجديدة (المرتبطة بالسيرفر)
+                const token = localStorage.getItem('token');
                 if (!token) {
                     alert("يجب تسجيل الدخول لحذف المشروع.");
                     return;
                 }
 
                 try {
-                    // الاتصال بالسيرفر للحذف النهائي من قاعدة البيانات
                     const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`, {
                         method: 'DELETE',
                         headers: {
@@ -484,16 +495,16 @@
                     });
 
                     if (response.ok) {
-                        // حذفه من التخزين المحلي لتحديث الواجهة فوراً
+                        // تحديث الواجهة فوراً
                         let allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
                         allProjects = allProjects.filter(p => p.id !== projectId);
                         localStorage.setItem('codeProjects', JSON.stringify(allProjects));
                         
                         renderProfilePage();
-                        alert("Your software project has been successfully deleted.");
+                        alert("تم حذف المشروع بنجاح من قاعدة البيانات.");
                     } else {
                         const data = await response.json().catch(() => ({}));
-                        alert("فشل الحذف: " + (data.msg || data.message || "حدث خطأ في السيرفر"));
+                        alert("فشل الحذف من السيرفر: " + (data.msg || data.message || "المسار غير موجود في السيرفر"));
                     }
                 } catch (error) {
                     console.error("Delete Error:", error);
