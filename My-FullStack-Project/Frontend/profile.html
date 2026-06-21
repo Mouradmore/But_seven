@@ -442,21 +442,29 @@
                 card.className = 'project-card';
                 // حماية للوصف لتجنب الأخطاء إذا كان فارغاً
                 // داخل حلقة userProjects.forEach
-        const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
-        const commentsCount = Array.isArray(project.comments) ? project.comments.length : 0;
+        const safeDesc = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
+                const shortDesc = safeDesc.length > 120 ? safeDesc.substring(0, 120) + '...' : safeDesc;
 
-        card.innerHTML = `
-            <div>
-                <h4>${project.title}</h4>
-                <p>${shortDesc}</p>
-            </div>
-            <div>
-                <div class="project-meta">
-                    <span><i class="fas fa-eye"></i> ${project.views || 0}</span>
-                    <span><i class="fas fa-heart"></i> ${likesCount}</span> <span><i class="fas fa-comments"></i> ${commentsCount}</span> </div>`;
+                card.innerHTML = `
+                    <div>
+                        <h4>${project.title}</h4>
+                        <p>${shortDesc}</p>
+                    </div>
+                    <div>
+                        <div class="project-meta">
+                            <span><i class="fas fa-eye"></i> ${project.views || 0}</span>
+                            <span><i class="fas fa-heart"></i> ${project.likes || 0}</span>
+                            <span><i class="fas fa-comments"></i> ${project.comments ? project.comments.length : 0}</span>
+                        </div>
+                        <div class="project-actions">
+                            <a href="view.html?id=${project.id}" class="btn-action btn-view"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#fff"/></svg></a>
+                            <button class="btn-action btn-delete" onclick="deleteMyProject('${project.id}')"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#fff"/><rect x="9" y="10" width="2" height="8" fill="#fff"/><rect x="13" y="10" width="2" height="8" fill="#fff"/></svg></button>
+                        </div>
+                    </div>
+                `;
                 projectsContainer.appendChild(card);
             });
-        }
+            }
 
         // 💡 التعديل 2: تحديث دالة الحذف لتقوم بإرسال طلب (DELETE) حقيقي للسيرفر
         async function deleteMyProject(projectId) {
