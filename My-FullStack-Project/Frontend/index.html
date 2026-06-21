@@ -514,9 +514,11 @@ function createCardHTML(project, isTrending = false) {
         followBtnHTML = `<button onclick="toggleFollow('${project.author}')" style="margin-right: auto; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 15px; border: 1px solid ${btnBorder}; background-color: ${btnBg}; color: ${btnColor}; cursor: pointer; transition: 0.3s;">${btnText}</button>`;
     }
     
-    // 💡 تم تأمين الوصف حتى لو كان غير موجود لا يتسبب في خطأ
     let rawDescription = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
     let safeDescription = rawDescription.length > 100 ? rawDescription.substring(0, 100) + '...' : rawDescription;
+    
+    // 💡 الحل الجذري هنا: نستخرج طول القائمة (عدد الأشخاص) بدلاً من الأسماء نفسها
+    const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
     
     return `
         <div class="${cardClass}">
@@ -532,7 +534,7 @@ function createCardHTML(project, isTrending = false) {
             
             <div class="project-meta">
                 <span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M23.688,11.654c-.131-.354-3.287-8.654-11.688-8.654C3.32,3.153,.464,11.306,.185,11.999c.276,.691,3.121,8.85,11.815,9.001,8.681-.154,11.536-8.305,11.815-9l-.127-.346Zm-11.688,7.346c-6.234,0-9.037-5.529-9.671-6.999,.637-1.47,3.448-7.001,9.671-7.001s9.033,5.529,9.671,7c-.638,1.471-3.449,7-9.671,7Zm5-7c0,2.761-2.239,5-5,5-1.669,0-3.138-.826-4.046-2.083l1.503-1.503,1.5,1.5,2.707-2.707,1.293,1.293v-3.429c0-.316-.256-.571-.571-.571h-3.429l1.293,1.293-1.293,1.293-1.5-1.5-2.362,2.362c-.059-.307-.096-.623-.096-.947,0-2.761,2.239-5,5-5s5,2.239,5,5Z"/></svg> Views: ${project.views || 0}</span>
-                <span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z" fill="red"/></svg> Likes: ${project.likes || 0}</span>
+                <span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z" fill="red"/></svg> Likes: ${likesCount}</span>
             </div>
             <div class="actions">
                 <button class="view-code-btn" data-project-id="${project.id}" style="background-color:#007bff;"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="18"><path d="M23.688,11.654c-.131-.354-3.287-8.654-11.688-8.654C3.32,3.153,.464,11.306,.185,11.999c.276,.691,3.121,8.85,11.815,9.001,8.681-.154,11.536-8.305,11.815-9l-.127-.346Zm-11.688,7.346c-6.234,0-9.037-5.529-9.671-6.999,.637-1.47,3.448-7.001,9.671-7.001s9.033,5.529,9.671,7c-.638,1.471-3.449,7-9.671,7Zm5-7c0,2.761-2.239,5-5,5-1.669,0-3.138-.826-4.046-2.083l1.503-1.503,1.5,1.5,2.707-2.707,1.293,1.293v-3.429c0-.316-.256-.571-.571-.571h-3.429l1.293,1.293-1.293,1.293-1.5-1.5-2.362,2.362c-.059-.307-.096-.623-.096-.947,0-2.761,2.239-5,5-5s5,2.239,5,5Z" fill="#fff"/></svg> View the page </button>
