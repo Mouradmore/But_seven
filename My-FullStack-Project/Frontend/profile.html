@@ -319,6 +319,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderProfilePage();
+            updateProfileFollowUI();
         });
 
         function renderProfilePage() {
@@ -341,9 +342,15 @@
 
             headerGreeting.textContent = ` ${currentUser}`;
 
+            // 💡 التعديل 1: جلب الصورة الشخصية من بيانات السيرفر المحفوظة أو الصورة الافتراضية
+            const serverPic = localStorage.getItem('profilePic');
             const users = JSON.parse(localStorage.getItem('users')) || [];
             const loggedInUser = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
-            const userProfilePic = loggedInUser ? loggedInUser.profilePic : '';
+            
+            let userProfilePic = serverPic;
+            if (!userProfilePic && loggedInUser && loggedInUser.profilePic) {
+                userProfilePic = loggedInUser.profilePic;
+            }
 
             const allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
             const userProjects = allProjects.filter(p => p.author === currentUser);
@@ -360,34 +367,34 @@
             mainWrapper.innerHTML = `
                 <div class="profile-card">
                     <div class="profile-avatar">
-                        ${userProfilePic ? `<img src="${userProfilePic}" alt="صورة ${currentUser}">` : `<i class="fas fa-user"></i>`}
+                        ${userProfilePic ? `<img src="${userProfilePic}" alt="صورة ${currentUser}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fas fa-user"></i>`}
                     </div>
                     <div class="profile-info">
                         <h2>${currentUser}</h2>
                         <p><i class="fas fa-calendar-alt"></i> A programmer registered in a community But_Seven_7</p>
                     </div>
                 </div>
-<div class="profile-stats" style="display: flex; gap: 20px; margin: 15px 0; justify-content: center; font-family: inherit;">
-    <div class="stat-item" id="followersCountBtn" style="cursor: pointer; background: ; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center; min-width: 80px;">
-        <div id="followersCount" style="font-size: 18px; font-weight: bold; color: #28a745;">0</div>
-        <span style="font-size: 13px; color: #666;">follower</span>
-    </div>
-    
-    <div class="stat-item" id="followingCountBtn" style="cursor: pointer; background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center; min-width: 80px;">
-        <div id="followingCount" style="font-size: 18px; font-weight: bold; color: #007bff;">0</div>
-        <span style="font-size: 13px; color: #666;">He continues</span>
-    </div>
-</div>
+                <div class="profile-stats" style="display: flex; gap: 20px; margin: 15px 0; justify-content: center; font-family: inherit;">
+                    <div class="stat-item" id="followersCountBtn" style="cursor: pointer; background: ; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center; min-width: 80px;">
+                        <div id="followersCount" style="font-size: 18px; font-weight: bold; color: #28a745;">0</div>
+                        <span style="font-size: 13px; color: #666;">follower</span>
+                    </div>
+                    
+                    <div class="stat-item" id="followingCountBtn" style="cursor: pointer; background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center; min-width: 80px;">
+                        <div id="followingCount" style="font-size: 18px; font-weight: bold; color: #007bff;">0</div>
+                        <span style="font-size: 13px; color: #666;">He continues</span>
+                    </div>
+                </div>
 
-<div id="followListModal" class="modal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); direction: rtl;">
-    <div class="modal-content" style="background-color: #fff; margin: 12% auto; padding: 20px; border-radius: 12px; width: 320px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <span id="closeFollowModal" style="position: absolute; left: 15px; top: 12px; cursor: pointer; font-size: 24px; color: #aaa;">&times;</span>
-        <h3 id="followModalTitle" style="margin-top: 0; margin-bottom: 15px; font-size: 18px; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px;">menu</h3>
-        
-        <ul id="followModalList" style="list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto;">
-        </ul>
-    </div>
-</div>
+                <div id="followListModal" class="modal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); direction: rtl;">
+                    <div class="modal-content" style="background-color: #fff; margin: 12% auto; padding: 20px; border-radius: 12px; width: 320px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        <span id="closeFollowModal" style="position: absolute; left: 15px; top: 12px; cursor: pointer; font-size: 24px; color: #aaa;">&times;</span>
+                        <h3 id="followModalTitle" style="margin-top: 0; margin-bottom: 15px; font-size: 18px; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px;">menu</h3>
+                        <ul id="followModalList" style="list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto;">
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-box">
                         <h3>${totalProjects}</h3>
@@ -395,27 +402,26 @@
                     </div>
                     <div class="stat-box views">
                         <h3>${totalViews}</h3>
-                        <p>   <?xml version="1.0" encoding="UTF-8"?>
-  <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="22" height="22">
-      <path d="M23.688,11.654c-.131-.354-3.287-8.654-11.688-8.654C3.32,3.153,.464,11.306,.185,11.999c.276,.691,3.121,8.85,11.815,9.001,8.681-.154,11.536-8.305,11.815-9l-.127-.346Zm-11.688,7.346c-6.234,0-9.037-5.529-9.671-6.999,.637-1.47,3.448-7.001,9.671-7.001s9.033,5.529,9.671,7c-.638,1.471-3.449,7-9.671,7Zm5-7c0,2.761-2.239,5-5,5-1.669,0-3.138-.826-4.046-2.083l1.503-1.503,1.5,1.5,2.707-2.707,1.293,1.293v-3.429c0-.316-.256-.571-.571-.571h-3.429l1.293,1.293-1.293,1.293-1.5-1.5-2.362,2.362c-.059-.307-.096-.623-.096-.947,0-2.761,2.239-5,5-5s5,2.239,5,5Z" />
-  </svg> Business Views</p>
+                        <p> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M23.688,11.654c-.131-.354-3.287-8.654-11.688-8.654C3.32,3.153,.464,11.306,.185,11.999c.276,.691,3.121,8.85,11.815,9.001,8.681-.154,11.536-8.305,11.815-9l-.127-.346Zm-11.688,7.346c-6.234,0-9.037-5.529-9.671-6.999,.637-1.47,3.448-7.001,9.671-7.001s9.033,5.529,9.671,7c-.638,1.471-3.449,7-9.671,7Zm5-7c0,2.761-2.239,5-5,5-1.669,0-3.138-.826-4.046-2.083l1.503-1.503,1.5,1.5,2.707-2.707,1.293,1.293v-3.429c0-.316-.256-.571-.571-.571h-3.429l1.293,1.293-1.293,1.293-1.5-1.5-2.362,2.362c-.059-.307-.096-.623-.096-.947,0-2.761,2.239-5,5-5s5,2.239,5,5Z" /></svg> Business Views</p>
                     </div>
                     <div class="stat-box likes">
                         <h3>${totalLikes}</h3>
-                        <p>    <?xml version="1.0" encoding="UTF-8"?>
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24">
-        <path d="M17.75,1c-2.504,0-4.777,1.851-5.75,4.354-.973-2.504-3.246-4.354-5.75-4.354C2.804,1,0,3.804,0,7.25c0,6.76,9.754,14.07,11.709,15.466l.291,.208,.291-.208c1.956-1.396,11.709-8.707,11.709-15.466,0-3.446-2.804-6.25-6.25-6.25Zm-5.75,20.693C6.859,17.958,1,12.022,1,7.25,1,4.355,3.355,2,6.25,2c2.748,0,5.25,2.86,5.25,6h1c0-3.14,2.502-6,5.25-6,2.895,0,5.25,2.355,5.25,5.25,0,4.772-5.859,10.708-11,14.443Z" />
-    </svg> Community Likes</p>
+                        <p> <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path d="M17.75,1c-2.504,0-4.777,1.851-5.75,4.354-.973-2.504-3.246-4.354-5.75-4.354C2.804,1,0,3.804,0,7.25c0,6.76,9.754,14.07,11.709,15.466l.291,.208,.291-.208c1.956-1.396,11.709-8.707,11.709-15.466,0-3.446-2.804-6.25-6.25-6.25Zm-5.75,20.693C6.859,17.958,1,12.022,1,7.25,1,4.355,3.355,2,6.25,2c2.748,0,5.25,2.86,5.25,6h1c0-3.14,2.502-6,5.25-6,2.895,0,5.25,2.355,5.25,5.25,0,4.772-5.859,10.708-11,14.443Z" /></svg> Community Likes</p>
                     </div>
                 </div>
 
                 <div class="section-title">
                     <span> projects</span>
-                    <a href="codes.html" class="btn-create-new"><svg id="Layer_1" height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z" fill="#666"/></svg>  </a>
+                    <a href="codes.html" class="btn-create-new"><svg height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg"><path d="m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z" fill="#666"/></svg>  </a>
                 </div>
 
                 <div class="user-projects-grid" id="userProjectsContainer"></div>
             `;
+
+            // إعداد أحداث إغلاق النافذة المنبثقة (يتم استدعاؤها بعد إنشاء العناصر في HTML)
+            document.getElementById('closeFollowModal').onclick = () => {
+                document.getElementById('followListModal').style.display = 'none';
+            };
 
             const projectsContainer = document.getElementById('userProjectsContainer');
             
@@ -433,10 +439,14 @@
             userProjects.forEach(project => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
+                // حماية للوصف لتجنب الأخطاء إذا كان فارغاً
+                const safeDesc = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
+                const shortDesc = safeDesc.length > 120 ? safeDesc.substring(0, 120) + '...' : safeDesc;
+
                 card.innerHTML = `
                     <div>
                         <h4>${project.title}</h4>
-                        <p>${project.description.substring(0, 120)}${project.description.length > 120 ? '...' : ''}</p>
+                        <p>${shortDesc}</p>
                     </div>
                     <div>
                         <div class="project-meta">
@@ -445,11 +455,8 @@
                             <span><i class="fas fa-comments"></i> ${project.comments ? project.comments.length : 0}</span>
                         </div>
                         <div class="project-actions">
-                            <a href="view.html?id=${project.id}" class="btn-action btn-view">    <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="20" height="20"><path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#fff"/></svg>
- </a>
-                            <button class="btn-action btn-delete" onclick="deleteMyProject('${project.id}')">    <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><g id="_01_align_center" data-name="01 align center"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#fff"/><rect x="9" y="10" width="2" height="8" fill="#fff"/><rect x="13" y="10" width="2" height="8" fill="#fff"/></g></svg> </button>
+                            <a href="view.html?id=${project.id}" class="btn-action btn-view"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#fff"/></svg></a>
+                            <button class="btn-action btn-delete" onclick="deleteMyProject('${project.id}')"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#fff"/><rect x="9" y="10" width="2" height="8" fill="#fff"/><rect x="13" y="10" width="2" height="8" fill="#fff"/></svg></button>
                         </div>
                     </div>
                 `;
@@ -457,115 +464,120 @@
             });
         }
 
-        function deleteMyProject(projectId) {
+        // 💡 التعديل 2: تحديث دالة الحذف لتقوم بإرسال طلب (DELETE) حقيقي للسيرفر
+        async function deleteMyProject(projectId) {
             if (confirm("Are you absolutely sure that you want to permanently delete this project from the code community?")) {
-                let allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
-                allProjects = allProjects.filter(p => p.id !== projectId);
-                localStorage.setItem('codeProjects', JSON.stringify(allProjects));
+                const token = localStorage.getItem('token');
                 
-                renderProfilePage();
-                alert("Your software project has been successfully deleted.");
+                if (!token) {
+                    alert("يجب تسجيل الدخول لحذف المشروع.");
+                    return;
+                }
+
+                try {
+                    // الاتصال بالسيرفر للحذف النهائي من قاعدة البيانات
+                    const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        // حذفه من التخزين المحلي لتحديث الواجهة فوراً
+                        let allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
+                        allProjects = allProjects.filter(p => p.id !== projectId);
+                        localStorage.setItem('codeProjects', JSON.stringify(allProjects));
+                        
+                        renderProfilePage();
+                        alert("Your software project has been successfully deleted.");
+                    } else {
+                        const data = await response.json().catch(() => ({}));
+                        alert("فشل الحذف: " + (data.msg || data.message || "حدث خطأ في السيرفر"));
+                    }
+                } catch (error) {
+                    console.error("Delete Error:", error);
+                    alert("فشل الاتصال بالسيرفر أثناء محاولة الحذف.");
+                }
             }
         }
 
         function logoutUser() {
             localStorage.removeItem('currentUser');
+            localStorage.removeItem('token');
+            localStorage.removeItem('profilePic');
             alert("Log out of your account.");
             window.location.href = "index.html";
         }
-        // دالة لجلب المستخدمين من الـ localStorage
-function getUsers() {
-    return JSON.parse(localStorage.getItem('users')) || [];
-}
 
-// دالة لجلب اسم المستخدم الحالي المسجل
-function getCurrentUser() {
-    return localStorage.getItem('currentUser');
-}
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('users')) || [];
+        }
 
-// دالة لتحديث واجهة المتابعة بالكامل
-function updateProfileFollowUI() {
-    // 1. تحديد أي ملف شخصي يتم عرضه الآن
-    // إذا كنت تستخدم نظام الروابط الذكية مثل profile.html?username=mourad فسيجلب الاسم من الرابط
-    // وإذا لم يجد وسيط في الرابط سيعرض حساب المستخدم الحالي المسجل تلقائياً
-    const urlParams = new URLSearchParams(window.location.search);
-    const profileUsername = urlParams.get('username') || getCurrentUser();
-    
-    if (!profileUsername) {
-        console.log("No user has been identified to view his statistics.");
-        return;
-    }
-    
-    const users = getUsers();
-    // البحث عن المستخدم صاحب الملف الحالي
-    const userObj = users.find(u => u.username.toLowerCase() === profileUsername.toLowerCase());
-    
-    if (userObj) {
-        // تأمين المصفوفات في حال كانت فارغة أو غير موجودة في الحسابات القديمة
-        const followersList = userObj.followers || [];
-        const followingList = userObj.following || [];
-        
-        // تحديث الأرقام في الـ HTML
-        document.getElementById('followersCount').innerText = followersList.length;
-        document.getElementById('followingCount').innerText = followingList.length;
-        
-        // ربط أزرار العدادات لفتح النافذة المنبثقة بالقوائم الصحيحة
-        document.getElementById('followersCountBtn').onclick = () => {
-            openFollowListModal('Followers', followersList);
-        };
-        
-        document.getElementById('followingCountBtn').onclick = () => {
-            openFollowListModal('who follow them', followingList);
-        };
-    }
-}
+        function getCurrentUser() {
+            return localStorage.getItem('currentUser');
+        }
 
-// دالة فتح النافذة المنبثقة وبناء قائمة الأسماء
-function openFollowListModal(title, usersList) {
-    const modal = document.getElementById('followListModal');
-    const modalTitle = document.getElementById('followModalTitle');
-    const modalList = document.getElementById('followModalList');
-    
-    modalTitle.innerText = title;
-    modalList.innerHTML = ''; // تنظيف القائمة السابقة
-    
-    if (usersList.length === 0) {
-        modalList.innerHTML = `<li style="color: #999; text-align: center; padding: 20px 0; font-size: 14px;">There are no users on this list at the moment.</li>`;
-    } else {
-        usersList.forEach(username => {
-            // بناء عنصر القائمة لكل مستخدم مع رابط يأخذك لملفه الشخصي
-            modalList.innerHTML += `
-                <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid #f9f9f9;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-user-circle" style="font-size: 24px; color: #ccc;"></i>
-                        <a href="profile.html?username=${username}" style="text-decoration: none; color: #333; font-weight: 600; font-size: 14px;">${username}</a>
-                    </div>
-                    <i class="fas fa-chevron-left" style="color: #ddd; font-size: 12px;"></i>
-                </li>
-            `;
+        function updateProfileFollowUI() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileUsername = urlParams.get('username') || getCurrentUser();
+            
+            if (!profileUsername) return;
+            
+            const users = getUsers();
+            const userObj = users.find(u => u.username.toLowerCase() === profileUsername.toLowerCase());
+            
+            if (userObj) {
+                const followersList = userObj.followers || [];
+                const followingList = userObj.following || [];
+                
+                const followersEl = document.getElementById('followersCount');
+                const followingEl = document.getElementById('followingCount');
+                
+                if(followersEl) followersEl.innerText = followersList.length;
+                if(followingEl) followingEl.innerText = followingList.length;
+                
+                const followersBtn = document.getElementById('followersCountBtn');
+                const followingBtn = document.getElementById('followingCountBtn');
+
+                if(followersBtn) followersBtn.onclick = () => openFollowListModal('Followers', followersList);
+                if(followingBtn) followingBtn.onclick = () => openFollowListModal('who follow them', followingList);
+            }
+        }
+
+        function openFollowListModal(title, usersList) {
+            const modal = document.getElementById('followListModal');
+            const modalTitle = document.getElementById('followModalTitle');
+            const modalList = document.getElementById('followModalList');
+            
+            modalTitle.innerText = title;
+            modalList.innerHTML = ''; 
+            
+            if (usersList.length === 0) {
+                modalList.innerHTML = `<li style="color: #999; text-align: center; padding: 20px 0; font-size: 14px;">There are no users on this list at the moment.</li>`;
+            } else {
+                usersList.forEach(username => {
+                    modalList.innerHTML += `
+                        <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid #f9f9f9;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-user-circle" style="font-size: 24px; color: #ccc;"></i>
+                                <a href="profile.html?username=${username}" style="text-decoration: none; color: #333; font-weight: 600; font-size: 14px;">${username}</a>
+                            </div>
+                            <i class="fas fa-chevron-left" style="color: #ddd; font-size: 12px;"></i>
+                        </li>
+                    `;
+                });
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('followListModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         });
-    }
-    
-    modal.style.display = 'block';
-}
-
-// إعداد أحداث إغلاق النافذة المنبثقة (Modal)
-document.getElementById('closeFollowModal').onclick = () => {
-    document.getElementById('followListModal').style.display = 'none';
-};
-
-// إغلاق النافذة عند الضغط في أي مكان خارج الصندوق الأبيض
-window.addEventListener('click', (event) => {
-    const modal = document.getElementById('followListModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-});
-
-// استدعاء الدالة تلقائياً عند فتح الصفحة الشخصية
-document.addEventListener('DOMContentLoaded', () => {
-    updateProfileFollowUI();
-});
     </script>
 </body>
 </html>
