@@ -123,7 +123,32 @@ app.get('/api/projects/:id', async (req, res) => {
         res.status(500).send('خطأ في السيرفر');
     }
 });
+// ... (الكود السابق في ملفك)
 
+// دالة حذف المشروع (DELETE)
+app.delete('/api/projects/:id', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        
+        if (!project) {
+            return res.status(404).json({ msg: 'المشروع غير موجود' });
+        }
+
+        // إضافة حماية: التأكد أن المستخدم الذي يحذف هو صاحب المشروع
+        if (project.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
+        }
+
+        await Project.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'تم حذف المشروع بنجاح' });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'خطأ داخلي في السيرفر' });
+    }
+});
+
+// ... (تكملة الكود الخاص بمسارات الإعجاب والتعليقات)
 // الإعجاب وإلغاء الإعجاب بمشروع (Like / Unlike) -> متوافق مع view.html
 app.post('/api/projects/:id/like', auth, async (req, res) => {
     try {
