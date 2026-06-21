@@ -352,18 +352,16 @@
                 userProfilePic = loggedInUser.profilePic;
             }
 
-            const allProjects = JSON.parse(localStorage.getItem('codeProjects')) || [];
-            const userProjects = allProjects.filter(p => p.author === currentUser);
-
             const totalProjects = userProjects.length;
             let totalViews = 0;
             let totalLikes = 0;
 
             userProjects.forEach(p => {
-                totalViews += Number(p.views) || 0;
-                // 💡 التعديل هنا: تحويل القائمة إلى رقم يمثل عدد الإعجابات لتتمكن الدالة من جمعها
-                totalLikes += Array.isArray(p.likes) ? p.likes.length : (Number(p.likes) || 0);
+                totalViews += (p.views || 0);
+                totalLikes += (p.likes || 0);
             });
+
+            
 
             mainWrapper.innerHTML = `
                 <div class="profile-card">
