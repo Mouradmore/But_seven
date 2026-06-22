@@ -498,11 +498,16 @@ function getUserAvatar(username) {
 // ==========================================
 function createCardHTML(project, isTrending = false) {
     const authorAvatar = getUserAvatar(project.author);
-    const badgeHTML = isTrending ? `<div class="trending-badge"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="22" height="22"><path d="M349.485,86.766c-25.569-21.67-51.906-44.15-78.561-70.72L255.731,0.96l-14.915,15.107 c-47.985,48.113-70.656,121.987-80.5,166.307c-7.535-11.679-13.126-24.502-16.556-37.97l-9.013-34.795l-26.208,24.632 C62.619,177.345,32,220.11,32,288.592c-0.882,101.634,67.488,190.839,165.859,216.401c14.405,3.504,29.109,5.644,43.915,6.392 c4.864,0.352,18.793,0.703,21.18,0.554c120.685-3.63,216.608-102.565,216.507-223.305 C479.461,197.14,419.225,146.001,349.485,86.766z M259.858,469.048c-2.231,0.193-4.259,0.213-6.516,0.192 c-39.844-1.218-71.54-33.819-71.637-73.681c0-27.002,14.481-40.461,47.254-68.357c8.262-7.027,17.249-14.672,26.704-23.425 c8.284,7.517,16.333,14.332,23.765,20.656c32.922,27.939,50.107,43.804,50.107,71.062 C329.461,434.599,298.901,466.859,259.858,469.048z"/></svg> Most interactive</div>` : '';
+    const badgeHTML = isTrending ? `<div class="trending-badge"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="22" height="22"><path d="M349.485,86.766c-25.569-21.67-51.906-44.15-78.561-70.72L255.731,0.96l-14.915,15.107 c-47.985,48.113-70.656,121.987-80.5,166.307c-7.535-11.679-13.126-24.502-16.556-37.97l-9.013-34.795l-26.208,24.632 C62.619,177.345,32,220.11,32,288.592c-0.882,101.634,67.488,190.839,165.859,216.401c14.405,3.504,29.109,5.644,43.915,6.392 c4.864,0.352,18.793,0.703,21.18,0.554c120.685-3.63,216.608-102.565,216.507-223.305 C479.461,197.14,419.225,146.001,349.485,86.766z M259.858,469.048c-2.231,0.193-4.259,0.213-6.516,0.192 c-39.844-1.218-71.54-33.819-71.637-73.681c0-27.002,14.481-40.461,47.254-68.357c8.262-7.027,17.249-14.672,26.704-23.425 c8.284,7.517,16.333,14.332,23.765,20.656c32.922,27.939,50.107,43.804,50.107,71.062 C329.461,434.599,298.901,466.859,259.858,469.048z M366.759,431.334l-0.426,0.298c3.822-11.644,5.777-23.819,5.792-36.074 c0-48.233-31.645-75.108-65.12-103.537c-11.861-10.051-24.106-20.443-36.329-32.667l-15.077-15.056l-15.056,15.056 c-13.799,13.778-27.3,25.277-39.204,35.414c-33.391,28.408-62.246,52.961-62.246,100.79c0.045,12.781,2.204,25.467,6.389,37.543 c-44.934-34.504-71.16-88.026-70.891-144.679c-0.35-37.368,14.113-73.355,40.226-100.087c4.498,9.125,9.83,17.815,15.929,25.959 c9.103,12.284,24.636,17.983,39.524,14.502c15.135-3.37,26.902-15.278,30.09-30.452c8.917-48.944,28.202-95.413,56.56-136.289 c22.466,21.295,44.72,40.141,64.801,57.199c66.696,56.645,114.994,97.574,114.994,169.296 c0.106,55.877-25.749,108.633-69.976,142.784H366.759z"/></svg> Most interactive</div>` : '';
     const cardClass = isTrending ? 'project-card trending-card' : 'project-card';
     
     const currentUser = getCurrentUser();
     let followBtnHTML = '';
+    
+    // 💡 التعديل 1: جلب عدد المتابعين من قائمة المستخدمين
+    const users = getUsers();
+    const authorObj = users.find(u => u.username.toLowerCase() === (project.author || '').toLowerCase());
+    const followersCount = authorObj && Array.isArray(authorObj.followers) ? authorObj.followers.length : 0;
     
     if (!currentUser || currentUser !== project.author) {
         const isFollowing = currentUser ? checkIsFollowing(currentUser, project.author) : false;
@@ -516,8 +521,6 @@ function createCardHTML(project, isTrending = false) {
     
     let rawDescription = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
     let safeDescription = rawDescription.length > 100 ? rawDescription.substring(0, 100) + '...' : rawDescription;
-    
-    // 💡 الحل الجذري هنا: نستخرج طول القائمة (عدد الأشخاص) بدلاً من الأسماء نفسها
     const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
     
     return `
@@ -526,9 +529,16 @@ function createCardHTML(project, isTrending = false) {
             <h4>${project.title}</h4>
             <p>${safeDescription}</p>
             
-            <div class="author" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <img src="${authorAvatar}" alt="${project.author}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
-                <span>By: ${project.author}</span>
+            <div class="author" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <img src="${authorAvatar}" alt="${project.author}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span style="font-size: 13px; color: #555;">By: <strong style="color: #333;">${project.author}</strong></span>
+                    <span style="font-size: 11px; color: #888; margin-top: 2px;">
+                        <i class="fas fa-users" style="font-size: 10px; color: #007bff;"></i> ${followersCount} متابع
+                    </span>
+                </div>
+                
                 ${followBtnHTML}
             </div>
             
