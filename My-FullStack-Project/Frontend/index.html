@@ -835,38 +835,7 @@ function displayMediaDirectly(keyword) {
         const mediaFixCss = `body { margin: 0 !important; padding: 0 !important; width: 100vw !important; height: 100dvh !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; overflow-x: auto !important; overflow-y: hidden !important; scroll-snap-type: x mandatory !important; touch-action: pan-x pan-y !important; font-size: 0 !important; color: transparent !important; } body::-webkit-scrollbar { display: none !important; } body * { display: contents !important; } img, video, canvas, audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: center !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; }`;
         const gestureScript = `<script> 
         const gestureScript = `<script> 
-            let touchStartX = 0; 
-            let touchStartY = 0; 
-            
-            document.addEventListener('touchstart', function(e) { 
-                touchStartX = e.changedTouches[0].clientX; 
-                touchStartY = e.changedTouches[0].clientY; 
-            }, {passive: true}); 
-            
-            document.addEventListener('touchend', function(e) { 
-                const touchEndX = e.changedTouches[0].clientX; 
-                const touchEndY = e.changedTouches[0].clientY; 
-                const deltaX = touchEndX - touchStartX; 
-                const deltaY = touchEndY - touchStartY; 
-                
-                if (Math.abs(deltaY) > 30 && Math.abs(deltaY) > Math.abs(deltaX)) { 
-                    window.parent.postMessage({action: 'hideUI', id: '${project.id}'}, '*'); 
-                } 
-            }, {passive: true}); 
-            
-            document.addEventListener('click', function(e) { 
-                // التحقق من أن العنصر ليس فيديو أو مقطع صوتي لتجنب تعطيل أزرار التشغيل
-                if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO') { 
-                    e.preventDefault(); // 👈 السر هنا: منع الروابط أو الأزرار من التسبب في خطأ 404
-                    window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
-                } 
-            }); 
-            
-            window.addEventListener('message', function(e) { 
-                if (e.data.action === 'scrollNext') { document.body.scrollBy({ left: window.innerWidth, behavior: 'smooth' }); } 
-                else if (e.data.action === 'scrollPrev') { document.body.scrollBy({ left: -window.innerWidth, behavior: 'smooth' }); } 
-            }); 
-        <\/script>`;
+        const gestureScript = `<script> let touchStartX = 0; let touchStartY = 0; document.addEventListener('touchstart', function(e) { touchStartX = e.changedTouches[0].clientX; touchStartY = e.changedTouches[0].clientY; }, {passive: true}); document.addEventListener('touchend', function(e) { const touchEndX = e.changedTouches[0].clientX; const touchEndY = e.changedTouches[0].clientY; const deltaX = touchEndX - touchStartX; const deltaY = touchEndY - touchStartY; if (Math.abs(deltaY) > 30 && Math.abs(deltaY) > Math.abs(deltaX)) { window.parent.postMessage({action: 'hideUI', id: '${project.id}'}, '*'); } }, {passive: true}); document.addEventListener('click', function(e) { if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO') { window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); } }); window.addEventListener('message', function(e) { if (e.data.action === 'scrollNext') { document.body.scrollBy({ left: window.innerWidth, behavior: 'smooth' }); } else if (e.data.action === 'scrollPrev') { document.body.scrollBy({ left: -window.innerWidth, behavior: 'smooth' }); } }); <\/script>`;
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'width: 100vw; height: 100dvh; border: none; display: block; background-color: #000;';
         iframe.srcdoc = "<!DOCTYPE html><html dir='ltr'><head><meta charset='UTF-8'>" + gestureScript + "<style>" + cssContent + " " + mediaFixCss + "</style></head><body>" + htmlContent + "<script>" + jsContent + "<\/script></body></html>";
