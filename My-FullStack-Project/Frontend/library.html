@@ -344,8 +344,18 @@
     <div class="container">
         <div class="toolbar">
             <h2> My uploaded files</h2>
-            
+            <button onclick="createFolder()" style="width: 40%;
+border: 2px dashed #888; margin-left: -40px;
+color: #007bff;
+background-color: #f8f9fa;
+padding: 15px 30px;
+border-radius: 8px;
+font-size: 1rem;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s;">📁  </button>
             <div class="upload-btn-wrapper">
+
                 <button class="btn-upload">  <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" id="Bold" viewBox="0 0 24 24" width="52" height="25"><path d="M22.419,10a8.269,8.269,0,0,0-4.442-3.063A8.185,8.185,0,0,0,8.258,1.111,8.174,8.174,0,0,0,2.6,12.375,5.781,5.781,0,0,0,.188,18.694,5.85,5.85,0,0,0,5.944,23H8.5A1.5,1.5,0,0,0,10,21.5h0A1.5,1.5,0,0,0,8.5,20H5.944A2.893,2.893,0,0,1,3.1,17.958a2.8,2.8,0,0,1,2-3.446,1.5,1.5,0,0,0,.83-2.346A5.2,5.2,0,0,1,5.119,7.6a5.1,5.1,0,0,1,3.7-3.539,5.589,5.589,0,0,1,1.264-.147,5.14,5.14,0,0,1,3.118,1.042,5.216,5.216,0,0,1,2.014,3.442,1.508,1.508,0,0,0,1.288,1.3A5.227,5.227,0,0,1,20,11.774a5.155,5.155,0,0,1,.92,3.958,5.031,5.031,0,0,1-2.246,3.319A1.5,1.5,0,0,0,18,20.307h0a1.515,1.515,0,0,0,2.313,1.3,8.016,8.016,0,0,0,3.565-5.363A8.127,8.127,0,0,0,22.419,10Z"/><path d="M15.5,22.5V17h1.663a1,1,0,0,0,.707-1.707L14.707,12.13a1,1,0,0,0-1.414,0L10.13,15.293A1,1,0,0,0,10.837,17H12.5v5.5a1.5,1.5,0,0,0,3,0Z"/></svg></button>
                 <input type="file" id="fileInput" accept=".html,.css,.js,.txt,.json,.xml" multiple />
@@ -361,6 +371,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalFileName">اسم الملف.js</h3>
+                
                 <i class="fas fa-times close-modal" onclick="closePopup()"></i>
             </div>
             <div class="modal-body">
@@ -369,182 +380,243 @@
         </div>
     </div>
 
-    <script>
-        // تعريف المتغيرات الأساسية
-        const fileInput = document.getElementById('fileInput');
-        const filesContainer = document.getElementById('filesContainer');
-        const codeModal = document.getElementById('codeModal');
-        const codeContent = document.getElementById('codeContent');
-        const modalFileName = document.getElementById('modalFileName');
 
-        // استدعاء الملفات المحفوظة من LocalStorage أو إنشاء مصفوفة جديدة
-        let libraryFiles = JSON.parse(localStorage.getItem('libraryFiles')) || [];
+<script>
+    // ==========================================
+// 1. المتغيرات الأساسية والإعدادات
+// ==========================================
+const fileInput = document.getElementById('fileInput');
+const filesContainer = document.getElementById('filesContainer');
+const codeModal = document.getElementById('codeModal');
+const codeContent = document.getElementById('codeContent');
+const modalFileName = document.getElementById('modalFileName');
 
-        // تشغيل دالة العرض عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', renderFiles);
+// استدعاء البيانات من localStorage
+let libraryFiles = JSON.parse(localStorage.getItem('libraryFiles')) || [];
+let currentFolderId = null; // تتبع المجلد الحالي (null يعني الروت الرئيسي)
 
-        // التعامل مع رفع الملفات الجديدة
-        fileInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            if (files.length === 0) return;
+// دالة لمعرفة المستخدم المسجل حالياً (مرتبطة بـ index.html)
+function getCurrentUser() {
+    return localStorage.getItem('currentUser') || 'Visitor';
+}
 
-            let filesProcessed = 0;
+document.addEventListener('DOMContentLoaded', renderFiles);
 
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    const newFile = {
-                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                        name: file.name,
-                        size: (file.size / 1024).toFixed(2) + ' KB', // الحجم بالكيلوبايت
-                        type: file.type || 'text/plain',
-                        content: e.target.result, // محتوى الكود
-                        date: new Date().toLocaleDateString('ar-EG')
-                    };
-
-                    libraryFiles.push(newFile);
-                    filesProcessed++;
-
-                    // تحديث الواجهة والحفظ بعد الانتهاء من قراءة كل الملفات
-                    if (filesProcessed === files.length) {
-                        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
-                        renderFiles();
-                        fileInput.value = ''; // تصفير الحقل
-                        alert('تم رفع الملفات بنجاح للمكتبة!');
-                    }
-                };
-
-                // قراءة محتوى الملف كنص (Text) لأنه ملف برمجي
-                reader.readAsText(file);
-            });
-        });
-
-        // بناء وعرض الكروت الخاصة بالملفات
-        function renderFiles() {
-            filesContainer.innerHTML = '';
-
-            if (libraryFiles.length === 0) {
-                filesContainer.innerHTML = `
-                    <div class="empty-state">
-                       
-            <h3>The library is empty</h3>
-    <p>Upload your code files (HTML, CSS, JS) to save and browse later.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // ترتيب الملفات من الأحدث للأقدم
-            libraryFiles.slice().reverse().forEach(file => {
-                // تحديد أيقونة تناسب نوع الملف
-                let iconClass = 'fa-file-code';
-                if (file.name.endsWith('.html')) iconClass = 'fa-html5';
-                else if (file.name.endsWith('.css')) iconClass = 'fa-css3-alt';
-                else if (file.name.endsWith('.js')) iconClass = 'fa-js-square';
-
-                const card = document.createElement('div');
-                card.className = 'file-card';
-                card.innerHTML = `
-                    <div class="file-icon"><i class="${iconClass.includes('fa-') && iconClass !== 'fa-file-code' ? 'fab' : 'fas'} ${iconClass}" style="color: #007bff;"></i></div>
-                    <div class="file-name" title="${file.name}">${file.name.length > 20 ? file.name.substring(0, 20) + '...' : file.name}</div>
-                    <div class="file-meta">
-                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span> <br>
-                        <span><i class="far fa-calendar-alt"></i> ${file.date}</span>
-                    </div>
-                    <div class="file-actions">
-                        <button class="btn-view" onclick="viewCode('${file.id}')" title="View code">    <?xml version="1.0" encoding="UTF-8"?>
-  <?xml version="1.0" encoding="UTF-8"?>
-  <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="24" height="24">
-      <path d="m15.941,8c.036-.329.059-.662.059-1s-.022-.671-.059-1h1.559c.534,0,1.034.13,1.485.347-.678.256-1.304.644-1.831,1.171l-.482.482h-.731Zm3.059,14H5v-6.231c-.702-.16-1.371-.403-2-.716v8.947h18v-5.672l-2,2v1.672Zm4.068-8.568l-6.569,6.568h-4.5v-4.5l6.568-6.568c1.24-1.24,3.259-1.24,4.5,0,1.24,1.24,1.24,3.26,0,4.5Zm-1.415-3.086c-.46-.461-1.21-.461-1.671,0l-5.982,5.982v1.672h1.671l5.982-5.982c.46-.461.46-1.211,0-1.672Zm-14.653,3.654c-3.86,0-7-3.141-7-7S3.14,0,7,0s7,3.141,7,7-3.14,7-7,7Zm0-2c2.757,0,5-2.243,5-5s-2.243-5-5-5S2,4.243,2,7s2.243,5,5,5Zm3.992-5.882l-1.402-1.426-3.229,3.175-1.63-1.58-1.393,1.436,1.846,1.789c.315.315.733.488,1.179.488s.864-.174,1.172-.482l3.457-3.399Z" fill="#666"/>
-  </svg>
-</button>
-<button onclick="previewFile('${file.id}')" class="btn-preview">
-        <?xml version="1.0" encoding="UTF-8"?>
-    <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#666"/>
-    </svg>
-</button>
-                        <button class="btn-download" onclick="downloadFile('${file.id}')" title="Download  file">    <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#666"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z"fill="#666"/></svg></button>
-                        <button class="btn-delete" onclick="deleteFile('${file.id}')" title="Delete">    <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><g id="_01_align_center" data-name="01 align center"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#666"/><rect x="9" y="10" width="2" height="8" fill="#666"/><rect x="13" y="10" width="2" height="8" fill="#666"/></g></svg></button>
-                    </div>
-                `;
-                filesContainer.appendChild(card);
-            });
-        }
-
-        // دالة عرض الكود في النافذة المنبثقة
-        window.viewCode = function(id) {
-            const file = libraryFiles.find(f => f.id === id);
-            if (file) {
-                modalFileName.textContent = file.name;
-                // استخدام textContent لضمان طباعة الأوسام كـ Text وليس كـ HTML فعلي
-                codeContent.textContent = file.content;
-                codeModal.style.display = 'flex';
-            }
+// ==========================================
+// 2. إدارة المجلدات (Folders)
+// ==========================================
+window.createFolder = function() {
+    const folderName = prompt("أدخل اسم المجلد الجديد:");
+    if (folderName && folderName.trim() !== "") {
+        const newFolder = {
+            id: Date.now().toString(),
+            name: folderName,
+            type: 'folder',
+            parentId: currentFolderId,
+            date: new Date().toLocaleDateString('ar-EG'),
+            author: getCurrentUser() // 👈 تسجيل المالك
         };
+        libraryFiles.push(newFolder);
+        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
+        renderFiles();
+    }
+};
 
-        // إغلاق النافذة المنبثقة
-        window.closePopup = function() {
-            codeModal.style.display = 'none';
-        };
+window.openFolder = function(id) {
+    currentFolderId = id;
+    renderFiles();
+};
 
-        // إغلاق النافذة عند الضغط في أي مكان خارجها
-        window.onclick = function(event) {
-            if (event.target === codeModal) {
-                closePopup();
-            }
-        };
+window.goBack = function() {
+    const currentFolder = libraryFiles.find(f => f.id === currentFolderId);
+    currentFolderId = currentFolder ? currentFolder.parentId : null;
+    renderFiles();
+};
 
-        // دالة تنزيل الملف (إنشاء ملف وهمي للتحميل)
-        window.downloadFile = function(id) {
-            const file = libraryFiles.find(f => f.id === id);
-            if (file) {
-                const blob = new Blob([file.content], { type: file.type });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name; // تعيين اسم الملف الأصلي
-                document.body.appendChild(a);
-                a.click(); // محاكاة الضغط للتحميل
-                
-                // تنظيف الذاكرة بعد التحميل
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);  
-                }, 0); 
-            }
-        };
-
-        // دالة حذف الملف
-        window.deleteFile = function(id) {
-            if (confirm('هل أنت متأكد من رغبتك في حذف هذا الملف من المكتبة؟')) {
-                libraryFiles = libraryFiles.filter(f => f.id !== id);
+// ==========================================
+// 3. رفع الملفات (Upload)
+// ==========================================
+fileInput.addEventListener('change', function(event) {
+    const files = event.target.files;
+    if (files.length === 0) return;
+    
+    let filesProcessed = 0;
+    
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newFile = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                name: file.name,
+                size: (file.size / 1024).toFixed(2) + ' KB',
+                type: file.type || 'text/plain',
+                parentId: currentFolderId, // ربط الملف بالمجلد الحالي
+                content: e.target.result,
+                date: new Date().toLocaleDateString('ar-EG'),
+                author: getCurrentUser() // 👈 تسجيل المالك
+            };
+            libraryFiles.push(newFile);
+            filesProcessed++;
+            
+            // تحديث الواجهة عند اكتمال قراءة جميع الملفات
+            if (filesProcessed === files.length) {
                 localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
                 renderFiles();
+                fileInput.value = '';
+                alert('تم رفع الملفات بنجاح للمكتبة!');
             }
         };
+        reader.readAsText(file);
+    });
+});
 
-        // دالة تشغيل معاينة الملف في علامة تبويب جديدة
+// ==========================================
+// 4. بناء واجهة العرض (Render) مع نظام الحماية
+// ==========================================
+function renderFiles() {
+    filesContainer.innerHTML = '';
+    
+    // عرض زر العودة إذا كنا داخل مجلد
+    if (currentFolderId !== null) {
+        const backBtn = document.createElement('div');
+        backBtn.className = 'file-card';
+        backBtn.style.cursor = 'pointer';
+        backBtn.style.border = '1px solid #ccc';
+        backBtn.innerHTML = `<div class="file-icon"><i class="fas fa-arrow-right" style="color: #666;"></i></div><div class="file-name">رجوع للخلف</div>`;
+        backBtn.onclick = goBack;
+        filesContainer.appendChild(backBtn);
+    }
+    
+    const currentUser = getCurrentUser();
+    const filteredFiles = libraryFiles.filter(f => f.parentId === currentFolderId);
+    
+    if (filteredFiles.length === 0 && currentFolderId === null) {
+        filesContainer.innerHTML = `<div class="empty-state"><h3>المكتبة فارغة</h3><p>ارفع ملفاتك البرمجية لتخزينها.</p></div>`;
+        return;
+    }
+    
+    // ترتيب الملفات من الأحدث للأقدم
+    filteredFiles.slice().reverse().forEach(item => {
+        let iconClass = 'fa-file-code';
+        if (item.name && item.name.endsWith('.html')) iconClass = 'fa-html5';
+        else if (item.name && item.name.endsWith('.css')) iconClass = 'fa-css3-alt';
+        else if (item.name && item.name.endsWith('.js')) iconClass = 'fa-js-square';
+        
+        const card = document.createElement('div');
+        card.className = 'file-card';
+        
+        // 💡 التحقق من الملكية: إذا كان المستخدم الحالي هو المالك (أو كان مسجلاً كـ Visitor قديماً)
+        const isOwner = (item.author === currentUser || !item.author || item.author === 'Visitor');
+        
+        // تجهيز زر الحذف فقط إذا كان المستخدم هو المالك
+        let deleteBtnHTML = isOwner ? `
+                <button class="btn-delete" onclick="deleteFile('${item.id}')" title="حذف">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#fff"/><rect x="9" y="10" width="2" height="8" fill="#fff"/><rect x="13" y="10" width="2" height="8" fill="#fff"/></svg>
+                </button>` : '';
+        
+        if (item.type === 'folder') {
+            card.innerHTML = `
+                        <div class="file-icon" onclick="openFolder('${item.id}')"><i class="fas fa-folder" style="color: #ffc107; font-size: 40px; cursor: pointer;"></i></div>
+                        <div class="file-name">${item.name}</div>
+                        ${isOwner 
+                            ? `<button class="btn-delete" onclick="deleteFile('${item.id}')" style="margin-top:15px; width:100%; border:none; padding:8px; border-radius:5px; background:#dc3545; color:white; cursor:pointer;">حذف المجلد</button>` 
+                            : `<div style="margin-top:15px; text-align:center; color:#999; font-size:0.85rem; font-weight:bold;">بواسطة: ${item.author}</div>`
+                        }`;
+        } else {
+            card.innerHTML = `
+                        <div class="file-icon"><i class="${iconClass.includes('fa-') && iconClass !== 'fa-file-code' ? 'fab' : 'fas'} ${iconClass}" style="color: #007bff; font-size: 30px;"></i></div>
+                        <div class="file-name" title="${item.name}">${item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}</div>
+                        <div class="file-meta">
+                            <span><i class="fas fa-weight-hanging"></i> ${item.size}</span> <br>
+                            <span><i class="far fa-calendar-alt"></i> ${item.date}</span> <br>
+                            <span style="color:#007bff; font-weight:bold;">✍️ ${item.author || 'Visitor'}</span>
+                        </div>
+                        <div class="file-actions" style="margin-top: 15px;">
+                            <button class="btn-view" onclick="viewCode('${item.id}')" title="عرض">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="m15.941,8c.036-.329.059-.662.059-1s-.022-.671-.059-1h1.559c.534,0,1.034.13,1.485.347-.678.256-1.304.644-1.831,1.171l-.482.482h-.731Zm3.059,14H5v-6.231c-.702-.16-1.371-.403-2-.716v8.947h18v-5.672l-2,2v1.672Zm4.068-8.568l-6.569,6.568h-4.5v-4.5l6.568-6.568c1.24-1.24,3.259-1.24,4.5,0,1.24,1.24,1.24,3.26,0,4.5Zm-1.415-3.086c-.46-.461-1.21-.461-1.671,0l-5.982,5.982v1.672h1.671l5.982-5.982c.46-.461.46-1.211,0-1.672Zm-14.653,3.654c-3.86,0-7-3.141-7-7S3.14,0,7,0s7,3.141,7,7-3.14,7-7,7Zm0-2c2.757,0,5-2.243,5-5s-2.243-5-5-5S2,4.243,2,7s2.243,5,5,5Zm3.992-5.882l-1.402-1.426-3.229,3.175-1.63-1.58-1.393,1.436,1.846,1.789c.315.315.733.488,1.179.488s.864-.174,1.172-.482l3.457-3.399Z" fill="#fff"/></svg>
+                            </button>
+                            <button class="btn-preview" onclick="previewFile('${item.id}')" title="معاينة">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#fff"/></svg>
+                            </button>
+                            <button class="btn-download" onclick="downloadFile('${item.id}')" title="تحميل">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#fff"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z" fill="#fff"/></svg>
+                            </button>
+                            ${deleteBtnHTML}
+                        </div>`;
+        }
+        filesContainer.appendChild(card);
+    });
+}
+
+// ==========================================
+// 5. دوال الإجراءات (عرض، معاينة، تحميل، حذف)
+// ==========================================
+window.viewCode = function(id) {
+    const file = libraryFiles.find(f => f.id === id);
+    if (file) {
+        modalFileName.textContent = file.name;
+        codeContent.textContent = file.content;
+        codeModal.style.display = 'flex';
+    }
+};
+
+window.downloadFile = function(id) {
+    const file = libraryFiles.find(f => f.id === id);
+    if (file) {
+        const blob = new Blob([file.content], { type: file.type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
+};
+
 window.previewFile = function(id) {
     const file = libraryFiles.find(f => f.id === id);
     if (file) {
-        // إنشاء كائن Blob يحتوي على كود الملف وتحديد نوعه كـ HTML
         const blob = new Blob([file.content], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
-        
-        // فتح الرابط المباشر للمعاينة في صفحة جديدة
         window.open(url, '_blank');
-        
-        // تنظيف الذاكرة بعد فتح الصفحة بوقت قصير
-        setTimeout(() => {
-            URL.revokeObjectURL(url);
-        }, 1000);
+        setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
     }
 };
-    </script>
+
+window.deleteFile = function(id) {
+    const fileToDelete = libraryFiles.find(f => f.id === id);
+    const currentUser = getCurrentUser();
+    
+    // حماية إضافية في حال تم تجاوز الواجهة: منع الحذف لغير المالك
+    if (fileToDelete.author && fileToDelete.author !== currentUser && fileToDelete.author !== 'Visitor') {
+        alert('عذراً، لا تملك صلاحية لحذف هذا الملف. المالك فقط يمكنه حذفه.');
+        return;
+    }
+    
+    if (confirm('هل أنت متأكد من رغبتك في الحذف؟')) {
+        const isFolder = fileToDelete?.type === 'folder';
+        if (isFolder) {
+            libraryFiles = libraryFiles.filter(f => f.id !== id && f.parentId !== id);
+        } else {
+            libraryFiles = libraryFiles.filter(f => f.id !== id);
+        }
+        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
+        renderFiles();
+    }
+};
+
+// إغلاق نافذة عرض الكود
+window.closePopup = () => codeModal.style.display = 'none';
+
+window.onclick = function(event) {
+    if (event.target === codeModal) {
+        closePopup();
+    }
+};
+</script>
 </body>
 </html>
