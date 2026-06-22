@@ -577,28 +577,54 @@ window.shareProject = function(projectId, btnElement) {
 
 window.toggleFollow = function(targetUsername) {
     const currentUsername = getCurrentUser();
+    
     if (!currentUsername) {
         alert("Please log in first to follow the developers!");
         openModal(document.getElementById('loginModal'));
         return;
     }
-    if (currentUsername === targetUsername) { alert("You cannot follow yourself."); return; }
+    
+    if (currentUsername === targetUsername) {
+        alert("You cannot follow yourself.");
+        return;
+    }
+    
     let users = getUsers();
-    let currentUserObj = users.find(u => u.username === currentUsername);
-    let targetUserObj = users.find(u => u.username === targetUsername);
-    if (!currentUserObj || !targetUserObj) return;
+    
+    // 💡 التعديل السحري: البحث عن المستخدمين، وإذا لم يكونوا موجودين محلياً، ننشئهم لغرض المتابعة
+    let currentUserObj = users.find(u => u.username.toLowerCase() === currentUsername.toLowerCase());
+    if (!currentUserObj) {
+        currentUserObj = { username: currentUsername, following: [], followers: [] };
+        users.push(currentUserObj);
+    }
+
+    let targetUserObj = users.find(u => u.username.toLowerCase() === targetUsername.toLowerCase());
+    if (!targetUserObj) {
+        targetUserObj = { username: targetUsername, following: [], followers: [] };
+        users.push(targetUserObj);
+    }
+    
+    // تهيئة المصفوفات لتجنب أي انهيار
     if (!currentUserObj.following) currentUserObj.following = [];
     if (!targetUserObj.followers) targetUserObj.followers = [];
+    
     const isFollowing = currentUserObj.following.includes(targetUsername);
+    
     if (isFollowing) {
+        // إلغاء المتابعة
         currentUserObj.following = currentUserObj.following.filter(name => name !== targetUsername);
         targetUserObj.followers = targetUserObj.followers.filter(name => name !== currentUsername);
     } else {
+        // إضافة المتابعة
         currentUserObj.following.push(targetUsername);
         targetUserObj.followers.push(currentUsername);
     }
+    
+    // حفظ التحديثات في المتصفح
     localStorage.setItem('users', JSON.stringify(users));
-    displayCodeProjects();
+    
+    // تحديث الواجهة فوراً ليتغير لون الزر وكلمة Follow
+    displayCodeProjects(); 
 };
 
 // ==========================================
