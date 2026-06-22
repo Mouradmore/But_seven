@@ -854,21 +854,27 @@ function displayMediaDirectly(keyword) {
                 } 
             }, {passive: true}); 
             
+            // 💡 الحل الأول: اصطياد النقر بقوة قبل أن يفتح أي رابط (وضع Capture)
             document.addEventListener('click', function(e) { 
-                // التحقق من أن العنصر ليس فيديو أو مقطع صوتي لتجنب تعطيل أزرار التشغيل
                 if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO') { 
-                    e.preventDefault(); // 👈 السر هنا: منع الروابط أو الأزرار من التسبب في خطأ 404
+                    e.preventDefault(); 
+                    e.stopPropagation(); // 👈 إيقاف أي تفاعل برمجي آخر (مثل فتح الروابط أو إرسال النماذج)
                     window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
                 } 
-            }); 
+            }, true); // 👈 (true) تعني أن هذا الحدث سيتم تنفيذه أولاً وقبل أي كود آخر
             
             window.addEventListener('message', function(e) { 
                 if (e.data.action === 'scrollNext') { document.body.scrollBy({ left: window.innerWidth, behavior: 'smooth' }); } 
                 else if (e.data.action === 'scrollPrev') { document.body.scrollBy({ left: -window.innerWidth, behavior: 'smooth' }); } 
             }); 
         <\/script>`;
+
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'width: 100vw; height: 100dvh; border: none; display: block; background-color: #000;';
+        
+        // 💡 الحل الثاني: القبضة الحديدية! قفل الإطار لمنع الانتقال أو النوافذ المنبثقة
+        iframe.sandbox = 'allow-scripts allow-same-origin';
+        
         iframe.srcdoc = "<!DOCTYPE html><html dir='ltr'><head><meta charset='UTF-8'>" + gestureScript + "<style>" + cssContent + " " + mediaFixCss + "</style></head><body>" + htmlContent + "<script>" + jsContent + "<\/script></body></html>";
         card.appendChild(iframe);
         
