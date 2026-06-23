@@ -751,6 +751,10 @@ function displayFilteredProjects(projects) {
 // ==========================================
 // 5. مشغل الوسائط المباشر (التيك توك المصغر)
 // ==========================================
+
+// ==========================================
+// 5. مشغل الوسائط المباشر (التيك توك المصغر)
+// ==========================================
 function displayMediaDirectly(keyword) {
     const existingBtn = document.getElementById('galleryCloseBtn');
     if (existingBtn) existingBtn.remove();
@@ -826,14 +830,26 @@ function displayMediaDirectly(keyword) {
     });
     
     document.body.style.overflow = 'hidden';
+
+    // أزرار التنقل العمودية (بين المشاريع)
+    const nextProjectBtn = document.createElement('div');
+    nextProjectBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+    nextProjectBtn.style.cssText = 'position: fixed; bottom: 30px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; cursor: pointer; z-index: 1005; border: 1px solid rgba(255,255,255,0.3); transition: 0.3s;';
+    nextProjectBtn.onclick = () => { galleryGrid.scrollBy({ top: window.innerHeight, behavior: 'smooth' }); };
     
+    const prevProjectBtn = document.createElement('div');
+    prevProjectBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+    prevProjectBtn.style.cssText = 'position: fixed; top: 90px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; cursor: pointer; z-index: 1005; border: 1px solid rgba(255,255,255,0.3); transition: 0.3s;';
+    prevProjectBtn.onclick = () => { galleryGrid.scrollBy({ top: -window.innerHeight, behavior: 'smooth' }); };
+
     filtered.forEach(project => {
         const card = document.createElement('div');
         card.style.cssText = 'height: 100dvh; width: 100vw; scroll-snap-align: start; position: relative; flex: 0 0 100dvh; overflow: hidden; background-color: #000;';
         const htmlContent = project.htmlCode || project.html || ''; const cssContent = project.cssCode || project.css || ''; const jsContent = project.jsCode || project.js || '';
         
-        const mediaFixCss = `body { margin: 0 !important; padding: 0 !important; width: 100vw !important; height: 100dvh !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; overflow-x: auto !important; overflow-y: hidden !important; scroll-snap-type: x mandatory !important; touch-action: pan-x pan-y !important; font-size: 0 !important; color: transparent !important; } body::-webkit-scrollbar { display: none !important; } body * { display: contents !important; } img, video, canvas, audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: center !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; }`;
+        const mediaFixCss = `html { scroll-snap-type: x mandatory !important; overflow-x: auto !important; overflow-y: hidden !important; width: 100% !important; height: 100% !important; margin: 0 !important; } body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; align-items: center !important; font-size: 0 !important; color: transparent !important; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; } body * { display: contents !important; } img, video, canvas, audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; }`;
        
+        // 💡 التعديل الجذري هنا: التنقل الدقيق للصورة التالية/السابقة
         const gestureScript = `<script> 
             let touchStartX = 0; 
             let touchStartY = 0; 
@@ -854,38 +870,70 @@ function displayMediaDirectly(keyword) {
                 } 
             }, {passive: true}); 
             
-            // 💡 الحل الأول: اصطياد النقر بقوة قبل أن يفتح أي رابط (وضع Capture)
             document.addEventListener('click', function(e) { 
                 if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO') { 
                     e.preventDefault(); 
-                    e.stopPropagation(); // 👈 إيقاف أي تفاعل برمجي آخر (مثل فتح الروابط أو إرسال النماذج)
+                    e.stopPropagation(); 
                     window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
                 } 
-            }, true); // 👈 (true) تعني أن هذا الحدث سيتم تنفيذه أولاً وقبل أي كود آخر
+            }, true); 
             
             window.addEventListener('message', function(e) { 
-                if (e.data.action === 'scrollNext') { document.body.scrollBy({ left: window.innerWidth, behavior: 'smooth' }); } 
-                else if (e.data.action === 'scrollPrev') { document.body.scrollBy({ left: -window.innerWidth, behavior: 'smooth' }); } 
+                // البحث عن جميع الصور والفيديوهات
+                const mediaEls = Array.from(document.querySelectorAll('img, video, audio, canvas'));
+                if(mediaEls.length === 0) return;
+                
+                // تحديد الصورة المعروضة حالياً على الشاشة
+                let closestEl = mediaEls[0];
+                let minDiff = Infinity;
+                mediaEls.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const diff = Math.abs(rect.left); // كلما كان أقرب للصفر، كان في منتصف الشاشة
+                    if(diff < minDiff) {
+                        minDiff = diff;
+                        closestEl = el;
+                    }
+                });
+
+                let currentIndex = mediaEls.indexOf(closestEl);
+
+                // الانتقال الدقيق 100%
+                if (e.data.action === 'scrollNext') { 
+                    if(currentIndex < mediaEls.length - 1) {
+                        mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+                    }
+                } 
+                else if (e.data.action === 'scrollPrev') { 
+                    if(currentIndex > 0) {
+                        mediaEls[currentIndex - 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+                    }
+                } 
             }); 
         <\/script>`;
 
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'width: 100vw; height: 100dvh; border: none; display: block; background-color: #000;';
-        
-        // 💡 الحل الثاني: القبضة الحديدية! قفل الإطار لمنع الانتقال أو النوافذ المنبثقة
         iframe.sandbox = 'allow-scripts allow-same-origin';
-        
         iframe.srcdoc = "<!DOCTYPE html><html dir='ltr'><head><meta charset='UTF-8'>" + gestureScript + "<style>" + cssContent + " " + mediaFixCss + "</style></head><body>" + htmlContent + "<script>" + jsContent + "<\/script></body></html>";
         card.appendChild(iframe);
         
         const mediaTagsMatch = htmlContent.match(/<(img|video|audio|canvas)/gi);
         const mediaCount = mediaTagsMatch ? mediaTagsMatch.length : 0;
 
+        // أزرار التنقل الأفقية (الأسهم الجانبية داخل المشروع)
         if (mediaCount > 1) {
-            const nextArrow = document.createElement('div'); nextArrow.innerHTML = '&#10095;'; nextArrow.style.cssText = 'position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; cursor: pointer; z-index: 1002; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.3s; backdrop-filter: blur(5px);'; nextArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollNext' }, '*'); };
-            const prevArrow = document.createElement('div'); prevArrow.innerHTML = ''; prevArrow.style.cssText = ''; prevArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollPrev' }, '*'); };
-            nextArrow.onmouseenter = () => nextArrow.style.background = 'rgba(0,0,0,0.8)'; nextArrow.onmouseleave = () => nextArrow.style.background = 'rgba(0,0,0,0.5)'; prevArrow.onmouseenter = () => prevArrow.style.background = 'rgba(0,0,0,0.8)'; prevArrow.onmouseleave = () => prevArrow.style.background = 'rgba(0,0,0,0.5)';
-            card.appendChild(nextArrow); card.appendChild(prevArrow);
+            const nextArrow = document.createElement('div'); 
+            nextArrow.innerHTML = '<i class="fas fa-chevron-right"></i>'; 
+            nextArrow.style.cssText = 'position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; cursor: pointer; z-index: 1002; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.3s; backdrop-filter: blur(5px);'; 
+            nextArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollNext' }, '*'); };
+            
+            const prevArrow = document.createElement('div'); 
+            prevArrow.innerHTML = '<i class="fas fa-chevron-left"></i>'; 
+            prevArrow.style.cssText = 'position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; cursor: pointer; z-index: 1002; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.3s; backdrop-filter: blur(5px);'; 
+            prevArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollPrev' }, '*'); };
+            
+            card.appendChild(nextArrow); 
+            card.appendChild(prevArrow);
         }  
         
         const overlayUI = document.createElement('div');
@@ -950,8 +998,15 @@ function displayMediaDirectly(keyword) {
         card.appendChild(overlayUI); galleryGrid.appendChild(card);
     });
     
-    galleryWrapper.appendChild(closeBtn); galleryWrapper.appendChild(galleryGrid); projectsListDiv.appendChild(galleryWrapper);
+    galleryWrapper.appendChild(closeBtn); 
+    galleryWrapper.appendChild(galleryGrid); 
+    galleryWrapper.appendChild(nextProjectBtn);
+    galleryWrapper.appendChild(prevProjectBtn);
+    projectsListDiv.appendChild(galleryWrapper);
 }
+    
+    
+    
 
 window.resetToCodes = function() {
     document.body.style.overflow = '';
