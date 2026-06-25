@@ -91,7 +91,32 @@ app.post('/api/projects', auth, async (req, res) => {
         res.status(500).send('خطأ أثناء حفظ المشروع');
     }
 });
+// تحديث مشروع موجود (Update Project)
+app.put('/api/projects/:id', auth, async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        
+        // التحقق من أن المشروع موجود
+        let project = await Project.findById(projectId);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        
+        // التأكد أن من يقوم بتحديثه هو صاحبه الفعلي
+        if (project.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بتحديث هذا المشروع' });
+        }
 
+        // تحديث الكود
+        project.html = req.body.html || project.html;
+        project.css = req.body.css || project.css;
+        project.js = req.body.js || project.js;
+        
+        await project.save();
+        res.json({ msg: 'تم التحديث بنجاح', project });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر أثناء التحديث');
+    }
+});
 // جلب كافة المشاريع مع الترقيم (Get Projects with Pagination) -> متوافق مع indexs.html
 app.get('/api/projects', async (req, res) => {
     try {
