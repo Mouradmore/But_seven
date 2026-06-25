@@ -1051,12 +1051,14 @@ async function exportToCommunityProjects() {
 
             alert(isUpdate ? "✅ تم تحديث مشروعك بنجاح!" : "🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح.");
             window.location.href = "index.html"; 
+        // استبدل الجزء الأخير من الدالة بهذا:
         } else {
+            console.error("Server Error Data:", data); // سيطبع الخطأ في الكونسول
             alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
         }
     } catch (error) {
-        console.error(error);
-        alert("فشل الاتصال بالسيرفر. يرجى التأكد من اتصالك بالإنترنت.");
+        console.error("Network or Fetch Error:", error); // سيطبع الخطأ هنا
+        alert("تفاصيل الخطأ المخفي: " + error.message);
     }
 }
 
