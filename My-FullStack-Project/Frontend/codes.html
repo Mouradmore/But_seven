@@ -1038,27 +1038,32 @@ async function exportToCommunityProjects() {
             body: JSON.stringify(payload)
         });
         
-        // 6. التعامل مع النتيجة
+        // 6. التعامل مع النتيجة (الكود المطور والمعالج للأخطاء تلقائياً)
         const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
-            // إذا كان مشروعاً جديداً وتم بنجاح، نقوم بحفظ الـ ID الخاص به للمرات القادمة
-            if (!isUpdate && data.project && data.project._id) {
-                localStorage.setItem('currentPublishedProjectId', data.project._id);
-            } else if (!isUpdate && data._id) { // احتياط في حال كان السيرفر يرسل الـ id مباشرة
-                localStorage.setItem('currentPublishedProjectId', data._id);
+            // حفظ الـ ID بشكل مرن يغطي كافة صيغ السيرفر المتوقعة
+            if (!isUpdate) {
+                const newId = (data.project && data.project._id) || data._id || (data.project && data.project.id) || data.id;
+                if (newId) {
+                    localStorage.setItem('currentPublishedProjectId', newId);
+                }
             }
 
             alert(isUpdate ? "✅ تم تحديث مشروعك بنجاح!" : "🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح.");
             window.location.href = "index.html"; 
-        // استبدل الجزء الأخير من الدالة بهذا:
         } else {
-            console.error("Server Error Data:", data); // سيطبع الخطأ في الكونسول
-            alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
+            // إذا قال السيرفر أن المشروع غير موجود، نقوم بتنظيف المتصفح فوراً لإنهاء المشكلة
+            if (response.status === 404 || data.msg === "المشروع غير موجود") {
+                localStorage.removeItem('currentPublishedProjectId');
+                alert("⚠️ هذا المشروع لم يعد موجوداً في السيرفر (ربما تم حذفه أو المعرف قديم). تم إعادة تعيين الإعدادات، يرجى الضغط على زر النشر مرة أخرى الآن ليتم رفعه كمشروع جديد بنجاح.");
+            } else {
+                alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
+            }
         }
     } catch (error) {
-        console.error("Network or Fetch Error:", error); // سيطبع الخطأ هنا
-        alert("تفاصيل الخطأ المخفي: " + error.message);
+        console.error(error);
+        alert("فشل الاتصال بالسيرفر. يرجى التأكد من اتصالك بالإنترنت.");
     }
 }
 
