@@ -748,7 +748,38 @@ function displayCodeProjects() {
 function searchProjects() {
     const query = document.getElementById('searchInput').value.toLowerCase();
     const allProjects = getCodeProjects();
-    const filtered = allProjects.filter(p => p.title.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query)) || p.author.toLowerCase().includes(query));
+
+    const filtered = allProjects.filter(p => {
+        // 1. البحث في البيانات الأساسية (العنوان الخارجي، الوصف، واسم الناشر)
+        const basicMatch = (p.title && p.title.toLowerCase().includes(query)) || 
+                           (p.description && p.description.toLowerCase().includes(query)) || 
+                           (p.author && p.author.toLowerCase().includes(query));
+
+        // 2. البحث الذكي والمتعمق داخل كود HTML الخاص بالمشروع
+        const htmlCode = p.html || p.htmlCode || '';
+        let codeMatch = false;
+
+        if (htmlCode) {
+            // استخراج النص الموجود داخل وسم <title>
+            const titleMatch = htmlCode.match(/<title[^>]*>(.*?)<\/title>/i);
+            const codeTitle = titleMatch ? titleMatch[1].toLowerCase() : '';
+
+            // استخراج النص من داخل وسم الميتا og:description
+            // (استخدمنا نمطين لضمان التقاط الوصف سواء تمت كتابة property أولاً أو content أولاً)
+            const metaMatch1 = htmlCode.match(/<meta[^>]*property=['"]og:description['"][^>]*content=['"](.*?)['"]/i);
+            const metaMatch2 = htmlCode.match(/<meta[^>]*content=['"](.*?)['"][^>]*property=['"]og:description['"]/i);
+            const metaDesc = (metaMatch1 ? metaMatch1[1] : (metaMatch2 ? metaMatch2[1] : '')).toLowerCase();
+
+            // التحقق مما إذا كانت كلمة البحث موجودة في عنوان الكود أو وصف الميتا
+            if (codeTitle.includes(query) || metaDesc.includes(query)) {
+                codeMatch = true;
+            }
+        }
+
+        // إرجاع المشروع إذا طابقت كلمة البحث البيانات الخارجية أو البيانات الموجودة داخل الكود
+        return basicMatch || codeMatch;
+    });
+
     currentPage = 1;
     displayFilteredProjects(filtered);
 }
