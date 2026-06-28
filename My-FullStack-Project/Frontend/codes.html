@@ -628,7 +628,24 @@ editor.on("inputRead", function(cm, change) {
             
             saveProject(); renderFileExplorer();
         }
-
+function createNewProjectWorkspace() {
+    if(confirm("هل أنت متأكد أنك تريد تنظيف مساحة العمل والبدء بمشروع جديد كلياً؟\n(تأكد من حفظ أو تحميل مشروعك الحالي كـ ZIP إذا كنت ترغب في الاحتفاظ به)")) {
+        // 1. مسح المعرف القديم لمنع تحديث المشروع السابق بالخطأ
+        localStorage.removeItem('currentPublishedProjectId'); 
+        
+        // 2. إعادة الملفات لوضعها الافتراضي الفارغ
+        fileSystem = getDefaultFileSystem(); 
+        saveProject(); 
+        renderFileExplorer();
+        openDefaultFirstFile();
+        
+        // 3. تنظيف شاشة المخرجات والمحرر
+        if (currentOpenFile) {
+            editor.setValue(currentOpenFile.content);
+        }
+        document.getElementById('terminalOutput').textContent = '';
+    }
+}
         function findNodeById(nodes, id) {
             for (let n of nodes) {
                 if (n.id === id) return n;
