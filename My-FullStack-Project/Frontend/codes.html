@@ -961,9 +961,7 @@ editor.on("inputRead", function(cm, change) {
         }
 
         function closeFullscreenPreview() { document.getElementById('fullscreenPreview').classList.remove('active'); }
-
 async function exportToCommunityProjects() {
-    // 1. التحقق من تسجيل الدخول
     const token = localStorage.getItem('token');
     const author = localStorage.getItem('currentUser');
     if (!token || !author) { 
@@ -971,46 +969,50 @@ async function exportToCommunityProjects() {
         return; 
     }
     
-    // 2. تجميع الكود
     const finalBundle = compileVirtualProject();
     if (!finalBundle) {
         alert("خطأ: لا يوجد ملف HTML صالح ليتم حزمه ونشره.");
         return;
     }
 
-    // 3. التحقق مما إذا كان المشروع قد تم نشره مسبقاً
     const publishedProjectId = localStorage.getItem('currentPublishedProjectId');
     let isUpdate = false;
 
     if (publishedProjectId) {
-        // سؤال المستخدم عما إذا كان يريد تحديث المشروع الحالي أم نشر نسخة جديدة
-        const userChoice = confirm("هذا المشروع تم نشره مسبقاً في المجتمع.\n\n- اضغط 'موافق' (OK) لتحديث الكود الخاص به.\n- اضغط 'إلغاء' (Cancel) لنشره كمشروع جديد منفصل.");
+        // رسالة أوضح للمستخدم
+        const userChoice = confirm("هذا المشروع مرتبط بمشروع قمت بنشره مسبقاً.\n\n- اضغط 'موافق' (OK) لتحديث المشروع الحالي في المجتمع.\n- اضغط 'إلغاء' (Cancel) لنشره كمشروع جديد منفصل تماماً.");
+        
         if (userChoice) {
             isUpdate = true;
         } else {
-            // إذا اختار إنشاء جديد، نحذف الـ ID القديم
-            localStorage.removeItem('currentPublishedProjectId');
+            // توكيد إضافي لمنع الخطأ
+            const confirmNew = confirm("سيتم فك الارتباط بالمشروع القديم ونشر هذا الكود كمشروع جديد. هل أنت متأكد؟");
+            if (!confirmNew) return; // الخروج إذا تراجع المستخدم
+            
+            isUpdate = false;
         }
     }
 
-    // 4. طلب العنوان والوصف (فقط إذا كان مشروعاً جديداً)
     let title = "", description = "";
     if (!isUpdate) {
         title = prompt("أدخل عنواناً للمشروع لنشره في المجتمع:");
-        if (!title || title.trim() === "") return;
+        if (!title || title.trim() === "") return; // التوقف إذا لم يدخل عنواناً، دون حذف الـ ID القديم
 
         description = prompt("أدخل وصفاً مبسطاً للمشروع:");
         if (!description || description.trim() === "") {
             description = "لا يوجد وصف متوفر لهذا المشروع.";
         }
+        
+        // نقوم بحذف المعرف القديم هنا فقط بعد تأكدنا من أنه سيدخل بيانات المشروع الجديد
+        if (publishedProjectId) {
+            localStorage.removeItem('currentPublishedProjectId');
+        }
     }
     
     try {
-        // 5. إعداد بيانات الاتصال بالسيرفر
         let url = 'https://my-backend-api-bntd.onrender.com/api/projects';
-        let method = 'POST'; // الافتراضي هو إنشاء جديد
+        let method = 'POST'; 
         
-        // البيانات التي سيتم إرسالها
         let payload = {
             html: finalBundle,
             css: "", 
@@ -1018,12 +1020,9 @@ async function exportToCommunityProjects() {
         };
 
         if (isUpdate) {
-            // إذا كان تحديثاً، نغير الرابط ونوع الطلب إلى PUT
             url = `https://my-backend-api-bntd.onrender.com/api/projects/${publishedProjectId}`;
             method = 'PUT'; 
-            // في التحديث، عادة نرسل الكود المحدث فقط
         } else {
-            // إذا كان جديداً، نرسل كل البيانات
             payload.title = title.trim();
             payload.description = description.trim();
             payload.author = author;
@@ -1038,11 +1037,9 @@ async function exportToCommunityProjects() {
             body: JSON.stringify(payload)
         });
         
-        // 6. التعامل مع النتيجة (الكود المطور والمعالج للأخطاء تلقائياً)
         const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
-            // حفظ الـ ID بشكل مرن يغطي كافة صيغ السيرفر المتوقعة
             if (!isUpdate) {
                 const newId = (data.project && data.project._id) || data._id || (data.project && data.project.id) || data.id;
                 if (newId) {
@@ -1053,10 +1050,9 @@ async function exportToCommunityProjects() {
             alert(isUpdate ? "✅ تم تحديث مشروعك بنجاح!" : "🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح.");
             window.location.href = "index.html"; 
         } else {
-            // إذا قال السيرفر أن المشروع غير موجود، نقوم بتنظيف المتصفح فوراً لإنهاء المشكلة
             if (response.status === 404 || data.msg === "المشروع غير موجود") {
                 localStorage.removeItem('currentPublishedProjectId');
-                alert("⚠️ هذا المشروع لم يعد موجوداً في السيرفر (ربما تم حذفه أو المعرف قديم). تم إعادة تعيين الإعدادات، يرجى الضغط على زر النشر مرة أخرى الآن ليتم رفعه كمشروع جديد بنجاح.");
+                alert("⚠️ هذا المشروع لم يعد موجوداً في السيرفر (ربما تم حذفه). يرجى الضغط على النشر مرة أخرى ليتم رفعه كجديد.");
             } else {
                 alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
             }
