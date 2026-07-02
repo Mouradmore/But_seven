@@ -661,11 +661,18 @@ window.toggleFollow = function(targetUsername) {
 // ==========================================
 async function syncProjectsFromBackend() {
     try {
-        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects');
+        // إضافة مُعامل الوقت (t) لمنع المتصفح من تخزين النتيجة القديمة
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects?t=' + new Date().getTime(), {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
         if (response.ok) {
             const data = await response.json();
-            let serverProjects = data.projects || (Array.isArray(data) ? data : []);
-            // ضبط المعرفات والوقت لتتوافق مع نظامك المحلي
+            // ... (باقي الكود كما هو بدون تغيير)       // ضبط المعرفات والوقت لتتوافق مع نظامك المحلي
             serverProjects = serverProjects.map(p => ({
                 ...p,
                 id: p._id || p.id,
