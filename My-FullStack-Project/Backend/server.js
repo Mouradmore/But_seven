@@ -50,50 +50,33 @@ app.post('/api/auth/register', async (req, res) => {
 // ==========================================
 // مسار تسجيل الدخول (Login) بعد التعديل
 // ==========================================
+// تسجيل الدخول (Login) 
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        // نستقبل اسم المستخدم وليس الإيميل لتتوافق مع الواجهة
+        const { username, password } = req.body;
 
-        // 1. التحقق من وجود المستخدم عبر البريد الإلكتروني
-        let user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ msg: 'بيانات الاعتماد غير صحيحة (البريد الإلكتروني غير مسجل)' });
-        }
+        const user = await User.findOne({ username });
+        if (!user) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
-        // 2. التحقق من تطابق كلمة المرور المشفرة
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ msg: 'بيانات الاعتماد غير صحيحة (كلمة المرور خاطئة)' });
-        }
+        if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
-        // 3. إعداد بيانات التوكن (Payload)
-        const payload = {
-            user: {
-                id: user.id,
-                username: user.username
-            }
-        };
+        const payload = { user: { id: user.id, username: user.username } };
+        
+        // إنشاء التوكن
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        // 4. إنشاء وتوقيع التوكن (JWT) وإرسال البيانات للمتصفح
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                
-                // التعديل الجديد ✅: نرسل التوكن، اسم المستخدم، والصورة الشخصية معاً
-                res.json({ 
-                    token, 
-                    username: user.username, 
-                    profilePic: user.profilePic 
-                });
-            }
-        );
-
+        // التعديل هنا فقط: إضافة profilePic للبيانات المرسلة
+        res.json({ 
+            token, 
+            username: user.username, 
+            profilePic: user.profilePic 
+        });
+        
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('حدث خطأ في السيرفر أثناء تسجيل الدخول');
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
     }
 });
 
