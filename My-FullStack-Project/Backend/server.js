@@ -47,22 +47,53 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // تسجيل الدخول (Login) -> متوافق مع indexs.html
+// ==========================================
+// مسار تسجيل الدخول (Login) بعد التعديل
+// ==========================================
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        const user = await User.findOne({ username });
-        if (!user) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+        // 1. التحقق من وجود المستخدم عبر البريد الإلكتروني
+        let user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ msg: 'بيانات الاعتماد غير صحيحة (البريد الإلكتروني غير مسجل)' });
+        }
 
+        // 2. التحقق من تطابق كلمة المرور المشفرة
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'بيانات الاعتماد غير صحيحة (كلمة المرور خاطئة)' });
+        }
 
-        const payload = { user: { id: user.id, username: user.username } };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+        // 3. إعداد بيانات التوكن (Payload)
+        const payload = {
+            user: {
+                id: user.id,
+                username: user.username
+            }
+        };
 
-        res.json({ token, username: user.username, profilePic: user.profilePic });
+        // 4. إنشاء وتوقيع التوكن (JWT) وإرسال البيانات للمتصفح
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: 360000 },
+            (err, token) => {
+                if (err) throw err;
+                
+                // التعديل الجديد ✅: نرسل التوكن، اسم المستخدم، والصورة الشخصية معاً
+                res.json({ 
+                    token, 
+                    username: user.username, 
+                    profilePic: user.profilePic 
+                });
+            }
+        );
+
     } catch (err) {
-        res.status(500).send('خطأ في السيرفر');
+        console.error(err.message);
+        res.status(500).send('حدث خطأ في السيرفر أثناء تسجيل الدخول');
     }
 });
 
