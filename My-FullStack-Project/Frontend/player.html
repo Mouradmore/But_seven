@@ -1,701 +1,299 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <style>
-  /* frontend/css/player.css */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>But_Seven Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ================= CSS ================= */
+        body { margin: 0; background-color: #0f0f0f; color: #fff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
+        .player-page-layout { display: flex; height: 100vh; gap: 20px; padding: 20px; box-sizing: border-box; }
+        .main-player-section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .player-container { position: relative; width: 100%; height: 70vh; background: #000; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        
+        #main-video { width: 100%; height: 100%; object-fit: contain; }
+        #brightness-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0); pointer-events: none; z-index: 10; }
+        #touch-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; }
+        
+        .controls-container { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 15px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; flex-direction: column; gap: 15px; z-index: 30; transition: opacity 0.3s ease; }
+        .progress-area { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 14px; font-weight: bold; }
+        #progress-bar { flex: 1; cursor: pointer; accent-color: #007bff; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 5px; outline: none; }
+        .buttons-area { display: flex; justify-content: space-between; }
+        .control-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: transform 0.2s; }
+        .control-btn:hover { transform: scale(1.1); color: #007bff; }
 
-body {
-    margin: 0;
-    background-color: #0f0f0f;
-    color: #fff;
-    font-family: system-ui, -apple-system, sans-serif;
-    overflow-x: hidden;
-}
+        .current-video-details { margin-top: 15px; padding: 10px; }
+        .current-video-details h1 { font-size: 20px; margin: 0 0 10px 0; }
+        .video-meta { color: #aaa; font-size: 14px; display: flex; gap: 15px; }
 
-.player-page-layout {
-    display: flex;
-    height: 100vh;
-    gap: 20px;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        /* القائمة الجانبية والتفاعلات */
+        .playlist-sidebar { width: 350px; display: flex; flex-direction: column; background: #1c1c1c; border-radius: 12px; overflow: hidden; }
+        .playlist-header { padding: 15px; background: #252525; border-bottom: 1px solid #333; }
+        .playlist-header h3 { margin: 0; font-size: 16px; display: flex; justify-content: space-between; }
+        .playlist-items { flex: 1; overflow-y: auto; padding: 10px; }
+        .playlist-items::-webkit-scrollbar { width: 6px; }
+        .playlist-items::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .playlist-card { display: flex; gap: 10px; margin-bottom: 15px; cursor: pointer; border-radius: 8px; padding: 5px; transition: background 0.2s; }
+        .playlist-card:hover { background: #2a2a2a; }
+        .playlist-thumb { width: 120px; height: 68px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+        .playlist-info { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        .playlist-title { font-size: 13px; font-weight: bold; margin: 0 0 5px 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .playlist-author { font-size: 11px; color: #aaa; }
 
-/* قسم الفيديو يأخذ المساحة المتبقية */
-.main-player-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0; /* لمنع تمدد الفليكس بوكس بشكل غير مرغوب */
-}
+        .interaction-sidebar { position: absolute; right: 20px; bottom: 100px; display: flex; flex-direction: column; gap: 20px; z-index: 40; }
+        .interact-btn { background: rgba(0, 0, 0, 0.5); border: none; color: #fff; font-size: 24px; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+        .interact-btn span { font-size: 12px; margin-top: 2px; }
+        .interact-btn.liked i { color: #ff3b30; }
 
-/* ضمان بقاء المشغل بحدود معينة */
-.player-container {
-    width: 100%;
-    height: 70vh;
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-}
+        .comments-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 60vh; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 50; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .comments-panel.open { transform: translateY(0); }
+        .panel-header { display: flex; justify-content: space-between; padding: 15px 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .comments-list { flex: 1; overflow-y: auto; padding: 15px; color: #fff; }
+        .comment-input-area { display: flex; padding: 15px; background: rgba(0,0,0,0.5); gap: 10px; }
+        #comment-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; outline: none; background: #333; color: #fff; }
+        #submit-comment { background: #007bff; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; }
 
-.current-video-details {
-    margin-top: 15px;
-    padding: 10px;
-}
-
-.current-video-details h1 {
-    font-size: 20px;
-    margin: 0 0 10px 0;
-}
-
-.video-meta {
-    color: #aaa;
-    font-size: 14px;
-    display: flex;
-    gap: 15px;
-}
-
-/* القائمة الجانبية */
-.playlist-sidebar {
-    width: 350px;
-    display: flex;
-    flex-direction: column;
-    background: #1c1c1c;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.playlist-header {
-    padding: 15px;
-    background: #252525;
-    border-bottom: 1px solid #333;
-}
-
-.playlist-header h3 {
-    margin: 0;
-    font-size: 16px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.playlist-items {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-/* تحسين شكل شريط التمرير للقائمة الجانبية */
-.playlist-items::-webkit-scrollbar { width: 6px; }
-.playlist-items::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-
-/* عناصر قائمة التشغيل (الكروت المصغرة) */
-.playlist-card {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 5px;
-    transition: background 0.2s;
-}
-
-.playlist-card:hover {
-    background: #2a2a2a;
-}
-
-.playlist-thumb {
-    width: 120px;
-    height: 68px;
-    border-radius: 6px;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.playlist-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.playlist-title {
-    font-size: 13px;
-    font-weight: bold;
-    margin: 0 0 5px 0;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.playlist-author {
-    font-size: 11px;
-    color: #aaa;
-}
-
-/* التجاوب مع الشاشات الصغيرة (الهواتف) */
-@media (max-width: 900px) {
-    .player-page-layout {
-        flex-direction: column;
-        height: auto;
-        padding: 0;
-        gap: 0;
-    }
-    .player-container {
-        height: 40vh;
-        border-radius: 0;
-    }
-    .playlist-sidebar {
-        width: 100%;
-        border-radius: 0;
-        margin-top: 20px;
-    }
-}
-    body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* منع التمرير الافتراضي للمتصفح */
-    background-color: #000;
-}
-
-.player-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#main-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* يحافظ على أبعاد الفيديو دون تشوه */
-}
-
-#brightness-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0); /* يبدأ بدون تعتيم */
-    pointer-events: none; /* يسمح بمرور اللمس للعناصر التي خلفه */
-    z-index: 10;
-}
-
-#touch-layer {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 20; /* يجب أن يكون فوق الفيديو لالتقاط اللمس */
-}
-.controls-container {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 20px 15px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    z-index: 30; /* يجب أن تكون أعلى من طبقة اللمس */
-    transition: opacity 0.3s ease;
-}
-
-/* تنسيق شريط التقدم */
-.progress-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-#progress-bar {
-    flex: 1;
-    cursor: pointer;
-    accent-color: #007bff; /* لون مميز للشريط */
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 5px;
-    outline: none;
-}
-
-/* تنسيق الأزرار */
-.buttons-area {
-    display: flex;
-    justify-content: space-between;
-}
-
-.control-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.control-btn:hover {
-    transform: scale(1.1);
-    color: #007bff;
-}
-.interaction-sidebar {
-    position: absolute;
-    right: 20px;
-    bottom: 100px; /* فوق شريط التحكم */
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    z-index: 40;
-}
-
-.interact-btn {
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    color: #fff;
-    font-size: 24px;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-}
-
-.interact-btn span {
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-.interact-btn.liked i {
-    color: #ff3b30; /* لون أحمر عند الإعجاب */
-}
-
-/* تصميم اللوحة المنزلقة للتعليقات */
-.comments-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60vh; /* تأخذ 60% من الشاشة */
-    background: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(10px);
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(100%); /* مخفية بالأسفل */
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.comments-panel.open {
-    transform: translateY(0); /* تظهر للأعلى */
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 20px;
-    color: #fff;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.comments-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    color: #fff;
-}
-
-.comment-input-area {
-    display: flex;
-    padding: 15px;
-    background: rgba(0,0,0,0.5);
-    gap: 10px;
-}
-
-#comment-input {
-    flex: 1;
-    padding: 10px 15px;
-    border-radius: 20px;
-    border: none;
-    outline: none;
-    background: #333;
-    color: #fff;
-}
-
-#submit-comment {
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-}
-  </style>
+        @media (max-width: 900px) {
+            .player-page-layout { flex-direction: column; height: auto; padding: 0; gap: 0; }
+            .player-container { height: 40vh; border-radius: 0; }
+            .playlist-sidebar { width: 100%; border-radius: 0; margin-top: 20px; }
+        }
+    </style>
 </head>
 
 <body>
     <div class="player-page-layout">
-    
-    <div class="main-player-section">
-        <div id="but-seven-player" class="player-container">
-            <video id="main-video" playsinline></video>
-        </div>
-        
-        <div class="current-video-details">
-            <h1 id="video-title-display">جاري التحميل...</h1>
-            <div class="video-meta">
-                <span id="video-author-display"></span>
-                <span id="video-views-display"></span>
+        <div class="main-player-section">
+            <div id="but-seven-player" class="player-container">
+                <video id="main-video" playsinline></video>
+                <div id="brightness-overlay"></div>
+                <div id="touch-layer"></div>
+                <div id="ui-controls" class="controls-container">
+                    <div class="progress-area">
+                        <span id="current-time">0:00</span>
+                        <input type="range" id="progress-bar" min="0" max="100" value="0" step="0.1">
+                        <span id="total-time">0:00</span>
+                    </div>
+                    <div class="buttons-area">
+                        <button id="play-pause-btn" class="control-btn"><i class="fas fa-play"></i></button>
+                        <button id="fullscreen-btn" class="control-btn"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="current-video-details">
+                <h1 id="video-title-display">جاري التحميل...</h1>
+                <div class="video-meta">
+                    <span id="video-author-display"></span>
+                    <span id="video-views-display"></span>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <aside class="playlist-sidebar">
-        <div class="playlist-header">
-            <h3>التالي <i class="fas fa-list-ul"></i></h3>
-        </div>
-        <div id="playlist-container" class="playlist-items">
-        </div>
-    </aside>
-    
-</div>
-    <div class="interaction-sidebar">
-    <button id="like-btn" class="interact-btn">
-        <i class="fas fa-heart"></i>
-        <span id="likes-count">0</span>
-    </button>
-    <button id="comment-btn" class="interact-btn">
-        <i class="fas fa-comment-dots"></i>
-        <span id="comments-count">0</span>
-    </button>
-</div>
-
-<div id="comments-panel" class="comments-panel">
-    <div class="panel-header">
-        <h3>التعليقات</h3>
-        <button id="close-comments"><i class="fas fa-times"></i></button>
-    </div>
-    <div id="comments-list" class="comments-list">
-        </div>
-    <div class="comment-input-area">
-        <input type="text" id="comment-input" placeholder="اكتب تعليقاً...">
-        <button id="submit-comment"><i class="fas fa-paper-plane"></i></button>
-    </div>
-</div>
-<div id="but-seven-player" class="player-container">
-    <video id="main-video" playsinline>
-        <source src="your-video-file.mp4" type="video/mp4">
-    </video>
-    
-    <div id="brightness-overlay"></div>
-    
-    <div id="touch-layer"></div>
-    
-    <div id="ui-controls">
-    </div>
-</div>
-<div id="ui-controls" class="controls-container">
-    <div class="progress-area">
-        <span id="current-time">0:00</span>
-        <input type="range" id="progress-bar" min="0" max="100" value="0" step="0.1">
-        <span id="total-time">0:00</span>
-    </div>
-    
-    <div class="buttons-area">
-        <button id="play-pause-btn" class="control-btn"><i class="fas fa-play"></i></button>
-        <button id="fullscreen-btn" class="control-btn"><i class="fas fa-expand"></i></button>
-    </div>
-</div>
-
-</body>
-<script>
-  const video = document.getElementById('main-video');
-const touchLayer = document.getElementById('touch-layer');
-const brightnessOverlay = document.getElementById('brightness-overlay');
-
-// المتغيرات لحفظ حالة اللمس
-let startX = 0;
-let startY = 0;
-let currentVolume = 1; // من 0 إلى 1
-let currentBrightness = 0; // من 0 (مضيء) إلى 1 (معتم بالكامل)
-let isSwiping = false;
-
-// إعدادات حساسية السحب
-const SWIPE_THRESHOLD = 30; // المسافة المطلوبة لاعتبار اللمس "سحباً"
-const SEEK_SECONDS = 10; // عدد الثواني للتقديم/التأخير عند النقر المزدوج
-
-// 1. التقاط بداية اللمس
-touchLayer.addEventListener('touchstart', (e) => {
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
-  currentVolume = video.volume;
-  isSwiping = false;
-});
-
-// 2. تتبع حركة السحب
-touchLayer.addEventListener('touchmove', (e) => {
-  if (!e.touches.length) return;
-  
-  const currentX = e.touches[0].clientX;
-  const currentY = e.touches[0].clientY;
-  
-  const diffX = currentX - startX;
-  const diffY = currentY - startY;
-  
-  // التأكد أن المستخدم يسحب فعلياً وليس مجرد نقرة طويلة
-  if (Math.abs(diffX) > SWIPE_THRESHOLD || Math.abs(diffY) > SWIPE_THRESHOLD) {
-    isSwiping = true;
-    
-    // تحديد ما إذا كان السحب أفقياً أم عمودياً
-    if (Math.abs(diffY) > Math.abs(diffX)) {
-      // -- السحب العمودي (أعلى/أسفل) --
-      const screenWidth = window.innerWidth;
-      const swipeDistance = diffY / window.innerHeight; // نسبة السحب من حجم الشاشة
-      
-      if (startX > screenWidth / 2) {
-        // النصف الأيمن: التحكم بالصوت
-        let newVolume = currentVolume - swipeDistance;
-        // التأكد أن الصوت بين 0 و 1
-        video.volume = Math.max(0, Math.min(1, newVolume));
-      } else {
-        // النصف الأيسر: التحكم بالسطوع (الوهمي)
-        let newBrightness = currentBrightness + swipeDistance;
-        newBrightness = Math.max(0, Math.min(0.8, newBrightness)); // أقصى تعتيم 80% لكي لا تختفي الشاشة
-        brightnessOverlay.style.backgroundColor = `rgba(0, 0, 0, ${newBrightness})`;
-        currentBrightness = newBrightness;
-      }
-    } else {
-      // -- السحب الأفقي (يمين/يسار) --
-      // يمكن استخدام هذه المساحة لتغيير موضع الفيديو (Seek) بربط diffX بـ video.currentTime
-      // مثال: video.currentTime += (diffX > 0 ? 1 : -1) * 0.5;
-    }
-  }
-});
-
-// 3. النقر المزدوج (التقديم والتأخير)
-let lastTapTime = 0;
-touchLayer.addEventListener('touchend', (e) => {
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTapTime;
-  
-  // إذا لم يكن هناك سحب، وكانت النقرة سريعة (أقل من 300 ملي ثانية)
-  if (!isSwiping && tapLength < 300 && tapLength > 0) {
-    const screenWidth = window.innerWidth;
-    const tapX = e.changedTouches[0].clientX;
-    
-    if (tapX > screenWidth / 2) {
-      // نقر مزدوج على اليمين: تقديم
-      video.currentTime += SEEK_SECONDS;
-    } else {
-      // نقر مزدوج على اليسار: تأخير
-      video.currentTime -= SEEK_SECONDS;
-    }
-    
-    // منع تشغيل النقر المزدوج الافتراضي للمتصفح
-    e.preventDefault();
-  }
-  
-  lastTapTime = currentTime;
-});
-const playPauseBtn = document.getElementById('play-pause-btn');
-const progressBar = document.getElementById('progress-bar');
-const currentTimeEl = document.getElementById('current-time');
-const totalTimeEl = document.getElementById('total-time');
-const fullscreenBtn = document.getElementById('fullscreen-btn');
-const uiControls = document.getElementById('ui-controls');
-
-// 1. تحويل الثواني إلى صيغة دقائق:ثواني
-function formatTime(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-}
-
-// 2. التشغيل والإيقاف المؤقت
-function togglePlay() {
-    if (video.paused) {
-        video.play();
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-    } else {
-        video.pause();
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    }
-}
-playPauseBtn.addEventListener('click', togglePlay);
-
-// عند النقر على الفيديو نفسه للتشغيل/الإيقاف (تضاف لطبقة اللمس)
-touchLayer.addEventListener('click', (e) => {
-    // التأكد من أن النقرة ليست سحباً
-    if (!isSwiping) togglePlay();
-});
-
-// 3. تحديث شريط التقدم والوقت أثناء التشغيل
-video.addEventListener('timeupdate', () => {
-    const current = video.currentTime;
-    const duration = video.duration;
-    
-    if (duration) {
-        // تحديث قيمة الشريط
-        progressBar.value = (current / duration) * 100;
-        // تحديث النصوص
-        currentTimeEl.textContent = formatTime(current);
-        totalTimeEl.textContent = formatTime(duration);
-    }
-});
-
-// 4. تغيير وقت الفيديو عند سحب شريط التقدم
-progressBar.addEventListener('input', (e) => {
-    const seekTime = (e.target.value / 100) * video.duration;
-    video.currentTime = seekTime;
-});
-
-// 5. وضع ملء الشاشة الفعلي (للمتصفح)
-fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-    } else {
-        document.exitFullscreen();
-        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-    }
-});
-
-// 6. إخفاء الواجهة تلقائياً عند عدم التفاعل
-let timeout;
-function resetHideUI() {
-    uiControls.style.opacity = '1';
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-        if (!video.paused) uiControls.style.opacity = '0';
-    }, 3000);
-}
-document.addEventListener('mousemove', resetHideUI);
-document.addEventListener('touchstart', resetHideUI);
-if ('mediaSession' in navigator) {
-  // تحديث بيانات الإشعار عند تحميل فيديو جديد
-  function updateMediaSession(title, artist, artworkUrl) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: title,
-      artist: artist,
-      artwork: [
-        { src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }
-      ]
-    });
-  }
-  
-  // ربط أزرار الإشعارات بوظائف المشغل
-  navigator.mediaSession.setActionHandler('play', () => {
-    video.play();
-    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-  });
-  
-  navigator.mediaSession.setActionHandler('pause', () => {
-    video.pause();
-    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-  });
-  
-  navigator.mediaSession.setActionHandler('seekforward', () => {
-    video.currentTime = Math.min(video.currentTime + 10, video.duration);
-  });
-  
-  navigator.mediaSession.setActionHandler('seekbackward', () => {
-    video.currentTime = Math.max(video.currentTime - 10, 0);
-  });
-  
-  // استدعاء تجريبي للبيانات (يتم استبدالها لاحقاً ببيانات الـ API)
-  updateMediaSession('عنوان الفيديو التجريبي', 'But_Seven_Dev', 'path/to/cover.jpg');
-}
-// frontend/js/player.js
-
-const playlistContainer = document.getElementById('playlist-container');
-
-// دالة لجلب وبناء قائمة التشغيل الجانبية
-async function loadPlaylist(currentId) {
-    try {
-        playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa; font-size:12px;">جاري تحميل القائمة...</p>';
         
-        // قم بتغيير هذه الأسطر أينما وجدت
-const url = videoId ? `https://my-backend-api-bntd.onrender.com/api/videos/${videoId}` : `https://my-backend-api-bntd.onrender.com/api/videos`;
-        const data = await response.json();
-        
-        playlistContainer.innerHTML = ''; // مسح رسالة التحميل
-        
-        if (!data.videos || data.videos.length === 0) {
-            playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa; font-size:12px;">لا توجد فيديوهات مقترحة حالياً.</p>';
-            return;
-        }
-        
-        data.videos.forEach(video => {
-            const card = document.createElement('div');
-            card.className = 'playlist-card';
-            
-            // عند الضغط على أي فيديو في القائمة الجانبية، أعد تحميل صفحة المشغل مع الـ ID الجديد
-            card.addEventListener('click', () => {
-                window.location.href = `player.html?v=${video.id}`;
-            });
-            
-            card.innerHTML = `
-                <img class="playlist-thumb" src="${video.thumbnail || 'img/default-thumb.jpg'}" alt="${video.title}">
-                <div class="playlist-info">
-                    <h4 class="playlist-title">${video.title}</h4>
-                    <span class="playlist-author">${video.author || 'But_Seven'}</span>
+        <aside class="playlist-sidebar">
+            <div class="playlist-header">
+                <h3>التالي <i class="fas fa-list-ul"></i></h3>
+            </div>
+            <div id="playlist-container" class="playlist-items">
                 </div>
-            `;
-            
-            playlistContainer.appendChild(card);
+        </aside>
+    </div>
+
+    <div class="interaction-sidebar">
+        <button id="like-btn" class="interact-btn">
+            <i class="fas fa-heart"></i>
+            <span id="likes-count">0</span>
+        </button>
+        <button id="comment-btn" class="interact-btn">
+            <i class="fas fa-comment-dots"></i>
+            <span id="comments-count">0</span>
+        </button>
+    </div>
+
+    <div id="comments-panel" class="comments-panel">
+        <div class="panel-header">
+            <h3>التعليقات</h3>
+            <button id="close-comments" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="comments-list" class="comments-list"></div>
+        <div class="comment-input-area">
+            <input type="text" id="comment-input" placeholder="اكتب تعليقاً...">
+            <button id="submit-comment"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // ================= JavaScript =================
+        const video = document.getElementById('main-video');
+        const touchLayer = document.getElementById('touch-layer');
+        const brightnessOverlay = document.getElementById('brightness-overlay');
+        const playlistContainer = document.getElementById('playlist-container');
+        
+        // إنشاء مصدر الفيديو
+        const videoSource = document.createElement('source');
+        video.appendChild(videoSource);
+
+        let currentVideoId = null;
+
+        // المتغيرات لحفظ حالة اللمس
+        let startX = 0, startY = 0, currentVolume = 1, currentBrightness = 0, isSwiping = false;
+        const SWIPE_THRESHOLD = 30, SEEK_SECONDS = 10;
+
+        // 1. التقاط بداية اللمس
+        touchLayer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            currentVolume = video.volume;
+            isSwiping = false;
         });
-        
-    } catch (error) {
-        console.error('خطأ في تحميل القائمة الجانبية:', error);
-        playlistContainer.innerHTML = '<p style="text-align:center; color:#ff3b30; font-size:12px;">حدث خطأ في تحميل الفيديوهات.</p>';
-    }
-}
 
-// تعديل بسيط على الدالة السابقة لتحديث تفاصيل الفيديو واستدعاء القائمة الجانبية
-async function fetchAndLoadVideo(videoId = null) {
-    try {
-        // قم بتغيير هذه الأسطر أينما وجدت
-const url = videoId ? `https://my-backend-api-bntd.onrender.com/api/videos/${videoId}` : `https://my-backend-api-bntd.onrender.com/api/videos`;
-        // وفي دوال التفاعل (الإعجابات والتعليقات):
-await fetch(`https://my-backend-api-bntd.onrender.com/api/interactions/${currentVideoId}/like`, ...);  const data = await response.json();
-        
-        let targetVideo = videoId ? data : (data.videos && data.videos[0]);
-        
-        if (targetVideo) {
-            currentVideoId = targetVideo.id; // تحديث المتغير العام
-            videoSource.src = targetVideo.videoUrl;
-            videoElement.load();
+        // 2. تتبع حركة السحب
+        touchLayer.addEventListener('touchmove', (e) => {
+            if (!e.touches.length) return;
+            const currentX = e.touches[0].clientX, currentY = e.touches[0].clientY;
+            const diffX = currentX - startX, diffY = currentY - startY;
             
-            // تحديث نصوص التفاصيل أسفل المشغل
-            document.getElementById('video-title-display').textContent = targetVideo.title;
-            document.getElementById('video-author-display').innerHTML = `<i class="fas fa-user-circle"></i> ${targetVideo.author || 'But_Seven'}`;
-            document.getElementById('video-views-display').innerHTML = `<i class="fas fa-eye"></i> ${targetVideo.views || 0} مشاهدة`;
-            
-            // إعداد خلفية الجلسة
-            if ('mediaSession' in navigator) {
-                // ... (نفس كود الميديا سيشن السابق)
+            if (Math.abs(diffX) > SWIPE_THRESHOLD || Math.abs(diffY) > SWIPE_THRESHOLD) {
+                isSwiping = true;
+                if (Math.abs(diffY) > Math.abs(diffX)) {
+                    const swipeDistance = diffY / window.innerHeight;
+                    if (startX > window.innerWidth / 2) {
+                        video.volume = Math.max(0, Math.min(1, currentVolume - swipeDistance));
+                    } else {
+                        let newBrightness = Math.max(0, Math.min(0.8, currentBrightness + swipeDistance));
+                        brightnessOverlay.style.backgroundColor = `rgba(0, 0, 0, ${newBrightness})`;
+                        currentBrightness = newBrightness;
+                    }
+                }
             }
+        });
+
+        // 3. النقر المزدوج (التقديم والتأخير)
+        let lastTapTime = 0;
+        touchLayer.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
             
-            // <-- الاستدعاء الجديد للقائمة الجانبية هنا -->
-            loadPlaylist(currentVideoId);
+            if (!isSwiping && tapLength < 300 && tapLength > 0) {
+                const tapX = e.changedTouches[0].clientX;
+                if (tapX > window.innerWidth / 2) video.currentTime += SEEK_SECONDS;
+                else video.currentTime -= SEEK_SECONDS;
+                e.preventDefault();
+            }
+            lastTapTime = currentTime;
+        });
+
+        // 4. عناصر التحكم بالفيديو
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalTimeEl = document.getElementById('total-time');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const uiControls = document.getElementById('ui-controls');
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
-    } catch (error) {
-        console.error('خطأ في الاتصال بالخادم:', error);
-    }
-}
-</script>
+
+        function togglePlay() {
+            if (video.paused) { video.play(); playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; } 
+            else { video.pause(); playPauseBtn.innerHTML = '<i class="fas fa-play"></i>'; }
+        }
+        playPauseBtn.addEventListener('click', togglePlay);
+        touchLayer.addEventListener('click', (e) => { if (!isSwiping) togglePlay(); });
+
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                progressBar.value = (video.currentTime / video.duration) * 100;
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                totalTimeEl.textContent = formatTime(video.duration);
+            }
+        });
+
+        progressBar.addEventListener('input', (e) => { video.currentTime = (e.target.value / 100) * video.duration; });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>'; } 
+            else { document.exitFullscreen(); fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>'; }
+        });
+
+        let timeout;
+        function resetHideUI() {
+            uiControls.style.opacity = '1';
+            clearTimeout(timeout);
+            timeout = setTimeout(() => { if (!video.paused) uiControls.style.opacity = '0'; }, 3000);
+        }
+        document.addEventListener('mousemove', resetHideUI);
+        document.addEventListener('touchstart', resetHideUI);
+
+        // 5. جلب بيانات السيرفر
+        async function loadPlaylist(currentId) {
+            try {
+                playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa;">جاري تحميل القائمة...</p>';
+                const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/videos/${currentId}/related`);
+                const data = await response.json();
+                
+                playlistContainer.innerHTML = '';
+                if (!data.videos || data.videos.length === 0) {
+                    playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa;">لا توجد فيديوهات مقترحة حالياً.</p>';
+                    return;
+                }
+                
+                data.videos.forEach(vid => {
+                    const card = document.createElement('div');
+                    card.className = 'playlist-card';
+                    card.addEventListener('click', () => window.location.href = `player.html?v=${vid.id}`);
+                    card.innerHTML = `
+                        <img class="playlist-thumb" src="${vid.thumbnail || 'img/default-thumb.jpg'}" alt="${vid.title}">
+                        <div class="playlist-info">
+                            <h4 class="playlist-title">${vid.title}</h4>
+                            <span class="playlist-author">${vid.author || 'But_Seven'}</span>
+                        </div>`;
+                    playlistContainer.appendChild(card);
+                });
+            } catch (error) {
+                playlistContainer.innerHTML = '<p style="text-align:center; color:#ff3b30;">حدث خطأ في تحميل الفيديوهات.</p>';
+            }
+        }
+
+        async function fetchAndLoadVideo(videoId = null) {
+            try {
+                const url = videoId ? `https://my-backend-api-bntd.onrender.com/api/videos/${videoId}` : `https://my-backend-api-bntd.onrender.com/api/videos`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let targetVideo = videoId ? data : (data.videos && data.videos[0]);
+                
+                if (targetVideo) {
+                    currentVideoId = targetVideo.id;
+                    videoSource.src = targetVideo.videoUrl;
+                    video.load();
+                    
+                    document.getElementById('video-title-display').textContent = targetVideo.title;
+                    document.getElementById('video-author-display').innerHTML = `<i class="fas fa-user-circle"></i> ${targetVideo.author || 'But_Seven'}`;
+                    document.getElementById('video-views-display').innerHTML = `<i class="fas fa-eye"></i> ${targetVideo.views || 0} مشاهدة`;
+                    
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.metadata = new MediaMetadata({ title: targetVideo.title, artist: targetVideo.author || 'But_Seven', artwork: [{ src: targetVideo.thumbnail || '', sizes: '512x512', type: 'image/jpeg' }] });
+                    }
+                    
+                    loadPlaylist(currentVideoId);
+                }
+            } catch (error) {
+                console.error('خطأ في الاتصال بالخادم:', error);
+            }
+        }
+
+        // 6. تشغيل الكود عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestedVideoId = urlParams.get('v');
+            fetchAndLoadVideo(requestedVideoId);
+        });
+    </script>
+</body>
 </html>
-
-
