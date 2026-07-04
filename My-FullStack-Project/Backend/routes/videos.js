@@ -3,130 +3,116 @@ const router = express.Router();
 const admin = require('firebase-admin');
 const db = admin.firestore();
 
-// مسار لجلب جميع الفيديوهات أو فيديو محدد
-router.get('/', async (req, res) => {
-  try {
-    const videosRef = db.collection('videos');
-    const snapshot = await videosRef.orderBy('createdAt', 'desc').get();
-    
-    if (snapshot.empty) {
-      return res.status(404).json({ message: 'لا توجد فيديوهات متاحة حالياً.' });
+// 1. مسار الصفحة الرئيسية (مقسمة: أحدث، أكثر مشاهدة، مقترحة)
+// GET /api/videos/homepage
+router.get('/homepage', async (req, res) => {
+    try {
+        const videosRef = db.collection('videos');
+        
+        const latestSnapshot = await videosRef.orderBy('createdAt', 'desc').limit(10).get();
+        let latest = [];
+        latestSnapshot.forEach(doc => latest.push({ id: doc.id, ...doc.data() }));
+
+        const popularSnapshot = await videosRef.orderBy('views', 'desc').limit(10).get();
+        let popular = [];
+        popularSnapshot.forEach(doc => popular.push({ id: doc.id, ...doc.data() }));
+
+        const suggestedSnapshot = await videosRef.where('isSuggested', '==', true).limit(10).get();
+        let suggested = [];
+        suggestedSnapshot.forEach(doc => suggested.push({ id: doc.id, ...doc.data() }));
+
+        // يجب أن تتطابق هذه المفاتيح (latest, popular, suggested) مع ما يقرأه home.html
+        res.status(200).json({ latest, popular, suggested });
+    } catch (error) {
+        console.error('Error fetching homepage videos:', error);
+        res.status(500).json({ error: 'حدث خطأ في الخادم أثناء جلب بيانات الرئيسية' });
     }
-    
-    let videos = [];
-    snapshot.forEach(doc => {
-      videos.push({ id: doc.id, ...doc.data() });
-    });
-    
-    res.status(200).json({ videos });
-  } catch (error) {
-    console.error('خطأ في جلب الفيديوهات:', error);
-    res.status(500).json({ error: 'حدث خطأ داخلي في الخادم' });
-  }
 });
 
-// مسار لجلب تفاصيل فيديو واحد بواسطة الـ ID
-router.get('/:id', async (req, res) => {
-  try {
-    const videoId = req.params.id;
-    const videoDoc = await db.collection('videos').doc(videoId).get();
-    
-    if (!videoDoc.exists) {
-      return res.status(404).json({ message: 'الفيديو غير موجود.' });
+// 2. مسار البحث الفوري
+// GET /api/videos/search?q=...
+router.get('/search', async (req, res) => {
+    try {
+        const query = req.query.q ? req.query.q.toLowerCase() : '';
+        if (!query) {
+            return res.status(200).json({ videos: [] });
+        }
+
+        const snapshot = await db.collection('videos').get();
+        let results = [];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const title = (data.title || '').toLowerCase();
+            const description = (data.description || '').toLowerCase();
+
+            if (title.includes(query) || description.includes(query)) {
+                results.push({ id: doc.id, ...data });
+            }
+        });
+
+        res.status(200).json({ videos: results });
+    } catch (error) {
+        console.error('Error in search:', error);
+        res.status(500).json({ error: 'خطأ في الخادم أثناء البحث' });
     }
-    
-    res.status(200).json({ id: videoDoc.id, ...videoDoc.data() });
-  } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في جلب تفاصيل الفيديو' });
-  }
+});
+
+// 3. مسار جلب كافة الفيديوهات (عند عدم تمرير ID محدد)
+// GET /api/videos
+router.get('/', async (req, res) => {
+    try {
+        const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
+        let videos = [];
+        snapshot.forEach(doc => videos.push({ id: doc.id, ...doc.data() }));
+        
+        res.status(200).json({ videos });
+    } catch (error) {
+        res.status(500).json({ error: 'خطأ في جلب الفيديوهات' });
+    }
+});
+
+// 4. مسار جلب القائمة الجانبية (الفيديوهات ذات الصلة باستثناء الحالي)
+// GET /api/videos/:id/related
+router.get('/:id/related', async (req, res) => {
+    try {
+        const currentVideoId = req.params.id;
+        const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').limit(15).get();
+        
+        let relatedVideos = [];
+        snapshot.forEach(doc => {
+            if (doc.id !== currentVideoId) {
+                relatedVideos.push({ id: doc.id, ...doc.data() });
+            }
+        });
+
+        res.status(200).json({ videos: relatedVideos });
+    } catch (error) {
+        res.status(500).json({ error: 'خطأ في جلب القائمة الجانبية' });
+    }
+});
+
+// 5. مسار جلب فيديو واحد بواسطة الـ ID
+// GET /api/videos/:id
+router.get('/:id', async (req, res) => {
+    try {
+        const videoId = req.params.id;
+        const videoDoc = await db.collection('videos').doc(videoId).get();
+
+        if (!videoDoc.exists) {
+            return res.status(404).json({ message: 'الفيديو غير موجود' });
+        }
+
+        // زيادة المشاهدات تلقائياً عند طلب الفيديو (اختياري)
+        await videoDoc.ref.update({
+            views: admin.firestore.FieldValue.increment(1)
+        });
+
+        // يرجع البيانات مباشرة ككائن (Object) ليتوافق مع targetVideo في الواجهة
+        res.status(200).json({ id: videoDoc.id, ...videoDoc.data() });
+    } catch (error) {
+        res.status(500).json({ error: 'خطأ في جلب تفاصيل الفيديو' });
+    }
 });
 
 module.exports = router;
-// مسار جلب فيديوهات الصفحة الرئيسية مقسمة حسب الأقسام
-router.get('/homepage', async (req, res) => {
-  try {
-    const videosRef = db.collection('videos');
-    
-    // 1. جلب أحدث الفيديوهات (مرتبة حسب تاريخ الإنشاء)
-    const latestSnapshot = await videosRef.orderBy('createdAt', 'desc').limit(10).get();
-    let latestVideos = [];
-    latestSnapshot.forEach(doc => latestVideos.push({ id: doc.id, ...doc.data() }));
-    
-    // 2. جلب الأكثر مشاهدة (مرتبة حسب عدد المشاهدات)
-    const popularSnapshot = await videosRef.orderBy('views', 'desc').limit(10).get();
-    let popularVideos = [];
-    popularSnapshot.forEach(doc => popularVideos.push({ id: doc.id, ...doc.data() }));
-    
-    // 3. الفيديوهات المقترحة (يمكن تخصيص المنطق لاحقاً، حالياً سنعتمد على اختيار عشوائي أو وسم معين)
-    const suggestedSnapshot = await videosRef.where('isSuggested', '==', true).limit(10).get();
-    let suggestedVideos = [];
-    suggestedSnapshot.forEach(doc => suggestedVideos.push({ id: doc.id, ...doc.data() }));
-    
-    // إرسال البيانات مجمعة
-    res.status(200).json({
-      latest: latestVideos,
-      popular: popularVideos,
-      suggested: suggestedVideos
-    });
-  } catch (error) {
-    console.error('خطأ في جلب بيانات الصفحة الرئيسية:', error);
-    res.status(500).json({ error: 'حدث خطأ في الخادم أثناء جلب البيانات' });
-  }
-});
-// مسار البحث الفوري
-router.get('/search', async (req, res) => {
-  try {
-    // استقبال كلمة البحث وتحويلها لأحرف صغيرة لضمان دقة المطابقة
-    const query = req.query.q ? req.query.q.toLowerCase() : '';
-    
-    if (!query) {
-      return res.status(200).json({ videos: [] });
-    }
-    
-    const videosRef = db.collection('videos');
-    const snapshot = await videosRef.get();
-    let results = [];
-    
-    // فلترة الفيديوهات في السيرفر بناءً على العنوان أو الوصف
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const title = (data.title || '').toLowerCase();
-      const description = (data.description || '').toLowerCase();
-      
-      // إذا كانت كلمة البحث موجودة في العنوان أو الوصف، أضف الكارت للنتائج
-      if (title.includes(query) || description.includes(query)) {
-        results.push({ id: doc.id, ...data });
-      }
-    });
-    
-    res.status(200).json({ videos: results });
-  } catch (error) {
-    console.error('خطأ في عملية البحث:', error);
-    res.status(500).json({ error: 'حدث خطأ في الخادم أثناء البحث' });
-  }
-});
-// backend/routes/videos.js
-
-// مسار جلب قائمة التشغيل الجانبية (الفيديوهات ذات الصلة)
-router.get('/:id/related', async (req, res) => {
-  try {
-    const currentVideoId = req.params.id;
-    const videosRef = db.collection('videos');
-    
-    // جلب أحدث الفيديوهات كمقترحات (يمكنك لاحقاً تغيير المنطق ليعتمد على التصنيف tags)
-    const snapshot = await videosRef.orderBy('createdAt', 'desc').limit(15).get();
-    
-    let relatedVideos = [];
-    snapshot.forEach(doc => {
-      // استبعاد الفيديو الحالي من القائمة
-      if (doc.id !== currentVideoId) {
-        relatedVideos.push({ id: doc.id, ...doc.data() });
-      }
-    });
-    
-    res.status(200).json({ videos: relatedVideos });
-  } catch (error) {
-    console.error('خطأ في جلب قائمة التشغيل:', error);
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
-  }
-});
