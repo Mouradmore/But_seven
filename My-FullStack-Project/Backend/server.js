@@ -232,3 +232,26 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
 // تشغيل الخادم
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
+const express = require('express');
+const cors = require('cors');
+const admin = require('firebase-admin');
+
+// تهيئة Firebase Admin SDK
+const serviceAccount = require('./config/firebaseServiceAccount.json');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const app = express();
+app.use(cors()); // السماح للواجهة الأمامية بالاتصال بالخادم
+app.use(express.json());
+
+// استدعاء مسارات الفيديو
+
+const videoRoutes = require('./routes/videos');
+app.use('/api/videos', videoRoutes);
+app.use('/api/interactions', require('./routes/interactions'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`🚀 الخادم يعمل بنجاح على المنفذ ${PORT}`);
+});
