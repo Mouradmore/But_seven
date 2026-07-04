@@ -15,7 +15,17 @@ const auth = require('./middleware/auth');
 // تهيئة Firebase Admin SDK
 // ==========================================
 // ⚠️ ملاحظة هامة جداً: تأكد من أن ملف firebaseServiceAccount.json موجود فعلاً في مجلد config ومرفوع على Render
-const serviceAccount = require('./config/firebaseServiceAccount.json');
+let serviceAccount;
+
+// التحقق مما إذا كنا على سيرفر Render أم محلياً
+if (process.env.FIREBASE_CREDENTIALS) {
+    // قراءة المفاتيح من متغيرات البيئة في Render
+    serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+} else {
+    // قراءة الملف محلياً أثناء التجربة على حاسوبك
+    serviceAccount = require('./config/firebaseServiceAccount.json');
+}
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
