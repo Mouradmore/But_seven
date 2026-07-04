@@ -199,7 +199,8 @@ text-decoration: none;
 
 async function fetchHomepageVideos() {
   try {
-    const response = await fetch('http://localhost:5000/api/videos/homepage');
+   // قم بتغيير هذا السطر
+const response = await fetch('https://my-backend-api-bntd.onrender.com/api/videos/homepage');
     const data = await response.json();
     
     // رندر كل قسم بناءً على مصفوفة البيانات القادمة من السيرفر
@@ -279,7 +280,8 @@ async function performSearch(query) {
         searchResultsSection.style.display = 'block';
         searchResultsRow.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">جاري البحث عن تفاصيل...</p>';
         
-        const response = await fetch(`http://localhost:5000/api/videos/search?q=${encodeURIComponent(query)}`);
+     // قم بتغيير هذا السطر
+const response = await fetch('https://my-backend-api-bntd.onrender.com/api/videos/homepage');
         const data = await response.json();
         
         searchResultsRow.innerHTML = ''; // مسح رسالة التحميل
