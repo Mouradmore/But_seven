@@ -281,7 +281,8 @@ async function performSearch(query) {
         searchResultsRow.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">جاري البحث عن تفاصيل...</p>';
         
      // قم بتغيير هذا السطر
-const response = await fetch('https://my-backend-api-bntd.onrender.com/api/videos/homepage');
+// الرابط الصحيح لجلب نتائج البحث
+const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/videos/search?q=${encodeURIComponent(query)}`);     
         const data = await response.json();
         
         searchResultsRow.innerHTML = ''; // مسح رسالة التحميل
