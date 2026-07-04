@@ -626,7 +626,8 @@ async function loadPlaylist(currentId) {
     try {
         playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa; font-size:12px;">جاري تحميل القائمة...</p>';
         
-        const response = await fetch(`http://localhost:5000/api/videos/${currentId}/related`);
+      // قم بتغيير هذا السطر
+const response = await fetch('https://my-backend-api-bntd.onrender.com/api/videos/homepage');
         const data = await response.json();
         
         playlistContainer.innerHTML = ''; // مسح رسالة التحميل
@@ -665,7 +666,8 @@ async function loadPlaylist(currentId) {
 // تعديل بسيط على الدالة السابقة لتحديث تفاصيل الفيديو واستدعاء القائمة الجانبية
 async function fetchAndLoadVideo(videoId = null) {
     try {
-        const url = videoId ? `http://localhost:5000/api/videos/${videoId}` : `http://localhost:5000/api/videos`;
+        // قم بتغيير هذا السطر
+const response = await fetch('https://my-backend-api-bntd.onrender.com/api/videos/homepage');
         const response = await fetch(url);
         const data = await response.json();
         
