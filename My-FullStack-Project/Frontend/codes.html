@@ -874,56 +874,65 @@ function createNewProjectWorkspace() {
             return map;
         }
 
-        // 1. الدالة الذكية لتجميع صفحة HTML وما ترتبط به من صفحات أخرى
+// 1. الدالة الذكية والمطورة لتجميع المشروع (تحل مشاكل JS والروابط)
 function compileSpecificHtml(htmlFileNode, allFilesMap, processedFiles = new Set()) {
-    // حماية من التكرار اللانهائي (لمنع انهيار المتصفح إذا كانت الصفحات تشير لبعضها)
-    if (processedFiles.has(htmlFileNode.name)) return "#"; 
+    // حماية من التكرار اللانهائي
+    if (processedFiles.has(htmlFileNode.name)) return "#";
     processedFiles.add(htmlFileNode.name);
-
+    
     let compiledHtml = htmlFileNode.content;
+    
+    // أولاً: دمج ملفات الجافاسكريبت مباشرة (Inline) لتفادي أخطاء الـ Base64
+    compiledHtml = compiledHtml.replace(/<script\s+[^>]*src=["']([^"']+)["'][^>]*>[\s\S]*?<\/script>/gi, (match, p1) => {
+        const filename = p1.split('/').pop();
+        if (allFilesMap[filename] && (allFilesMap[filename].fileType === 'js' || allFilesMap[filename].fileType === 'ts')) {
+            return `<script>\n${allFilesMap[filename].content}\n<\/script>`;
+        }
+        return match;
+    });
 
-    // دمج الوسائط وملفات JS (التي تستخدم src)
+    // ثانياً: دمج ملفات CSS مباشرة (Inline)
+    compiledHtml = compiledHtml.replace(/<link\s+[^>]*href=["']([^"']+)["'][^>]*>/gi, (match, p1) => {
+        const filename = p1.split('/').pop();
+        if (allFilesMap[filename] && allFilesMap[filename].fileType === 'css') {
+            return `<style>\n${allFilesMap[filename].content}\n<\/style>`;
+        }
+        return match;
+    });
+    
+    // ثالثاً: معالجة الصور والوسائط المتعددة (Base64 كما هي)
     compiledHtml = compiledHtml.replace(/src=["']([^"']+)["']/gi, (match, p1) => {
         const filename = p1.split('/').pop();
         if (allFilesMap[filename]) {
             const file = allFilesMap[filename];
-            if (file.fileType === 'js' || file.fileType === 'ts') { 
-                if (file.content.startsWith('data:')) return `src="${file.content}"`;
-                const b64 = btoa(unescape(encodeURIComponent(file.content)));
-                return `src="data:text/javascript;base64,${b64}"`;
-            } else if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
+            if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
                 return `src="${file.content}"`;
             }
         }
         return match;
     });
-
-    // دمج ملفات CSS وصفحات HTML الأخرى (التي تستخدم href)
+    
+    // رابعاً: معالجة الروابط لصفحات HTML الأخرى (تجاوز حظر المتصفحات)
     compiledHtml = compiledHtml.replace(/href=["']([^"']+)["']/gi, (match, p1) => {
         const filename = p1.split('/').pop();
+        
+        // تجاهل روابط CSS لأننا عالجناها سابقاً
+        if (match.toLowerCase().includes('rel="stylesheet"')) return match; 
+        
         if (allFilesMap[filename]) {
             const file = allFilesMap[filename];
-            
-            // إذا كان الرابط لملف CSS
-            if (file.fileType === 'css') {
-                if (file.content.startsWith('data:')) return `href="${file.content}"`;
-                const b64 = btoa(unescape(encodeURIComponent(file.content)));
-                return `href="data:text/css;base64,${b64}"`;
-            } 
-            // إذا كان الرابط لصفحة HTML أخرى داخل المشروع
-            else if (file.fileType === 'html' && file !== htmlFileNode) {
-                // تجميع الصفحة الأخرى برمجياً وبشكل متداخل (Recursion)
+            if (file.fileType === 'html' && file !== htmlFileNode) {
                 let linkedCompiled = compileSpecificHtml(file, allFilesMap, new Set(processedFiles));
                 if (linkedCompiled !== "#") {
                     const b64 = btoa(unescape(encodeURIComponent(linkedCompiled)));
-                    // تحويل الصفحة إلى رابط بيانات ليتمكن المتصفح من الانتقال إليها مباشرة
-                    return `href="data:text/html;charset=utf-8;base64,${b64}"`;
+                    // خدعة ذكية: استبدال الرابط بدالة جافاسكريبت تقوم بفتح الصفحة الجديدة فوراً 
+                    return `href="javascript:void(0);" onclick="document.open(); document.write(decodeURIComponent(escape(atob('${b64}')))); document.close();"`;
                 }
             }
         }
         return match;
     });
-
+    
     return compiledHtml;
 }
 
