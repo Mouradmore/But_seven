@@ -47,13 +47,8 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // تسجيل الدخول (Login) -> متوافق مع indexs.html
-// ==========================================
-// مسار تسجيل الدخول (Login) بعد التعديل
-// ==========================================
-// تسجيل الدخول (Login) 
 app.post('/api/auth/login', async (req, res) => {
     try {
-        // نستقبل اسم المستخدم وليس الإيميل لتتوافق مع الواجهة
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
@@ -63,19 +58,10 @@ app.post('/api/auth/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
         const payload = { user: { id: user.id, username: user.username } };
-        
-        // إنشاء التوكن
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        // التعديل هنا فقط: إضافة profilePic للبيانات المرسلة
-        res.json({ 
-            token, 
-            username: user.username, 
-            profilePic: user.profilePic 
-        });
-        
+        res.json({ token, username: user.username, profilePic: user.profilePic });
     } catch (err) {
-        console.error(err);
         res.status(500).send('خطأ في السيرفر');
     }
 });
