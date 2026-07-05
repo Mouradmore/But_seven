@@ -874,45 +874,76 @@ function createNewProjectWorkspace() {
             return map;
         }
 
-        function compileVirtualProject() {
-            const allFilesMap = getAllFilesFlat(fileSystem);
-            let activeHtmlFile = null;
+        // 1. الدالة الذكية لتجميع صفحة HTML وما ترتبط به من صفحات أخرى
+function compileSpecificHtml(htmlFileNode, allFilesMap, processedFiles = new Set()) {
+    // حماية من التكرار اللانهائي (لمنع انهيار المتصفح إذا كانت الصفحات تشير لبعضها)
+    if (processedFiles.has(htmlFileNode.name)) return "#"; 
+    processedFiles.add(htmlFileNode.name);
 
-            if (currentOpenFile && currentOpenFile.fileType === 'html') activeHtmlFile = currentOpenFile;
-            else activeHtmlFile = allFilesMap['index.html'] || Object.values(allFilesMap).find(f => f.fileType === 'html');
+    let compiledHtml = htmlFileNode.content;
 
-            if (!activeHtmlFile) return null;
-
-            let compiledHtml = activeHtmlFile.content;
-
-            compiledHtml = compiledHtml.replace(/src=["']([^"']+)["']/g, (match, p1) => {
-                const filename = p1.split('/').pop();
-                if (allFilesMap[filename]) {
-                    const file = allFilesMap[filename];
-                    if (file.fileType === 'js' || file.fileType === 'ts') { 
-                        if (file.content.startsWith('data:')) return `src="${file.content}"`;
-                        const b64 = btoa(unescape(encodeURIComponent(file.content)));
-                        return `src="data:text/javascript;base64,${b64}"`;
-                    } else if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
-                        return `src="${file.content}"`;
-                    }
-                }
-                return match;
-            });
-
-            compiledHtml = compiledHtml.replace(/href=["']([^"']+)["']/g, (match, p1) => {
-                const filename = p1.split('/').pop();
-                if (allFilesMap[filename] && allFilesMap[filename].fileType === 'css') {
-                    const file = allFilesMap[filename];
-                    if (file.content.startsWith('data:')) return `href="${file.content}"`;
-                    const b64 = btoa(unescape(encodeURIComponent(file.content)));
-                    return `href="data:text/css;base64,${b64}"`;
-                }
-                return match;
-            });
-
-            return compiledHtml;
+    // دمج الوسائط وملفات JS (التي تستخدم src)
+    compiledHtml = compiledHtml.replace(/src=["']([^"']+)["']/gi, (match, p1) => {
+        const filename = p1.split('/').pop();
+        if (allFilesMap[filename]) {
+            const file = allFilesMap[filename];
+            if (file.fileType === 'js' || file.fileType === 'ts') { 
+                if (file.content.startsWith('data:')) return `src="${file.content}"`;
+                const b64 = btoa(unescape(encodeURIComponent(file.content)));
+                return `src="data:text/javascript;base64,${b64}"`;
+            } else if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
+                return `src="${file.content}"`;
+            }
         }
+        return match;
+    });
+
+    // دمج ملفات CSS وصفحات HTML الأخرى (التي تستخدم href)
+    compiledHtml = compiledHtml.replace(/href=["']([^"']+)["']/gi, (match, p1) => {
+        const filename = p1.split('/').pop();
+        if (allFilesMap[filename]) {
+            const file = allFilesMap[filename];
+            
+            // إذا كان الرابط لملف CSS
+            if (file.fileType === 'css') {
+                if (file.content.startsWith('data:')) return `href="${file.content}"`;
+                const b64 = btoa(unescape(encodeURIComponent(file.content)));
+                return `href="data:text/css;base64,${b64}"`;
+            } 
+            // إذا كان الرابط لصفحة HTML أخرى داخل المشروع
+            else if (file.fileType === 'html' && file !== htmlFileNode) {
+                // تجميع الصفحة الأخرى برمجياً وبشكل متداخل (Recursion)
+                let linkedCompiled = compileSpecificHtml(file, allFilesMap, new Set(processedFiles));
+                if (linkedCompiled !== "#") {
+                    const b64 = btoa(unescape(encodeURIComponent(linkedCompiled)));
+                    // تحويل الصفحة إلى رابط بيانات ليتمكن المتصفح من الانتقال إليها مباشرة
+                    return `href="data:text/html;charset=utf-8;base64,${b64}"`;
+                }
+            }
+        }
+        return match;
+    });
+
+    return compiledHtml;
+}
+
+// 2. تحديث الدالة الرئيسية التي يتم استدعاؤها عند النشر أو المعاينة
+function compileVirtualProject() {
+    const allFilesMap = getAllFilesFlat(fileSystem);
+    let activeHtmlFile = null;
+
+    // تحديد الصفحة المفتوحة حالياً، أو الصفحة الرئيسية كخيار افتراضي
+    if (currentOpenFile && currentOpenFile.fileType === 'html') {
+        activeHtmlFile = currentOpenFile;
+    } else {
+        activeHtmlFile = allFilesMap['index.html'] || Object.values(allFilesMap).find(f => f.fileType === 'html');
+    }
+
+    if (!activeHtmlFile) return null;
+
+    // تمرير الصفحة لدالة التجميع الذكية
+    return compileSpecificHtml(activeHtmlFile, allFilesMap);
+}
 
         function showTerminal(initialText = "") {
             const terminal = document.getElementById('terminalPanel');
