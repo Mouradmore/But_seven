@@ -123,10 +123,9 @@
             <button id="submit-comment"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-<script src="player.js" type="text/javascript" charset="utf-8"></script>
-  
+ 
    <script>
-    // ================= JavaScript =================
+       // ================= JavaScript =================
 const video = document.getElementById('main-video');
 const touchLayer = document.getElementById('touch-layer');
 const brightnessOverlay = document.getElementById('brightness-overlay');
@@ -139,48 +138,51 @@ let startX = 0, startY = 0, currentVolume = 1, currentBrightness = 0, isSwiping 
 const SWIPE_THRESHOLD = 30, SEEK_SECONDS = 10;
 
 // 1. التقاط بداية اللمس
-touchLayer.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    currentVolume = video.volume;
-    isSwiping = false;
-});
+if (touchLayer) {
+    touchLayer.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentVolume = video ? video.volume : 1;
+        isSwiping = false;
+    });
 
-// 2. تتبع حركة السحب
-touchLayer.addEventListener('touchmove', (e) => {
-    if (!e.touches.length) return;
-    const currentX = e.touches[0].clientX, currentY = e.touches[0].clientY;
-    const diffX = currentX - startX, diffY = currentY - startY;
-    
-    if (Math.abs(diffX) > SWIPE_THRESHOLD || Math.abs(diffY) > SWIPE_THRESHOLD) {
-        isSwiping = true;
-        if (Math.abs(diffY) > Math.abs(diffX)) {
-            const swipeDistance = diffY / window.innerHeight;
-            if (startX > window.innerWidth / 2) {
-                video.volume = Math.max(0, Math.min(1, currentVolume - swipeDistance));
-            } else {
-                let newBrightness = Math.max(0, Math.min(0.8, currentBrightness + swipeDistance));
-                brightnessOverlay.style.backgroundColor = `rgba(0, 0, 0, ${newBrightness})`;
-                currentBrightness = newBrightness;
+    // 2. تتبع حركة السحب
+    touchLayer.addEventListener('touchmove', (e) => {
+        if (!e.touches.length || !video) return;
+        const currentX = e.touches[0].clientX, currentY = e.touches[0].clientY;
+        const diffX = currentX - startX, diffY = currentY - startY;
+        
+        if (Math.abs(diffX) > SWIPE_THRESHOLD || Math.abs(diffY) > SWIPE_THRESHOLD) {
+            isSwiping = true;
+            if (Math.abs(diffY) > Math.abs(diffX)) {
+                const swipeDistance = diffY / window.innerHeight;
+                if (startX > window.innerWidth / 2) {
+                    video.volume = Math.max(0, Math.min(1, currentVolume - swipeDistance));
+                } else if (brightnessOverlay) {
+                    let newBrightness = Math.max(0, Math.min(0.8, currentBrightness + swipeDistance));
+                    brightnessOverlay.style.backgroundColor = `rgba(0, 0, 0, ${newBrightness})`;
+                    currentBrightness = newBrightness;
+                }
             }
         }
-    }
-});
+    });
 
-// 3. النقر المزدوج (التقديم والتأخير)
-let lastTapTime = 0;
-touchLayer.addEventListener('touchend', (e) => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTapTime;
-    
-    if (!isSwiping && tapLength < 300 && tapLength > 0) {
-        const tapX = e.changedTouches[0].clientX;
-        if (tapX > window.innerWidth / 2) video.currentTime += SEEK_SECONDS;
-        else video.currentTime -= SEEK_SECONDS;
-        e.preventDefault();
-    }
-    lastTapTime = currentTime;
-});
+    // 3. النقر المزدوج (التقديم والتأخير)
+    let lastTapTime = 0;
+    touchLayer.addEventListener('touchend', (e) => {
+        if (!video) return;
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTapTime;
+        
+        if (!isSwiping && tapLength < 300 && tapLength > 0) {
+            const tapX = e.changedTouches[0].clientX;
+            if (tapX > window.innerWidth / 2) video.currentTime += SEEK_SECONDS;
+            else video.currentTime -= SEEK_SECONDS;
+            e.preventDefault();
+        }
+        lastTapTime = currentTime;
+    });
+}
 
 // 4. عناصر التحكم بالفيديو
 const playPauseBtn = document.getElementById('play-pause-btn');
@@ -198,108 +200,116 @@ function formatTime(seconds) {
 }
 
 function togglePlay() {
-    if (!video.src) return; // لا تفعل شيء إذا لم يكن هناك فيديو محمل
+    if (!video || !video.src) return; 
     
     if (video.paused) { 
-        video.play().catch(e => console.log("تحتاج لتفاعل المستخدم أولاً")); 
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; 
+        video.play().catch(e => console.log("التشغيل يحتاج تفاعل المستخدم")); 
+        if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; 
     } else { 
         video.pause(); 
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>'; 
+        if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-play"></i>'; 
     }
 }
 
-playPauseBtn.addEventListener('click', togglePlay);
-touchLayer.addEventListener('click', (e) => { if (!isSwiping) togglePlay(); });
+if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlay);
+if (touchLayer) touchLayer.addEventListener('click', (e) => { if (!isSwiping) togglePlay(); });
 
-// إرجاع زر التشغيل عند انتهاء الفيديو
-video.addEventListener('ended', () => {
-    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-});
+if (video) {
+    video.addEventListener('ended', () => {
+        if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    });
 
-// إشعار بخطأ التحميل
-video.addEventListener('error', () => {
-    document.getElementById('video-title-display').textContent += " (خطأ في التحميل: الرابط قد يكون معطوباً أو غير مدعوم)";
-});
+    video.addEventListener('timeupdate', () => {
+        if (video.duration && progressBar) {
+            progressBar.value = (video.currentTime / video.duration) * 100;
+            if (currentTimeEl) currentTimeEl.textContent = formatTime(video.currentTime);
+            if (totalTimeEl) totalTimeEl.textContent = formatTime(video.duration);
+        }
+    });
+}
 
-video.addEventListener('timeupdate', () => {
-    if (video.duration) {
-        progressBar.value = (video.currentTime / video.duration) * 100;
-        currentTimeEl.textContent = formatTime(video.currentTime);
-        totalTimeEl.textContent = formatTime(video.duration);
-    }
-});
+if (progressBar) {
+    progressBar.addEventListener('input', (e) => { 
+        if (video && video.duration) video.currentTime = (e.target.value / 100) * video.duration; 
+    });
+}
 
-progressBar.addEventListener('input', (e) => { 
-    if (video.duration) video.currentTime = (e.target.value / 100) * video.duration; 
-});
-
-fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) { 
-        document.documentElement.requestFullscreen().catch(e => console.log(e)); 
-        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>'; 
-    } else { 
-        document.exitFullscreen(); 
-        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>'; 
-    }
-});
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) { 
+            document.documentElement.requestFullscreen().catch(e => console.log(e)); 
+            fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>'; 
+        } else { 
+            document.exitFullscreen(); 
+            fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>'; 
+        }
+    });
+}
 
 let timeout;
 function resetHideUI() {
-    uiControls.style.opacity = '1';
-    clearTimeout(timeout);
-    timeout = setTimeout(() => { if (!video.paused) uiControls.style.opacity = '0'; }, 3000);
+    if (uiControls) {
+        uiControls.style.opacity = '1';
+        clearTimeout(timeout);
+        timeout = setTimeout(() => { if (video && !video.paused) uiControls.style.opacity = '0'; }, 3000);
+    }
 }
 document.addEventListener('mousemove', resetHideUI);
 document.addEventListener('touchstart', resetHideUI);
 
 // =======================================================
-// 5. النظام الذكي الجديد لجلب الفيديوهات من المتصفح مباشرة
+// 5. النظام الذكي والمحمي لاستخراج الفيديوهات (بدون انهيار)
 // =======================================================
 
 function getVideosFromLocalProjects() {
-    const allProjects = JSON.parse(localStorage.getItem('codeProjects') || '[]');
-    const videoProjects = [];
-    
-    allProjects.forEach(p => {
-        const code = (p.htmlCode || p.html || '');
-        const codeLower = code.toLowerCase();
-        
-        // التحقق من وجود فيديو أو إطار يوتيوب
-        if (codeLower.includes('<video') || codeLower.includes('youtube.com/embed')) {
-            
-            // استخراج الرابط المباشر بمرونة أعلى (يقبل المسافات)
-            const directMatch = code.match(/<(?:video|source)[^>]+src\s*=\s*["']([^"']+)["']/i);
-            const ytMatch = code.match(/<iframe[^>]+src\s*=\s*["']([^"']+)["']/i);
+    let videoProjects = [];
+    try {
+        const allProjects = JSON.parse(localStorage.getItem('codeProjects') || '[]');
+        const parser = new DOMParser();
+
+        allProjects.forEach(p => {
+            const code = (p.htmlCode || p.html || '');
+            if (!code) return;
+
+            // تحويل الكود إلى عناصر HTML حقيقية للبحث داخلها بأمان
+            const doc = parser.parseFromString(code, 'text/html');
             
             let extractedUrl = '';
-            if (directMatch) extractedUrl = directMatch[1];
-            else if (ytMatch) extractedUrl = ytMatch[1];
+            
+            // البحث عن مصدر الفيديو
+            const sourceTag = doc.querySelector('source');
+            const videoTag = doc.querySelector('video');
+            const iframeTag = doc.querySelector('iframe[src*="youtube.com"], iframe[src*="youtu.be"]');
+
+            if (sourceTag && sourceTag.getAttribute('src')) {
+                extractedUrl = sourceTag.getAttribute('src');
+            } else if (videoTag && videoTag.getAttribute('src')) {
+                extractedUrl = videoTag.getAttribute('src');
+            } else if (iframeTag && iframeTag.getAttribute('src')) {
+                extractedUrl = iframeTag.getAttribute('src');
+            }
 
             if (extractedUrl) {
                 videoProjects.push({
-                    id: p.id,
+                    id: p.id || Math.random().toString(36).substr(2, 9),
                     title: p.title || 'مشروع بدون عنوان',
                     author: p.author || 'But_Seven',
                     views: p.views || 0,
                     videoUrl: extractedUrl, 
                     thumbnail: p.profilePic || 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"%3E%3Cpath d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/%3E%3C/svg%3E',
-                    isYouTube: extractedUrl.includes('youtube.com') // تحديد ما إذا كان يوتيوب
+                    isYouTube: extractedUrl.includes('youtube') || extractedUrl.includes('youtu.be')
                 });
             }
-        }
-    });
-    
+        });
+    } catch (error) {
+        console.error("خطأ أثناء قراءة المشاريع:", error);
+    }
     return videoProjects;
 }
 
 function loadPlaylist(videos) {
+    if (!playlistContainer) return;
     playlistContainer.innerHTML = ''; 
-    
-    if (!videos || videos.length === 0) {
-        playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa; font-size:12px; margin-top: 20px;">لا توجد مشاريع تحتوي على فيديوهات.</p>';
-        return;
-    }
     
     videos.forEach(vid => {
         const card = document.createElement('div');
@@ -318,51 +328,48 @@ function loadPlaylist(videos) {
 }
 
 function fetchAndLoadVideo(requestedId = null) {
-    const videos = getVideosFromLocalProjects();
+    let videos = getVideosFromLocalProjects();
     
-    // إذا لم يجد النظام أي فيديو في كل المشاريع
+    // 💡 فيديو تجريبي احتياطي: إذا لم يجد النظام أي مشروع يحتوي على فيديو، سيعرض هذا الفيديو لكي لا تظل الشاشة سوداء!
     if (videos.length === 0) {
-        document.getElementById('video-title-display').textContent = "لم يتم العثور على أي فيديو!";
-        document.getElementById('video-author-display').innerHTML = "";
-        document.getElementById('video-views-display').innerHTML = "";
-        playlistContainer.innerHTML = '<p style="text-align:center; color:#aaa; font-size:12px; margin-top: 20px;">أضف مشروعاً يحتوي على وسم &lt;video&gt; ليظهر هنا.</p>';
-        return;
+        videos = [{
+            id: 'demo123',
+            title: 'فيديو تجريبي (لم يتم العثور على مشاريع)',
+            author: 'النظام',
+            views: 999,
+            videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4', // فيديو تجريبي مجاني
+            thumbnail: 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"%3E%3Cpath d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/%3E%3C/svg%3E',
+            isYouTube: false
+        }];
     }
 
-    let targetVideo = null;
-    if (requestedId) targetVideo = videos.find(v => String(v.id) === String(requestedId));
-    if (!targetVideo) targetVideo = videos[0]; // تشغيل أول فيديو افتراضياً
+    let targetVideo = requestedId ? videos.find(v => String(v.id) === String(requestedId)) : videos[0];
+    if (!targetVideo) targetVideo = videos[0]; 
     
     if (targetVideo) {
         currentVideoId = targetVideo.id;
         
-        // التعامل الذكي: إذا كان يوتيوب أم مباشر
         if (targetVideo.isYouTube) {
-            // إخفاء مشغل الفيديو العادي ووضع iframe الخاص باليوتيوب مكانه
-            video.style.display = 'none';
-            document.getElementById('but-seven-player').innerHTML += `<iframe src="${targetVideo.videoUrl}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; z-index: 50;"></iframe>`;
+            if (video) video.style.display = 'none';
+            const playerContainer = document.getElementById('but-seven-player');
+            if (playerContainer) {
+                playerContainer.innerHTML += `<iframe src="${targetVideo.videoUrl}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; z-index: 50;"></iframe>`;
+            }
         } else {
-            // تحديث مباشر للـ src الخاص بالفيديو 
-            video.src = targetVideo.videoUrl;
-            video.load();
-            video.play().then(() => {
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            }).catch(e => console.log("التشغيل التلقائي يحتاج لضغطة من المستخدم"));
+            if (video) {
+                video.src = targetVideo.videoUrl;
+                video.load();
+            }
         }
         
-        // تحديث البيانات المرئية
-        document.getElementById('video-title-display').textContent = targetVideo.title;
-        document.getElementById('video-author-display').innerHTML = `<i class="fas fa-user-circle"></i> ${targetVideo.author}`;
-        document.getElementById('video-views-display').innerHTML = `<i class="fas fa-eye"></i> ${targetVideo.views} مشاهدة`;
+        // تحديث النصوص
+        const titleDisplay = document.getElementById('video-title-display');
+        const authorDisplay = document.getElementById('video-author-display');
+        const viewsDisplay = document.getElementById('video-views-display');
         
-        // دعم ميزة الإشعارات في الهواتف
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({ 
-                title: targetVideo.title, 
-                artist: targetVideo.author, 
-                artwork: [{ src: targetVideo.thumbnail, sizes: '512x512', type: 'image/jpeg' }] 
-            });
-        }
+        if (titleDisplay) titleDisplay.textContent = targetVideo.title;
+        if (authorDisplay) authorDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${targetVideo.author}`;
+        if (viewsDisplay) viewsDisplay.innerHTML = `<i class="fas fa-eye"></i> ${targetVideo.views} مشاهدة`;
         
         loadPlaylist(videos);
     }
@@ -370,9 +377,13 @@ function fetchAndLoadVideo(requestedId = null) {
 
 // 6. تشغيل الكود بمجرد أن تجهز الصفحة
 window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestedVideoId = urlParams.get('v');
-    fetchAndLoadVideo(requestedVideoId);
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedVideoId = urlParams.get('v');
+        fetchAndLoadVideo(requestedVideoId);
+    } catch (e) {
+        console.error("حدث خطأ غير متوقع أثناء بدء التشغيل:", e);
+    }
 });
 </script>
 </body>
