@@ -181,8 +181,19 @@
         }
         .shortcut-btn:hover { background-color: #555; }
 
-        .editor-wrapper { flex: 1; height: calc(100vh - 90px); position: relative; }
-        .CodeMirror { height: 100% !important; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 15px; }
+        .editor-wrapper { 
+    flex: 1; 
+    height: calc(100vh - 90px); 
+    position: relative; 
+    overflow: hidden; /* إضافة هذه الخاصية هامة جداً */
+}
+.CodeMirror { 
+    position: absolute; /* جعل المحرر يملأ الحاوية برمجياً */
+    top: 0; bottom: 0; left: 0; right: 0;
+    height: 100% !important; 
+    font-family: 'Cascadia Code', 'Fira Code', monospace; 
+    font-size: 15px; 
+}
 
         .media-preview-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #1e1e1e; gap: 20px; }
         .media-preview-panel img, .media-preview-panel video { max-width: 90%; max-height: 90%; object-fit: contain; border: 2px solid #3c3c3c; }
