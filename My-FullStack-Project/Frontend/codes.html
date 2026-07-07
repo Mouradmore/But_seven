@@ -727,17 +727,13 @@ function createNewProjectWorkspace() {
                     mediaPanel.innerHTML = `<h3><i class="fas fa-music"></i> audio browser: ${fileNode.name}</h3><audio controls src="${fileNode.content}"></audio>`;
                 }
             } else {
-            mediaPanel.style.display = 'none';
-            if(wrapper) wrapper.style.display = 'block';
-            editor.setValue(fileNode.content || "");
-            editor.setOption("mode", mode);
-            
-            // استخدام setTimeout لضمان اكتمال تحميل الواجهة قبل رسم الأسطر
-            setTimeout(() => {
+                mediaPanel.style.display = 'none';
+                if(wrapper) wrapper.style.display = 'block';
+                editor.setValue(fileNode.content || "");
+                editor.setOption("mode", mode);
                 editor.refresh();
-            }, 50);
-        }
-        renderFileExplorer();
+            }
+            renderFileExplorer();
         }
         function openDefaultFirstFile() {
             if (fileSystem.length > 0 && fileSystem[0].children && fileSystem[0].children.length > 0) {
