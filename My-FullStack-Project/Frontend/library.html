@@ -4,10 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>مكتبة الأكواد والملفات | But_Seven_7</title>
+    <title>مكتبة الأكواد والملفات | But_Seven</title>
    
     <style>
-        /* الأنماط الأساسية الموحدة */
+        /* =============================================
+                   الأنماط الأساسية المحسنة
+                   ============================================= */
+        
+        /* نظام الإشعارات (Toasts) */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 420px;
+            direction: rtl;
+        }
+
+        .toast-message {
+            padding: 14px 22px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast-message .toast-icon {
+            font-size: 1.3rem;
+        }
+
+        .toast-success { 
+            background: linear-gradient(135deg, #28a745, #20c997); 
+        }
+        .toast-error { 
+            background: linear-gradient(135deg, #dc3545, #e74c3c); 
+        }
+        .toast-warning { 
+            background: linear-gradient(135deg, #ffc107, #f39c12); 
+            color: #333;
+        }
+        .toast-info { 
+            background: linear-gradient(135deg, #17a2b8, #0dcaf0); 
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(60px) scale(0.9); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        .toast-message.hiding {
+            animation: toastSlideOut 0.3s ease forwards;
+        }
+
+        @keyframes toastSlideOut {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to { transform: translateX(60px) scale(0.9); opacity: 0; }
+        }
+
+        /* الأنماط الأساسية */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -20,41 +84,48 @@
 
         header {
             background-color: #fff;
-            color: #666;
-            padding: 15px 20px;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             position: sticky;
             top: 0;
             z-index: 100;
-            text-align: center;
         }
 
         header .logo {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #666;
             font-weight: bold;
-            text-align: center;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 20px;
+        header .logo a {
+            color: #666;
+            text-decoration: none;
+            transition: 0.3s;
         }
 
-        /* أدوات الرفع والتحكم */
+        header .logo a:hover {
+            color: #007bff;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px 40px;
+        }
+
+        /* شريط الأدوات */
         .toolbar {
             background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 20px 24px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
@@ -63,43 +134,67 @@
             gap: 15px;
         }
 
-        .toolbar h2 { 
-            margin-right: 30px;
-            color: #666; }
+        .toolbar h2 {
+            margin: 0;
+            color: #666;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-toolbar {
+            padding: 10px 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background: #f8f9fa;
+            color: #007bff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-toolbar:hover {
+            background: #fff;
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .btn-toolbar.danger {
+            color: #dc3545;
+            border-color: #f8d7da;
+        }
+
+        .btn-toolbar.danger:hover {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
 
         .upload-btn-wrapper {
             position: relative;
-     margin-right: 80px;
             overflow: hidden;
             display: inline-block;
-            
-        }
-
-        .btn-upload {
-       width: 100%;
-            border: 2px dashed #888;
-            color: #007bff;
-            background-color: #f8f9fa;
-            padding: 10px 25px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .upload-btn-wrapper:hover .btn-upload {
-            background-color: #fff;
-            color: #007bff;
         }
 
         .upload-btn-wrapper input[type=file] {
-            font-size: 100px;
             position: absolute;
             left: 0;
             top: 0;
             opacity: 0;
             cursor: pointer;
+            width: 100%;
             height: 100%;
         }
 
@@ -112,71 +207,110 @@
 
         .file-card {
             background: #fff;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             border-top: 4px solid #007bff;
+            position: relative;
         }
 
-        .file-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        .file-card.folder-card {
+            border-top-color: #ffc107;
+            cursor: pointer;
+        }
+
+        .file-card.folder-card:hover {
+            border-top-color: #f57f17;
+        }
+
         .file-icon {
             font-size: 2.5rem;
             color: #6c757d;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
         }
 
         .file-name {
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 600;
+            font-size: 1rem;
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             word-break: break-all;
             text-align: center;
         }
 
         .file-meta {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #888;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .file-meta span {
+            display: inline-block;
+            margin: 0 4px;
         }
 
         .file-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .file-actions button {
             flex: 1;
-            padding: 8px;
+            min-width: 40px;
+            padding: 8px 10px;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
             color: #fff;
-            transition: background 0.3s;
+            transition: all 0.3s;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .file-actions button:hover {
+            transform: scale(1.05);
+            filter: brightness(0.95);
         }
 
         .btn-view { background-color: #17a2b8; }
         .btn-view:hover { background-color: #138496; }
         
-        .btn-download { background-color: #28a745; }
-        .btn-download:hover { background-color: #218838; }
+        .btn-preview { background-color: #28a745; }
+        .btn-preview:hover { background-color: #218838; }
+
+        .btn-download { background-color: #007bff; }
+        .btn-download:hover { background-color: #0069d9; }
 
         .btn-delete { background-color: #dc3545; }
         .btn-delete:hover { background-color: #c82333; }
 
-        /* النافذة المنبثقة (Modal) لعرض الكود */
+        .btn-folder-open { 
+            background: #ffc107; 
+            color: #333;
+        }
+        .btn-folder-open:hover { 
+            background: #f57f17; 
+            color: #fff;
+        }
+
+        /* نافذة عرض الكود */
         .modal {
             display: none;
             position: fixed;
@@ -186,194 +320,281 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
         }
 
-        .modal-content {
-            background-color: #282a36; /* لون متوافق مع محررات الأكواد */
-            margin: auto;
-            padding: 0;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 800px;
-            height: 80vh;
+        .modal.show {
             display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .modal-content {
+            background-color: #282a36;
+            margin: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .modal-header {
-            padding: 15px 20px;
+            padding: 16px 24px;
             background-color: #1e1f29;
             color: #f8f8f2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            flex-shrink: 0;
         }
 
-        .modal-header h3 { margin: 0; font-size: 1.2rem; }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header .file-type-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
         
         .close-modal {
             color: #ff5555;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            transition: color 0.3s;
+            transition: 0.3s;
+            line-height: 1;
         }
-        .close-modal:hover { color: #ff9999; }
+        
+        .close-modal:hover { 
+            color: #ff9999;
+            transform: rotate(90deg);
+        }
 
         .modal-body {
             flex-grow: 1;
-            padding: 20px;
+            padding: 24px;
             overflow-y: auto;
         }
 
-        pre {
+        .modal-body pre {
             margin: 0;
             color: #f8f8f2;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             white-space: pre-wrap;
             word-wrap: break-word;
-            direction: ltr; /* اتجاه الأكواد من اليسار لليمين دائماً */
+            direction: ltr;
             text-align: left;
+            line-height: 1.6;
         }
 
-        /* رسالة حالة فارغة */
+        /* حالة فارغة */
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 50px;
-            color: #777;
+            padding: 60px 20px;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        /* تنسيق زر المعاينة الجديد */
-.btn-preview {
-    background-color: #28a745; /* اللون الأخضر للمعاينة */
-    color: #fff;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-}
 
-.btn-preview:hover {
-    background-color: #218838;
-}
-/* --- تنسيقات نافذة المعاينة المدمجة --- */
-.preview-modal {
-    display: none; /* مخفية افتراضياً */
-    position: fixed; 
-    z-index: 2000; /* لتكون فوق كل شيء */
-    left: 0px; 
-    top: 0; 
-    width: 100%; 
-    height: 100%; 
-    background-color: #fff; 
-    flex-direction: column;
-}
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
 
-.preview-modal.show {
-    display: flex;
-}
+        .empty-state p {
+            color: #999;
+            font-size: 0.95rem;
+        }
 
-.preview-header {
-    background-color: #f8f9fa;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
 
-.preview-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #333;
-}
+        /* رسالة التحميل */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
 
-.close-preview-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+        .loading-overlay.active {
+            display: flex;
+        }
 
-.close-preview-btn:hover {
-    background-color: #c82333;
-}
+        .loading-spinner {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
 
-.preview-iframe {
-    width: 100%;
-    flex: 1; /* ليأخذ الطول الكامل المتبقي من الشاشة */
-    border: none;
-    background-color: #fff;
-}
+        .loading-spinner .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #007bff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            margin: 0;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* استجابة للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .toolbar {
+                padding: 16px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .toolbar h2 {
+                text-align: center;
+                justify-content: center;
+            }
+            
+            .toolbar-actions {
+                justify-content: center;
+            }
+            
+            .btn-toolbar {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+            
+            .files-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .file-actions button {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+            }
+            
+            header {
+                padding: 8px 16px;
+            }
+            
+            header .logo {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .file-actions {
+                gap: 6px;
+            }
+            
+            .file-actions button {
+                flex: 1 1 40%;
+                min-width: 35px;
+                padding: 6px;
+            }
+            
+            .file-actions button svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <p class="logo">But_Seven</p>
-        <a href="index.html" style="color: #666; text-decoration: none; font-weight: bold;"><?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="24" height="24"><path d="M23.121,9.069,15.536,1.483a5.008,5.008,0,0,0-7.072,0L.879,9.069A2.978,2.978,0,0,0,0,11.19v9.817a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V11.19A2.978,2.978,0,0,0,23.121,9.069ZM15,22.007H9V18.073a3,3,0,0,1,6,0Zm7-1a1,1,0,0,1-1,1H17V18.073a5,5,0,0,0-10,0v3.934H3a1,1,0,0,1-1-1V11.19a1.008,1.008,0,0,1,.293-.707L9.878,2.9a3.008,3.008,0,0,1,4.244,0l7.585,7.586A1.008,1.008,0,0,1,22,11.19Z" fill="#666"/></svg></a>
+        <div class="logo">
+            📚 But_Seven
+        </div>
+        <a href="index.html" style="color: #666; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="#666">
+                <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+            </svg>
+            الرئيسية
+        </a>
     </header>
 
     <div class="container">
+        <!-- شريط الأدوات -->
         <div class="toolbar">
-            <h2> My uploaded files</h2>
-            <button onclick="createFolder()" style="width: 40%;
-border: 2px dashed #888; margin-left: -40px;
-color: #007bff;
-background-color: #f8f9fa;
-padding: 15px 30px;
-border-radius: 8px;
-font-size: 1rem;
-font-weight: bold;
-cursor: pointer;
-transition: all 0.3s;">📁  </button>
-            <div class="upload-btn-wrapper">
-
-                <button class="btn-upload">  <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="Bold" viewBox="0 0 24 24" width="52" height="25"><path d="M22.419,10a8.269,8.269,0,0,0-4.442-3.063A8.185,8.185,0,0,0,8.258,1.111,8.174,8.174,0,0,0,2.6,12.375,5.781,5.781,0,0,0,.188,18.694,5.85,5.85,0,0,0,5.944,23H8.5A1.5,1.5,0,0,0,10,21.5h0A1.5,1.5,0,0,0,8.5,20H5.944A2.893,2.893,0,0,1,3.1,17.958a2.8,2.8,0,0,1,2-3.446,1.5,1.5,0,0,0,.83-2.346A5.2,5.2,0,0,1,5.119,7.6a5.1,5.1,0,0,1,3.7-3.539,5.589,5.589,0,0,1,1.264-.147,5.14,5.14,0,0,1,3.118,1.042,5.216,5.216,0,0,1,2.014,3.442,1.508,1.508,0,0,0,1.288,1.3A5.227,5.227,0,0,1,20,11.774a5.155,5.155,0,0,1,.92,3.958,5.031,5.031,0,0,1-2.246,3.319A1.5,1.5,0,0,0,18,20.307h0a1.515,1.515,0,0,0,2.313,1.3,8.016,8.016,0,0,0,3.565-5.363A8.127,8.127,0,0,0,22.419,10Z"/><path d="M15.5,22.5V17h1.663a1,1,0,0,0,.707-1.707L14.707,12.13a1,1,0,0,0-1.414,0L10.13,15.293A1,1,0,0,0,10.837,17H12.5v5.5a1.5,1.5,0,0,0,3,0Z"/></svg></button>
-                <input type="file" id="fileInput" accept=".html,.css,.js,.txt,.json,.xml" multiple />
+            <h2>
+                <span>📁 ملفاتي</span>
+                <span id="folderPath" style="font-size: 0.8rem; color: #aaa; font-weight: normal;"></span>
+            </h2>
+            <div class="toolbar-actions">
+                <button class="btn-toolbar" onclick="createFolder()">
+                    📁 مجلد جديد
+                </button>
+                <div class="upload-btn-wrapper">
+                    <button class="btn-toolbar">
+                        📤 رفع ملفات
+                    </button>
+                    <input type="file" id="fileInput" accept=".html,.css,.js,.txt,.json,.xml,.md,.sql,.py,.php,.java,.c,.cpp,.cs,.go,.rs" multiple />
+                </div>
+                <button class="btn-toolbar danger" onclick="clearLibrary()">
+                    🗑️ تفريغ الكل
+                </button>
             </div>
         </div>
 
+        <!-- شبكة الملفات -->
         <div class="files-grid" id="filesContainer">
-            </div>
+            <!-- سيتم تعبئتها بواسطة JavaScript -->
+        </div>
     </div>
 
+    <!-- نافذة عرض الكود -->
     <div id="codeModal" class="modal">
-        
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalFileName">اسم الملف.js</h3>
-                
-                <i class="fas fa-times close-modal" onclick="closePopup()"></i>
+                <h3>
+                    <span id="modalFileName">اسم الملف</span>
+                    <span class="file-type-badge" id="modalFileType">.js</span>
+                </h3>
+                <span class="close-modal" onclick="closePopup()">✕</span>
             </div>
             <div class="modal-body">
                 <pre><code id="codeContent"></code></pre>
@@ -381,243 +602,528 @@ transition: all 0.3s;">📁  </button>
         </div>
     </div>
 
+    <!-- نافذة التحميل -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>جاري المعالجة...</p>
+        </div>
+    </div>
 
-<script>
-    // ==========================================
-// 1. المتغيرات الأساسية والإعدادات
-// ==========================================
-const fileInput = document.getElementById('fileInput');
-const filesContainer = document.getElementById('filesContainer');
-const codeModal = document.getElementById('codeModal');
-const codeContent = document.getElementById('codeContent');
-const modalFileName = document.getElementById('modalFileName');
+    <!-- حاوية الإشعارات -->
+    <div class="toast-container" id="toastContainer"></div>
 
-// استدعاء البيانات من localStorage
-let libraryFiles = JSON.parse(localStorage.getItem('libraryFiles')) || [];
-let currentFolderId = null; // تتبع المجلد الحالي (null يعني الروت الرئيسي)
-
-// دالة لمعرفة المستخدم المسجل حالياً (مرتبطة بـ index.html)
-function getCurrentUser() {
-    return localStorage.getItem('currentUser') || 'Visitor';
-}
-
-document.addEventListener('DOMContentLoaded', renderFiles);
-
-// ==========================================
-// 2. إدارة المجلدات (Folders)
-// ==========================================
-window.createFolder = function() {
-    const folderName = prompt("أدخل اسم المجلد الجديد:");
-    if (folderName && folderName.trim() !== "") {
-        const newFolder = {
-            id: Date.now().toString(),
-            name: folderName,
-            type: 'folder',
-            parentId: currentFolderId,
-            date: new Date().toLocaleDateString('ar-EG'),
-            author: getCurrentUser() // 👈 تسجيل المالك
-        };
-        libraryFiles.push(newFolder);
-        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
-        renderFiles();
-    }
-};
-
-window.openFolder = function(id) {
-    currentFolderId = id;
-    renderFiles();
-};
-
-window.goBack = function() {
-    const currentFolder = libraryFiles.find(f => f.id === currentFolderId);
-    currentFolderId = currentFolder ? currentFolder.parentId : null;
-    renderFiles();
-};
-
-// ==========================================
-// 3. رفع الملفات (Upload)
-// ==========================================
-fileInput.addEventListener('change', function(event) {
-    const files = event.target.files;
-    if (files.length === 0) return;
-    
-    let filesProcessed = 0;
-    
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const newFile = {
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                name: file.name,
-                size: (file.size / 1024).toFixed(2) + ' KB',
-                type: file.type || 'text/plain',
-                parentId: currentFolderId, // ربط الملف بالمجلد الحالي
-                content: e.target.result,
-                date: new Date().toLocaleDateString('ar-EG'),
-                author: getCurrentUser() // 👈 تسجيل المالك
+    <!-- ============================================= -->
+    <!-- جافا سكريبت محسن بالكامل -->
+    <!-- ============================================= -->
+    <script>
+        // =============================================
+        // 1. نظام الإشعارات (Toasts)
+        // =============================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toastContainer');
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
             };
-            libraryFiles.push(newFile);
-            filesProcessed++;
             
-            // تحديث الواجهة عند اكتمال قراءة جميع الملفات
-            if (filesProcessed === files.length) {
-                localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
-                renderFiles();
-                fileInput.value = '';
-                alert('تم رفع الملفات بنجاح للمكتبة!');
-            }
-        };
-        reader.readAsText(file);
-    });
-});
+            const toast = document.createElement('div');
+            toast.className = `toast-message toast-${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
 
-// ==========================================
-// 4. بناء واجهة العرض (Render) مع نظام الحماية
-// ==========================================
-function renderFiles() {
-    filesContainer.innerHTML = '';
-    
-    // عرض زر العودة إذا كنا داخل مجلد
-    if (currentFolderId !== null) {
-        const backBtn = document.createElement('div');
-        backBtn.className = 'file-card';
-        backBtn.style.cursor = 'pointer';
-        backBtn.style.border = '1px solid #ccc';
-        backBtn.innerHTML = `<div class="file-icon"><i class="fas fa-arrow-right" style="color: #666;"></i></div><div class="file-name">رجوع للخلف</div>`;
-        backBtn.onclick = goBack;
-        filesContainer.appendChild(backBtn);
-    }
-    
-    const currentUser = getCurrentUser();
-    const filteredFiles = libraryFiles.filter(f => f.parentId === currentFolderId);
-    
-    if (filteredFiles.length === 0 && currentFolderId === null) {
-        filesContainer.innerHTML = `<div class="empty-state"><h3>المكتبة فارغة</h3><p>ارفع ملفاتك البرمجية لتخزينها.</p></div>`;
-        return;
-    }
-    
-    // ترتيب الملفات من الأحدث للأقدم
-    filteredFiles.slice().reverse().forEach(item => {
-        let iconClass = 'fa-file-code';
-        if (item.name && item.name.endsWith('.html')) iconClass = 'fa-html5';
-        else if (item.name && item.name.endsWith('.css')) iconClass = 'fa-css3-alt';
-        else if (item.name && item.name.endsWith('.js')) iconClass = 'fa-js-square';
-        
-        const card = document.createElement('div');
-        card.className = 'file-card';
-        
-        // 💡 التحقق من الملكية: إذا كان المستخدم الحالي هو المالك (أو كان مسجلاً كـ Visitor قديماً)
-        const isOwner = (item.author === currentUser || !item.author || item.author === 'Visitor');
-        
-        // تجهيز زر الحذف فقط إذا كان المستخدم هو المالك
-        let deleteBtnHTML = isOwner ? `
-                <button class="btn-delete" onclick="deleteFile('${item.id}')" title="حذف">
-                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" fill="#fff"/><rect x="9" y="10" width="2" height="8" fill="#fff"/><rect x="13" y="10" width="2" height="8" fill="#fff"/></svg>
-                </button>` : '';
-        
-        if (item.type === 'folder') {
-            card.innerHTML = `
-                        <div class="file-icon" onclick="openFolder('${item.id}')"><i class="fas fa-folder" style="color: #ffc107; font-size: 40px; cursor: pointer;"></i></div>
-                        <div class="file-name">${item.name}</div>
-                        ${isOwner 
-                            ? `<button class="btn-delete" onclick="deleteFile('${item.id}')" style="margin-top:15px; width:100%; border:none; padding:8px; border-radius:5px; background:#dc3545; color:white; cursor:pointer;">حذف المجلد</button>` 
-                            : `<div style="margin-top:15px; text-align:center; color:#999; font-size:0.85rem; font-weight:bold;">بواسطة: ${item.author}</div>`
-                        }`;
-        } else {
-            card.innerHTML = `
-                        <div class="file-icon"><i class="${iconClass.includes('fa-') && iconClass !== 'fa-file-code' ? 'fab' : 'fas'} ${iconClass}" style="color: #007bff; font-size: 30px;"></i></div>
-                        <div class="file-name" title="${item.name}">${item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}</div>
-                        <div class="file-meta">
-                            <span><i class="fas fa-weight-hanging"></i> ${item.size}</span> <br>
-                            <span><i class="far fa-calendar-alt"></i> ${item.date}</span> <br>
-                            <span style="color:#007bff; font-weight:bold;">✍️ ${item.author || 'Visitor'}</span>
+        // =============================================
+        // 2. المتغيرات والإعدادات
+        // =============================================
+        const fileInput = document.getElementById('fileInput');
+        const filesContainer = document.getElementById('filesContainer');
+        const codeModal = document.getElementById('codeModal');
+        const codeContent = document.getElementById('codeContent');
+        const modalFileName = document.getElementById('modalFileName');
+        const modalFileType = document.getElementById('modalFileType');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const folderPath = document.getElementById('folderPath');
+
+        let libraryFiles = JSON.parse(localStorage.getItem('libraryFiles')) || [];
+        let currentFolderId = null;
+
+        function getCurrentUser() {
+            return localStorage.getItem('currentUser') || 'زائر';
+        }
+
+        function getFolderName(id) {
+            const folder = libraryFiles.find(f => f.id === id);
+            return folder ? folder.name : '';
+        }
+
+        function getFolderPath(id) {
+            if (!id) return '';
+            const folder = libraryFiles.find(f => f.id === id);
+            if (!folder) return '';
+            const parentPath = folder.parentId ? getFolderPath(folder.parentId) : '';
+            return parentPath ? `${parentPath} / ${folder.name}` : folder.name;
+        }
+
+        // =============================================
+        // 3. إدارة التحميل
+        // =============================================
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // =============================================
+        // 4. إدارة المجلدات
+        // =============================================
+        window.createFolder = function() {
+            const folderName = prompt("📁 أدخل اسم المجلد الجديد:");
+            if (!folderName || folderName.trim() === "") return;
+            
+            const newFolder = {
+                id: 'folder_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                name: folderName.trim(),
+                type: 'folder',
+                parentId: currentFolderId,
+                date: new Date().toLocaleDateString('ar-EG'),
+                author: getCurrentUser()
+            };
+            
+            libraryFiles.push(newFolder);
+            saveAndRender();
+            showToast(`📁 تم إنشاء المجلد "${folderName}"`, 'success');
+        };
+
+        window.openFolder = function(id) {
+            currentFolderId = id;
+            renderFiles();
+            updateFolderPath();
+        };
+
+        window.goBack = function() {
+            const currentFolder = libraryFiles.find(f => f.id === currentFolderId);
+            currentFolderId = currentFolder ? currentFolder.parentId : null;
+            renderFiles();
+            updateFolderPath();
+        };
+
+        function updateFolderPath() {
+            if (currentFolderId) {
+                const path = getFolderPath(currentFolderId);
+                folderPath.textContent = `📍 ${path}`;
+            } else {
+                folderPath.textContent = '';
+            }
+        }
+
+        // =============================================
+        // 5. رفع الملفات (محسن)
+        // =============================================
+        fileInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+            
+            showLoading();
+            let filesProcessed = 0;
+            
+            Array.from(files).forEach((file, index) => {
+                // التحقق من حجم الملف
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    showToast(`⚠️ الملف "${file.name}" كبير جداً (حد 5MB)`, 'warning');
+                    filesProcessed++;
+                    if (filesProcessed === files.length) {
+                        hideLoading();
+                        saveAndRender();
+                        fileInput.value = '';
+                    }
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        // تحديد نوع الملف
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        let fileType = 'txt';
+                        const allowedExts = ['html','css','js','txt','json','md','sql','py','php','java','c','cpp','cs','go','rs','xml'];
+                        if (allowedExts.includes(ext)) {
+                            fileType = ext;
+                        }
+                        
+                        const newFile = {
+                            id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                            name: file.name,
+                            size: (file.size / 1024).toFixed(2) + ' KB',
+                            type: file.type || 'text/plain',
+                            parentId: currentFolderId,
+                            content: e.target.result,
+                            fileType: fileType,
+                            date: new Date().toLocaleDateString('ar-EG'),
+                            author: getCurrentUser()
+                        };
+                        
+                        libraryFiles.push(newFile);
+                        filesProcessed++;
+                        
+                        if (filesProcessed === files.length) {
+                            saveAndRender();
+                            fileInput.value = '';
+                            hideLoading();
+                            showToast(`✅ تم رفع ${files.length} ملف بنجاح`, 'success');
+                        }
+                    } catch (error) {
+                        console.error('خطأ في قراءة الملف:', error);
+                        showToast(`❌ فشل رفع "${file.name}"`, 'error');
+                        filesProcessed++;
+                        if (filesProcessed === files.length) {
+                            hideLoading();
+                        }
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showToast(`❌ فشل قراءة "${file.name}"`, 'error');
+                    filesProcessed++;
+                    if (filesProcessed === files.length) {
+                        hideLoading();
+                    }
+                };
+                
+                reader.readAsText(file);
+            });
+        });
+
+        // =============================================
+        // 6. عرض الملفات (محسن)
+        // =============================================
+        function renderFiles() {
+            filesContainer.innerHTML = '';
+            updateFolderPath();
+            
+            // زر العودة
+            if (currentFolderId !== null) {
+                const backBtn = document.createElement('div');
+                backBtn.className = 'file-card folder-card';
+                backBtn.style.borderTopColor = '#6c757d';
+                backBtn.innerHTML = `
+                    <div class="file-icon"><i class="fas fa-arrow-right" style="color: #6c757d;"></i></div>
+                    <div class="file-name">⬅️ رجوع للخلف</div>
+                `;
+                backBtn.onclick = goBack;
+                filesContainer.appendChild(backBtn);
+            }
+            
+            const filteredFiles = libraryFiles.filter(f => f.parentId === currentFolderId);
+            
+            if (filteredFiles.length === 0) {
+                filesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <h3>${currentFolderId ? 'هذا المجلد فارغ' : 'المكتبة فارغة'}</h3>
+                        <p>${currentFolderId ? 'ارفع ملفات أو أنشئ مجلدات فرعية.' : 'ارفع ملفاتك البرمجية لتخزينها وتنظيمها.'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // ترتيب: المجلدات أولاً، ثم الملفات
+            const sorted = filteredFiles.slice().sort((a, b) => {
+                if (a.type === 'folder' && b.type !== 'folder') return -1;
+                if (a.type !== 'folder' && b.type === 'folder') return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
+            sorted.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `file-card ${item.type === 'folder' ? 'folder-card' : ''}`;
+                
+                const currentUser = getCurrentUser();
+                const isOwner = (item.author === currentUser || !item.author || item.author === 'زائر');
+                
+                if (item.type === 'folder') {
+                    card.innerHTML = `
+                        <div class="file-icon" onclick="openFolder('${item.id}')">
+                            <i class="fas fa-folder" style="color: #ffc107; font-size: 40px; cursor: pointer;"></i>
                         </div>
-                        <div class="file-actions" style="margin-top: 15px;">
-                            <button class="btn-view" onclick="viewCode('${item.id}')" title="عرض">
-                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="m15.941,8c.036-.329.059-.662.059-1s-.022-.671-.059-1h1.559c.534,0,1.034.13,1.485.347-.678.256-1.304.644-1.831,1.171l-.482.482h-.731Zm3.059,14H5v-6.231c-.702-.16-1.371-.403-2-.716v8.947h18v-5.672l-2,2v1.672Zm4.068-8.568l-6.569,6.568h-4.5v-4.5l6.568-6.568c1.24-1.24,3.259-1.24,4.5,0,1.24,1.24,1.24,3.26,0,4.5Zm-1.415-3.086c-.46-.461-1.21-.461-1.671,0l-5.982,5.982v1.672h1.671l5.982-5.982c.46-.461.46-1.211,0-1.672Zm-14.653,3.654c-3.86,0-7-3.141-7-7S3.14,0,7,0s7,3.141,7,7-3.14,7-7,7Zm0-2c2.757,0,5-2.243,5-5s-2.243-5-5-5S2,4.243,2,7s2.243,5,5,5Zm3.992-5.882l-1.402-1.426-3.229,3.175-1.63-1.58-1.393,1.436,1.846,1.789c.315.315.733.488,1.179.488s.864-.174,1.172-.482l3.457-3.399Z" fill="#fff"/></svg>
+                        <div class="file-name">📁 ${item.name}</div>
+                        <div class="file-meta">
+                            <span>📅 ${item.date}</span>
+                            <span>👤 ${item.author || 'زائر'}</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-folder-open" onclick="openFolder('${item.id}')" style="flex: 1;">
+                                📂 فتح
+                            </button>
+                            ${isOwner ? `
+                                <button class="btn-delete" onclick="deleteFile('${item.id}')">
+                                    🗑️ حذف
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // تحديد أيقونة حسب النوع
+                    let iconHtml = '<i class="fas fa-file-code" style="color: #007bff; font-size: 30px;"></i>';
+                    const ext = item.fileType || item.name.split('.').pop().toLowerCase();
+                    const iconMap = {
+                        'html': '<i class="fab fa-html5" style="color: #e44d26; font-size: 30px;"></i>',
+                        'css': '<i class="fab fa-css3-alt" style="color: #264de4; font-size: 30px;"></i>',
+                        'js': '<i class="fab fa-js-square" style="color: #f7df1e; font-size: 30px;"></i>',
+                        'json': '<i class="fas fa-code" style="color: #e3e3e3; font-size: 30px;"></i>',
+                        'py': '<i class="fab fa-python" style="color: #3776ab; font-size: 30px;"></i>',
+                        'php': '<i class="fab fa-php" style="color: #777bb4; font-size: 30px;"></i>',
+                        'md': '<i class="fas fa-file-alt" style="color: #fff; font-size: 30px;"></i>',
+                        'sql': '<i class="fas fa-database" style="color: #f29111; font-size: 30px;"></i>',
+                        'xml': '<i class="fas fa-code" style="color: #f0662b; font-size: 30px;"></i>',
+                        'java': '<i class="fab fa-java" style="color: #b07219; font-size: 30px;"></i>',
+                        'c': '<i class="fas fa-code" style="color: #00599c; font-size: 30px;"></i>',
+                        'cpp': '<i class="fas fa-code" style="color: #00599c; font-size: 30px;"></i>',
+                        'cs': '<i class="fas fa-code" style="color: #00599c; font-size: 30px;"></i>',
+                        'go': '<i class="fas fa-code" style="color: #00add8; font-size: 30px;"></i>',
+                        'rs': '<i class="fas fa-code" style="color: #dea584; font-size: 30px;"></i>'
+                    };
+                    if (iconMap[ext]) iconHtml = iconMap[ext];
+                    
+                    // اختصار اسم الملف الطويل
+                    let displayName = item.name;
+                    if (displayName.length > 25) {
+                        const parts = displayName.split('.');
+                        const ext2 = parts.pop();
+                        displayName = parts.join('.').substring(0, 20) + '...' + (ext2 ? '.' + ext2 : '');
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="file-icon">${iconHtml}</div>
+                        <div class="file-name" title="${item.name}">${displayName}</div>
+                        <div class="file-meta">
+                            <span>📦 ${item.size || 'غير معروف'}</span>
+                            <span>📅 ${item.date}</span>
+                            <span>👤 ${item.author || 'زائر'}</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-view" onclick="viewCode('${item.id}')" title="عرض الكود">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff">
+                                    <path d="M9.5 8L5 12l4.5 4 1.5-1.5L8 12l3-2.5L9.5 8zM14.5 8L13 9.5 16 12l-3 2.5L14.5 16 19 12l-4.5-4z"/>
+                                </svg>
                             </button>
                             <button class="btn-preview" onclick="previewFile('${item.id}')" title="معاينة">
-                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" fill="#fff"/></svg>
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff">
+                                    <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                                    <path d="M12 3C6.48 3 2 6.58 2 12c0 5.42 4.48 9 10 9s10-3.58 10-9c0-5.42-4.48-9-10-9zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                                </svg>
                             </button>
                             <button class="btn-download" onclick="downloadFile('${item.id}')" title="تحميل">
-                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#fff"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z" fill="#fff"/></svg>
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff">
+                                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                </svg>
                             </button>
-                            ${deleteBtnHTML}
-                        </div>`;
+                            ${isOwner ? `
+                                <button class="btn-delete" onclick="deleteFile('${item.id}')" title="حذف">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+                
+                filesContainer.appendChild(card);
+            });
         }
-        filesContainer.appendChild(card);
-    });
-}
 
-// ==========================================
-// 5. دوال الإجراءات (عرض، معاينة، تحميل، حذف)
-// ==========================================
-window.viewCode = function(id) {
-    const file = libraryFiles.find(f => f.id === id);
-    if (file) {
-        modalFileName.textContent = file.name;
-        codeContent.textContent = file.content;
-        codeModal.style.display = 'flex';
-    }
-};
-
-window.downloadFile = function(id) {
-    const file = libraryFiles.find(f => f.id === id);
-    if (file) {
-        const blob = new Blob([file.content], { type: file.type });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.name;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
-    }
-};
-
-window.previewFile = function(id) {
-    const file = libraryFiles.find(f => f.id === id);
-    if (file) {
-        const blob = new Blob([file.content], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
-    }
-};
-
-window.deleteFile = function(id) {
-    const fileToDelete = libraryFiles.find(f => f.id === id);
-    const currentUser = getCurrentUser();
-    
-    // حماية إضافية في حال تم تجاوز الواجهة: منع الحذف لغير المالك
-    if (fileToDelete.author && fileToDelete.author !== currentUser && fileToDelete.author !== 'Visitor') {
-        alert('عذراً، لا تملك صلاحية لحذف هذا الملف. المالك فقط يمكنه حذفه.');
-        return;
-    }
-    
-    if (confirm('هل أنت متأكد من رغبتك في الحذف؟')) {
-        const isFolder = fileToDelete?.type === 'folder';
-        if (isFolder) {
-            libraryFiles = libraryFiles.filter(f => f.id !== id && f.parentId !== id);
-        } else {
-            libraryFiles = libraryFiles.filter(f => f.id !== id);
+        // =============================================
+        // 7. حفظ واسترجاع البيانات
+        // =============================================
+        function saveAndRender() {
+            try {
+                localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
+                renderFiles();
+            } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                    showToast('⚠️ تجاوزت سعة التخزين! حاول حذف بعض الملفات الكبيرة.', 'error');
+                } else {
+                    console.error('خطأ في الحفظ:', error);
+                    showToast('❌ حدث خطأ أثناء حفظ البيانات', 'error');
+                }
+            }
         }
-        localStorage.setItem('libraryFiles', JSON.stringify(libraryFiles));
-        renderFiles();
-    }
-};
 
-// إغلاق نافذة عرض الكود
-window.closePopup = () => codeModal.style.display = 'none';
+        // =============================================
+        // 8. إجراءات الملفات (عرض، معاينة، تحميل، حذف)
+        // =============================================
+        window.viewCode = function(id) {
+            const file = libraryFiles.find(f => f.id === id);
+            if (file) {
+                modalFileName.textContent = file.name;
+                const ext = file.fileType || file.name.split('.').pop().toLowerCase();
+                modalFileType.textContent = '.' + ext;
+                codeContent.textContent = file.content || '// الملف فارغ';
+                codeModal.classList.add('show');
+            }
+        };
 
-window.onclick = function(event) {
-    if (event.target === codeModal) {
-        closePopup();
-    }
-};
-</script>
+        window.previewFile = function(id) {
+            const file = libraryFiles.find(f => f.id === id);
+            if (!file) return;
+            
+            // التحقق من أن الملف هو HTML
+            const ext = file.fileType || file.name.split('.').pop().toLowerCase();
+            if (ext !== 'html') {
+                showToast('⚠️ المعاينة متاحة فقط لملفات HTML', 'warning');
+                return;
+            }
+            
+            try {
+                const blob = new Blob([file.content || ''], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => { URL.revokeObjectURL(url); }, 5000);
+            } catch (error) {
+                showToast('❌ فشل فتح المعاينة', 'error');
+            }
+        };
+
+        window.downloadFile = function(id) {
+            const file = libraryFiles.find(f => f.id === id);
+            if (!file) return;
+            
+            try {
+                const blob = new Blob([file.content || ''], { type: file.type || 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                showToast(`✅ تم تحميل "${file.name}"`, 'success', 2000);
+            } catch (error) {
+                showToast('❌ فشل تحميل الملف', 'error');
+            }
+        };
+
+        window.deleteFile = function(id) {
+            const fileToDelete = libraryFiles.find(f => f.id === id);
+            if (!fileToDelete) return;
+            
+            const currentUser = getCurrentUser();
+            
+            // التحقق من الصلاحية
+            if (fileToDelete.author && fileToDelete.author !== currentUser && fileToDelete.author !== 'زائر') {
+                showToast('⚠️ لا تملك صلاحية حذف هذا الملف', 'warning');
+                return;
+            }
+            
+            const isFolder = fileToDelete.type === 'folder';
+            const confirmMsg = isFolder 
+                ? `⚠️ هل أنت متأكد من حذف المجلد "${fileToDelete.name}" وجميع محتوياته؟`
+                : `🗑️ هل أنت متأكد من حذف "${fileToDelete.name}"؟`;
+            
+            if (!confirm(confirmMsg)) return;
+            
+            if (isFolder) {
+                // حذف المجلد وجميع محتوياته
+                libraryFiles = libraryFiles.filter(f => f.id !== id && f.parentId !== id);
+                showToast(`🗑️ تم حذف المجلد "${fileToDelete.name}" ومحتوياته`, 'warning');
+            } else {
+                libraryFiles = libraryFiles.filter(f => f.id !== id);
+                showToast(`🗑️ تم حذف "${fileToDelete.name}"`, 'warning');
+            }
+            
+            saveAndRender();
+        };
+
+        window.clearLibrary = function() {
+            if (libraryFiles.length === 0) {
+                showToast('📭 المكتبة فارغة بالفعل', 'info');
+                return;
+            }
+            
+            if (!confirm('⚠️ هل أنت متأكد من رغبتك في حذف جميع الملفات والمجلدات نهائياً؟')) return;
+            
+            libraryFiles = [];
+            currentFolderId = null;
+            saveAndRender();
+            showToast('🗑️ تم تفريغ المكتبة بالكامل', 'warning');
+        };
+
+        window.closePopup = function() {
+            codeModal.classList.remove('show');
+        };
+
+        // إغلاق المودال بالضغط خارج المحتوى
+        codeModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+
+        // إغلاق المودال بالضغط على Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && codeModal.classList.contains('show')) {
+                closePopup();
+            }
+        });
+
+        // =============================================
+        // 9. التهيئة
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFiles();
+            updateFolderPath();
+            showToast('📚 مرحباً بك في مكتبة الأكواد', 'info', 2000);
+            
+            // تنبيه المستخدم غير المسجل
+            if (getCurrentUser() === 'زائر') {
+                setTimeout(() => {
+                    showToast('👋 قم بتسجيل الدخول لحماية ملفاتك', 'warning', 3000);
+                }, 1000);
+            }
+        });
+
+        // =============================================
+        // 10. اختصارات لوحة المفاتيح
+        // =============================================
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + U: رفع ملف
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                fileInput.click();
+            }
+            
+            // Ctrl + F: إنشاء مجلد
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                createFolder();
+            }
+            
+            // Escape: إغلاق المودال
+            if (e.key === 'Escape' && codeModal.classList.contains('show')) {
+                closePopup();
+            }
+        });
+
+        console.log('📚 مكتبة الأكواد جاهزة للاستخدام!');
+        console.log('📖 اختصارات:');
+        console.log('  Ctrl+U → رفع ملف');
+        console.log('  Ctrl+F → إنشاء مجلد');
+        console.log('  Escape → إغلاق النافذة');
+    </script>
 </body>
 </html>
