@@ -1193,29 +1193,41 @@
 }
 
         function displayCodeProjects() {
-            let projects = getCodeProjects();
-            projects = projects.map(p => {
-                if (!p.views) p.views = 0;
-                if (!p.likes) p.likes = 0;
-                if (!p.comments) p.comments = [];
-                return p;
-            });
-            saveCodeProjects(projects);
+    let projects = getCodeProjects(); // من localStorage
+    
+    // إذا كانت localStorage فارغة، حاول جلب من السيرفر
+    if (projects.length === 0) {
+        syncProjectsFromBackend();
+        return;
+    }
+    
+    // معالجة البيانات
+    projects = projects.map(p => {
+        if (!p.views) p.views = 0;
+        if (!p.likes) p.likes = 0;
+        if (!p.comments) p.comments = [];
+        return p;
+    });
+    saveCodeProjects(projects);
 
-            projectsListDiv.innerHTML = '';
+    projectsListDiv.innerHTML = '';
 
-            if (projects.length === 0) {
-                projectsListDiv.innerHTML = `
-                    <div class="empty-state">
-                        <h3>📭 لا توجد مشاريع لعرضها</h3>
-                        <p><a href="#" onclick="checkAndGoToCodes()">ابدأ مشروعك الأول الآن!</a></p>
-                    </div>
-                `;
-                if(prevPageBtn) prevPageBtn.disabled = true;
-                if(nextPageBtn) nextPageBtn.disabled = true;
-                currentPageDisplay.textContent = 'الصفحة 0 من 0';
-                return;
-            }
+    if (projects.length === 0) {
+        projectsListDiv.innerHTML = `
+            <div class="empty-state">
+                <h3>📭 لا توجد مشاريع لعرضها</h3>
+                <p><a href="#" onclick="checkAndGoToCodes()">ابدأ مشروعك الأول الآن!</a></p>
+            </div>
+        `;
+        // تحديث أزرار الترقيم
+        if(prevPageBtn) prevPageBtn.disabled = true;
+        if(nextPageBtn) nextPageBtn.disabled = true;
+        currentPageDisplay.textContent = 'الصفحة 0 من 0';
+        return;
+    }
+
+    // ... باقي الكود لعرض المشاريع
+}
 
             let topProject = null;
             let otherProjects = projects;
