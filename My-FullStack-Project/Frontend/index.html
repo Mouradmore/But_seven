@@ -896,7 +896,17 @@
 
         function getCurrentUser() { return localStorage.getItem('currentUser'); }
         function getUsers() { return JSON.parse(localStorage.getItem('users')) || []; }
-        function getCodeProjects() { return JSON.parse(localStorage.getItem('codeProjects')) || []; }
+        function getCodeProjects() { 
+    try {
+        const data = localStorage.getItem('codeProjects');
+        if (!data) return [];
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.error('خطأ في قراءة المشاريع:', e);
+        return [];
+    }
+} 
         function saveCodeProjects(projects) { localStorage.setItem('codeProjects', JSON.stringify(projects)); }
         function clearCurrentUser() { 
             localStorage.removeItem('currentUser');
