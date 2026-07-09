@@ -1084,88 +1084,85 @@
             }
         };
 
-        function createCardHTML(project, isTrending = false) {
-            const authorAvatar = getUserAvatar(project.author);
-            const badgeHTML = isTrending ? `
-                <div class="trending-badge">
-                    🔥 الأكثر تفاعلاً
-                </div>
-            ` : '';
+           function createCardHTML(project, isTrending = false) {
+    const authorAvatar = getUserAvatar(project.author);
+    const badgeHTML = isTrending ? `
+        <div class="trending-badge">
+            🔥 الأكثر تفاعلاً
+        </div>
+    ` : '';
+    
+    const cardClass = isTrending ? 'project-card trending-card' : 'project-card';
+    
+    const currentUser = getCurrentUser();
+    let followBtnHTML = '';
+    
+    const users = getUsers();
+    const authorObj = users.find(u => u.username.toLowerCase() === (project.author || '').toLowerCase());
+    const followersCount = authorObj && Array.isArray(authorObj.followers) ? authorObj.followers.length : 0;
+    
+    if (!currentUser || currentUser !== project.author) {
+        const isFollowing = currentUser ? checkIsFollowing(currentUser, project.author) : false;
+        const btnText = isFollowing ? 'إلغاء المتابعة' : 'متابعة';
+        const btnBg = isFollowing ? '#f4f4f4' : '#007bff';
+        const btnColor = isFollowing ? '#333' : '#fff';
+        const btnBorder = isFollowing ? '#ccc' : '#007bff';
+        
+        followBtnHTML = `
+            <button onclick="toggleFollow('${project.author}')" style="
+                margin-right: auto; 
+                padding: 4px 14px; 
+                font-size: 0.75rem; 
+                font-weight: 700; 
+                border-radius: 50px; 
+                border: 1px solid ${btnBorder}; 
+                background-color: ${btnBg}; 
+                color: ${btnColor}; 
+                cursor: pointer; 
+                transition: all 0.3s;
+            ">${btnText}</button>
+        `;
+    }
+    
+    const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
+    
+    return `
+        <div class="${cardClass}">
+            ${badgeHTML}
+            <h4>${project.title || 'بدون عنوان'}</h4>
             
-            const cardClass = isTrending ? 'project-card trending-card' : 'project-card';
-            
-            const currentUser = getCurrentUser();
-            let followBtnHTML = '';
-            
-            const users = getUsers();
-            const authorObj = users.find(u => u.username.toLowerCase() === (project.author || '').toLowerCase());
-            const followersCount = authorObj && Array.isArray(authorObj.followers) ? authorObj.followers.length : 0;
-            
-            if (!currentUser || currentUser !== project.author) {
-                const isFollowing = currentUser ? checkIsFollowing(currentUser, project.author) : false;
-                const btnText = isFollowing ? 'إلغاء المتابعة' : 'متابعة';
-                const btnBg = isFollowing ? '#f4f4f4' : '#007bff';
-                const btnColor = isFollowing ? '#333' : '#fff';
-                const btnBorder = isFollowing ? '#ccc' : '#007bff';
+            <div class="author" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <img src="${authorAvatar}" alt="${project.author}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
                 
-                followBtnHTML = `
-                    <button onclick="toggleFollow('${project.author}')" style="
-                        margin-right: auto; 
-                        padding: 4px 14px; 
-                        font-size: 0.75rem; 
-                        font-weight: 700; 
-                        border-radius: 50px; 
-                        border: 1px solid ${btnBorder}; 
-                        background-color: ${btnBg}; 
-                        color: ${btnColor}; 
-                        cursor: pointer; 
-                        transition: all 0.3s;
-                    ">${btnText}</button>
-                `;
-            }
-            
-            let rawDescription = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
-            let safeDescription = rawDescription.length > 120 ? rawDescription.substring(0, 120) + '...' : rawDescription;
-            const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
-            
-            return `
-                <div class="${cardClass}">
-                    ${badgeHTML}
-                    <h4>${project.title || 'بدون عنوان'}</h4>
-                    <p>${safeDescription}</p>
-                    
-                    <div class="author" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <img src="${authorAvatar}" alt="${project.author}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
-                        
-                        <div style="display: flex; flex-direction: column; line-height: 1.2;">
-                            <span style="font-size: 0.85rem; color: #555;">
-                                بواسطة: <strong style="color: #333;">${project.author || 'زائر'}</strong>
-                            </span>
-                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">
-                                👥 ${followersCount} متابع
-                            </span>
-                        </div>
-                        
-                        ${followBtnHTML}
-                    </div>
-                    
-                    <div class="project-meta">
-                        <span>👁️ ${project.views || 0}</span>
-                        <span>❤️ ${likesCount}</span>
-                        <span>💬 ${Array.isArray(project.comments) ? project.comments.length : 0}</span>
-                    </div>
-                    
-                    <div class="actions">
-                        <button class="view-code-btn" data-project-id="${project.id}" style="background-color:#007bff;">
-                            👁️ عرض الصفحة
-                        </button>
-                        <button onclick="shareProject('${project.id}', this)" style="background-color:#28a745;">
-                            📤 مشاركة
-                        </button>
-                    </div>
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span style="font-size: 0.85rem; color: #555;">
+                        بواسطة: <strong style="color: #333;">${project.author || 'زائر'}</strong>
+                    </span>
+                    <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">
+                        👥 ${followersCount} متابع
+                    </span>
                 </div>
-            `;
-        }
+                
+                ${followBtnHTML}
+            </div>
+            
+            <div class="project-meta">
+                <span>👁️ ${project.views || 0}</span>
+                <span>❤️ ${likesCount}</span>
+                <span>💬 ${Array.isArray(project.comments) ? project.comments.length : 0}</span>
+            </div>
+            
+            <div class="actions">
+                <button class="view-code-btn" data-project-id="${project.id}" style="background-color:#007bff;">
+                    👁️ عرض الصفحة
+                </button>
+                <button onclick="shareProject('${project.id}', this)" style="background-color:#28a745;">
+                    📤 مشاركة
+                </button>
+            </div>
+        </div>
+    `;
+}
 
         // =============================================
         // 6. جلب وعرض المشاريع
