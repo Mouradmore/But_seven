@@ -233,39 +233,78 @@
             top: 12px;
         }
 
+        /* ========================================== */
+        /* 🔥 تنسيق نموذج التعليق (الزر بجانب النص) */
+        /* ========================================== */
         .comment-input-form {
-            padding: 15px;
+            padding: 10px 15px;
             border-top: 1px solid #eee;
             background: #fff;
             flex-shrink: 0;
         }
 
+        .comment-input-form form {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
         .comment-input-form textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
             resize: none;
             box-sizing: border-box;
             font-family: inherit;
-            margin-bottom: 10px;
             font-size: 0.9rem;
+            min-height: 44px;
+            max-height: 80px;
+            transition: border-color 0.3s;
+            background: #f8f9fa;
+            line-height: 1.4;
+        }
+
+        .comment-input-form textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #fff;
+        }
+
+        .comment-input-form textarea::placeholder {
+            color: #aaa;
         }
 
         .comment-input-form button {
-            width: 100%;
+            padding: 0;
             background: #007bff;
             color: #fff;
             border: none;
-            padding: 9px;
-            border-radius: 6px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            margin-bottom: 0;
         }
 
         .comment-input-form button:hover {
             background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .comment-input-form button:active {
+            transform: scale(0.95);
+        }
+
+        .comment-input-form button i {
+            font-size: 16px;
+            margin: 0;
         }
 
         .loading-screen {
@@ -301,7 +340,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ردود الفعل */
         .reply-item {
             margin-right: 30px;
             border-right: 2px solid rgba(0, 123, 255, 0.3);
@@ -381,7 +419,6 @@
             margin-right: 8px;
         }
 
-        /* زر العودة */
         .back-btn {
             background: #6c757d;
             color: #fff;
@@ -398,6 +435,26 @@
 
         .back-btn:hover {
             background: #5a6268;
+        }
+
+        /* تحسين عرض التعليقات على الشاشات الصغيرة */
+        @media (max-width: 500px) {
+            .interaction-sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            .interaction-sidebar.open {
+                left: 0;
+            }
+            .comment-input-form textarea {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+                min-height: 38px;
+            }
+            .comment-input-form button {
+                width: 38px;
+                height: 38px;
+            }
         }
     </style>
 </head>
@@ -460,11 +517,12 @@
             <div class="comments-list" id="commentsListZone"></div>
         </div>
 
+        <!-- 🔥 نموذج التعليق المعدل (الزر بجانب النص) -->
         <div class="comment-input-form">
             <form id="sidebarCommentForm">
-                <textarea id="sidebarCommentInput" rows="2" placeholder="أضف تعليقك هنا عن الصفحة..." required></textarea>
+                <textarea id="sidebarCommentInput" rows="1" placeholder="اكتب تعليقك هنا..." required></textarea>
                 <button type="submit">
-                    <i class="fas fa-paper-plane"></i> إرسال التعليق
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </form>
         </div>
@@ -555,7 +613,15 @@
     }
 
     // ==========================================
-    // 3. جلب المشروع (من السيرفر أو محلياً)
+    // 3. ضبط ارتفاع حقل النص تلقائياً
+    // ==========================================
+    function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 80) + 'px';
+    }
+
+    // ==========================================
+    // 4. جلب المشروع (من السيرفر أو محلياً)
     // ==========================================
     async function fetchProjectData() {
         if (!projectId) {
@@ -599,23 +665,19 @@
     }
 
     // ==========================================
-    // 4. عرض المشروع
+    // 5. عرض المشروع
     // ==========================================
     function renderProject(project) {
-        // تحديث النصوص في الواجهة
         topProjectTitle.textContent = project.title || "بدون عنوان";
         authorName.textContent = project.author || "Visitor";
         viewsCount.textContent = project.views || 0;
         
-        // حساب عدد الإعجابات (سواء كانت مصفوفة أو رقم)
         const likes = Array.isArray(project.likes) ? project.likes.length : (project.likes || 0);
         likesCount.textContent = likes;
         
-        // حساب عدد التعليقات
         const comments = Array.isArray(project.comments) ? project.comments : [];
         topCommentsCount.textContent = comments.length;
 
-        // عرض المحتوى في الإطار
         const htmlContent = project.html || project.htmlCode || '';
         const cssContent = project.css || project.cssCode || '';
         const jsContent = project.js || project.jsCode || '';
@@ -643,19 +705,17 @@
             loadingScreen.style.display = 'none';
         };
 
-        // تحديث حالة زر الإعجاب
         const currentUser = getCurrentUser();
         if (currentUser) {
             const isLiked = Array.isArray(project.likes) && project.likes.includes(currentUser);
             updateLikeButton(isLiked);
         }
 
-        // عرض التعليقات
         renderComments(comments);
     }
 
     // ==========================================
-    // 5. إدارة الإعجابات (محلياً وعلى السيرفر)
+    // 6. إدارة الإعجابات
     // ==========================================
     function updateLikeButton(isLiked) {
         if (isLiked) {
@@ -685,10 +745,8 @@
         }
 
         if (isLocalProject) {
-            // ✅ معالجة الإعجاب للمشاريع المحلية
             handleLocalLike(currentUser);
         } else {
-            // ✅ معالجة الإعجاب للمشاريع على السيرفر
             handleServerLike();
         }
     });
@@ -742,8 +800,6 @@
             const data = await response.json();
             likesCount.textContent = data.likesCount;
             updateLikeButton(data.liked);
-            
-            // تحديث المشروع المحلي إن وجد
             updateLocalProjectAfterServerAction('likes', data.likesCount, data.liked);
 
         } catch (error) {
@@ -753,7 +809,7 @@
     }
 
     // ==========================================
-    // 6. إدارة التعليقات (محلياً وعلى السيرفر)
+    // 7. إدارة التعليقات
     // ==========================================
     function renderComments(comments) {
         commentsListZone.innerHTML = '';
@@ -779,7 +835,6 @@
             const card = document.createElement('div');
             card.className = 'comment-card';
             
-            // صورة المستخدم
             const avatar = getUserAvatar(comment.author);
             
             card.innerHTML = `
@@ -824,7 +879,6 @@
         });
     }
 
-    // دالة إظهار/إخفاء نموذج الرد
     window.toggleReplyForm = function(index) {
         const form = document.getElementById(`replyForm_${index}`);
         if (form) {
@@ -836,7 +890,6 @@
         }
     };
 
-    // دالة إضافة رد
     window.addReply = async function(index) {
         const input = document.getElementById(`replyInput_${index}`);
         const text = input.value.trim();
@@ -849,7 +902,6 @@
         }
 
         if (isLocalProject) {
-            // ✅ معالجة الرد محلياً
             const localProjects = getCodeProjects();
             const projectIndex = localProjects.findIndex(p => p.id === projectId);
             if (projectIndex === -1) return;
@@ -870,7 +922,6 @@
             renderComments(project.comments);
 
         } else {
-            // ✅ معالجة الرد على السيرفر
             try {
                 const token = getToken();
                 if (!token) {
@@ -894,8 +945,6 @@
 
                 const updatedComments = await response.json();
                 renderComments(updatedComments);
-                
-                // تحديث المشروع المحلي
                 updateLocalProjectAfterServerAction('comments', updatedComments);
 
             } catch (error) {
@@ -908,12 +957,10 @@
         document.getElementById(`replyForm_${index}`).classList.remove('active');
     };
 
-    // دالة حذف التعليق
     window.deleteComment = async function(index) {
         if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
 
         if (isLocalProject) {
-            // ✅ معالجة الحذف محلياً
             const localProjects = getCodeProjects();
             const projectIndex = localProjects.findIndex(p => p.id === projectId);
             if (projectIndex === -1) return;
@@ -928,7 +975,6 @@
             topCommentsCount.textContent = project.comments.length;
 
         } else {
-            // ✅ معالجة الحذف على السيرفر
             try {
                 const token = getToken();
                 if (!token) {
@@ -948,8 +994,6 @@
                 const updatedComments = await response.json();
                 renderComments(updatedComments);
                 topCommentsCount.textContent = updatedComments.length;
-                
-                // تحديث المشروع المحلي
                 updateLocalProjectAfterServerAction('comments', updatedComments);
 
             } catch (error) {
@@ -960,7 +1004,7 @@
     };
 
     // ==========================================
-    // 7. إرسال تعليق جديد (من النموذج السفلي)
+    // 8. إرسال تعليق جديد (من النموذج السفلي)
     // ==========================================
     sidebarCommentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -974,7 +1018,6 @@
         }
 
         if (isLocalProject) {
-            // ✅ معالجة التعليق محلياً
             const localProjects = getCodeProjects();
             const projectIndex = localProjects.findIndex(p => p.id === projectId);
             if (projectIndex === -1) return;
@@ -994,9 +1037,9 @@
             renderComments(project.comments);
             topCommentsCount.textContent = project.comments.length;
             sidebarCommentInput.value = '';
+            autoResizeTextarea(sidebarCommentInput);
 
         } else {
-            // ✅ معالجة التعليق على السيرفر
             try {
                 const token = getToken();
                 if (!token) {
@@ -1025,8 +1068,7 @@
                 renderComments(updatedComments);
                 topCommentsCount.textContent = updatedComments.length;
                 sidebarCommentInput.value = '';
-
-                // تحديث المشروع المحلي
+                autoResizeTextarea(sidebarCommentInput);
                 updateLocalProjectAfterServerAction('comments', updatedComments);
 
             } catch (error) {
@@ -1037,7 +1079,7 @@
     });
 
     // ==========================================
-    // 8. تحديث المشروع المحلي بعد تغييرات السيرفر
+    // 9. تحديث المشروع المحلي بعد تغييرات السيرفر
     // ==========================================
     function updateLocalProjectAfterServerAction(type, value, liked) {
         const localProjects = getCodeProjects();
@@ -1065,10 +1107,18 @@
     }
 
     // ==========================================
-    // 9. تشغيل التطبيق
+    // 10. تشغيل التطبيق
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
         fetchProjectData();
+        
+        // إضافة حدث ضبط ارتفاع حقل النص
+        if (sidebarCommentInput) {
+            sidebarCommentInput.addEventListener('input', function() {
+                autoResizeTextarea(this);
+            });
+            setTimeout(() => autoResizeTextarea(sidebarCommentInput), 200);
+        }
     });
     </script>
 </body>
