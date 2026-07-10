@@ -26,7 +26,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/php/php.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/xml-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/html-hint.min.js"></script>
@@ -47,40 +47,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
- <link rel="stylesheet" href="style/codemirror.min.css">
- <link rel="stylesheet" href="style/dracula.min.css">
- <link rel="stylesheet" href="style/show-hint.min.css">
- <link rel="stylesheet" href="style/dialog.min.css">
- <link rel="stylesheet" href="style/all.min.css">
- 
- <script src="script/codemirror.min.js"></script>
- <script src="script/xml.min.js"></script>
- <script src="script/javascript.min.js"></script>
- <script src="script/css.min.js"></script>
- <script src="script/htmlmixed.min.js"></script>
- <script src="script/python.min.js"></script>
- <script src="script/clike.min.js"></script>
- <script src="script/php.min.js"></script>
- <script src="script/anyword-hint.min.js"></script>
- <script src="script/show-hint.min.js"></script>
- <script src="script/xml-hint.min.js"></script>
- <script src="script/html-hint.min.js"></script>
- <script src="script/css-hint.min.js"></script>
- <script src="script/javascript-hint.min.js"></script>
- <script src="script/anyword-hint.min.js"></script>
- 
- <script src="script/searchcursor.min.js"></script>
- <script src="script/search.min.js"></script>
- <script src="script/jump-to-line.min.js"></script>
- <script src="script/dialog.min.js"></script>
- 
- <script src="script/closebrackets.min.js"></script>
- <script src="script/closetag.min.js"></script>
- <script src="script/beautify.min.js"></script>
- <script src="script/beautify-css.min.js"></script>
- <script src="script/beautify-html.min.js"></script>
- <script src="script/jszip.min.js"></script>
- <script src="script/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="style/codemirror.min.css">
+    <link rel="stylesheet" href="style/dracula.min.css">
+    <link rel="stylesheet" href="style/show-hint.min.css">
+    <link rel="stylesheet" href="style/dialog.min.css">
+    <link rel="stylesheet" href="style/all.min.css">
+    
+    <script src="script/codemirror.min.js"></script>
+    <script src="script/xml.min.js"></script>
+    <script src="script/javascript.min.js"></script>
+    <script src="script/css.min.js"></script>
+    <script src="script/htmlmixed.min.js"></script>
+    <script src="script/python.min.js"></script>
+    <script src="script/clike.min.js"></script>
+    <script src="script/php.min.js"></script>
+    <script src="script/anyword-hint.min.js"></script>
+    <script src="script/show-hint.min.js"></script>
+    <script src="script/xml-hint.min.js"></script>
+    <script src="script/html-hint.min.js"></script>
+    <script src="script/css-hint.min.js"></script>
+    <script src="script/javascript-hint.min.js"></script>
+    <script src="script/anyword-hint.min.js"></script>
+    
+    <script src="script/searchcursor.min.js"></script>
+    <script src="script/search.min.js"></script>
+    <script src="script/jump-to-line.min.js"></script>
+    <script src="script/dialog.min.js"></script>
+    
+    <script src="script/closebrackets.min.js"></script>
+    <script src="script/closetag.min.js"></script>
+    <script src="script/beautify.min.js"></script>
+    <script src="script/beautify-css.min.js"></script>
+    <script src="script/beautify-html.min.js"></script>
+    <script src="script/jszip.min.js"></script>
+    <script src="script/FileSaver.min.js"></script>
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -88,7 +89,6 @@
             position: relative; background-color: #1e1e1e; color: #fff;
         }
 
-        /* إصلاح ظهور النوافذ المنبثقة والبحث */
         .CodeMirror-hints {
             z-index: 9999999 !important;
             background-color: #2d2d2d !important;
@@ -182,18 +182,18 @@
         .shortcut-btn:hover { background-color: #555; }
 
         .editor-wrapper { 
-    flex: 1; 
-    height: calc(100vh - 90px); 
-    position: relative; 
-    overflow: hidden; /* إضافة هذه الخاصية هامة جداً */
-}
-.CodeMirror { 
-    position: absolute; /* جعل المحرر يملأ الحاوية برمجياً */
-    top: 0; bottom: 0; left: 0; right: 0;
-    height: 100% !important; 
-    font-family: 'Cascadia Code', 'Fira Code', monospace; 
-    font-size: 15px; 
-}
+            flex: 1; 
+            height: calc(100vh - 90px); 
+            position: relative; 
+            overflow: hidden;
+        }
+        .CodeMirror { 
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+            height: 100% !important; 
+            font-family: 'Cascadia Code', 'Fira Code', monospace; 
+            font-size: 15px; 
+        }
 
         .media-preview-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #1e1e1e; gap: 20px; }
         .media-preview-panel img, .media-preview-panel video { max-width: 90%; max-height: 90%; object-fit: contain; border: 2px solid #3c3c3c; }
@@ -239,31 +239,32 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px 10px; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; gap: 10px;">
                 <button onclick="addFolder()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 3px 5px; cursor: pointer;" title="new folder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z" fill="#fff"/></svg></button>
-<button onclick="addFile()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 3px 5px; cursor: pointer;" title="New blank file">
-<svg height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="m19.95 5.536-3.486-3.486a6.954 6.954 0 0 0 -4.949-2.05h-4.515a5.006 5.006 0 0 0 -5 5v14a5.006 5.006 0 0 0 5 5h10a5.006 5.006 0 0 0 5-5v-8.515a6.954 6.954 0 0 0 -2.05-4.949zm-1.414 1.414a5.018 5.018 0 0 1 .781 1.05h-4.317a1 1 0 0 1 -1-1v-4.317a5.018 5.018 0 0 1 1.05.781zm1.464 12.05a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3-3v-14a3 3 0 0 1 3-3h4.515c.165 0 .323.032.485.047v4.953a3 3 0 0 0 3 3h4.953c.015.162.047.32.047.485zm-3.276-5.689a1 1 0 0 1 -.035 1.413l-3.589 3.414a3 3 0 0 1 -4.226-.017l-1.54-1.374a1 1 0 0 1 1.332-1.494l1.585 1.414a1 1 0 0 0 1.456.04 l3.6-3.431a1 1 0 0 1 1.417.035z" fill="#fff"/></svg></button>
-<button onclick="currentTargetFolderId = null; document.getElementById('globalFileInput').click()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 3px 8px; cursor: pointer; display: flex; align-items: center;" title="رفع ملف (صورة، فيديو، صوت، أو كود)">
-<i class="fas fa-upload" style="font-size: 15px;"></i></button>
-<input type="file" id="globalFileInput" accept="image/*,video/*,audio/*,.html,.css,.js,.ts,.py,.php,.txt,.json,.md,.sql,.xml,.java,.c,.cpp,.cs,.go,.rs" style="display:none" onchange="handleGlobalFileUpload(event)" multiple>
+                <button onclick="addFile()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 3px 5px; cursor: pointer;" title="New blank file">
+                    <svg height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="m19.95 5.536-3.486-3.486a6.954 6.954 0 0 0 -4.949-2.05h-4.515a5.006 5.006 0 0 0 -5 5v14a5.006 5.006 0 0 0 5 5h10a5.006 5.006 0 0 0 5-5v-8.515a6.954 6.954 0 0 0 -2.05-4.949zm-1.414 1.414a5.018 5.018 0 0 1 .781 1.05h-4.317a1 1 0 0 1 -1-1v-4.317a5.018 5.018 0 0 1 1.05.781zm1.464 12.05a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3-3v-14a3 3 0 0 1 3-3h4.515c.165 0 .323.032.485.047v4.953a3 3 0 0 0 3 3h4.953c.015.162.047.32.047.485zm-3.276-5.689a1 1 0 0 1 -.035 1.413l-3.589 3.414a3 3 0 0 1 -4.226-.017l-1.54-1.374a1 1 0 0 1 1.332-1.494l1.585 1.414a1 1 0 0 0 1.456.04 l3.6-3.431a1 1 0 0 1 1.417.035z" fill="#fff"/></svg></button>
+                <button onclick="currentTargetFolderId = null; document.getElementById('globalFileInput').click()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 3px 8px; cursor: pointer; display: flex; align-items: center;" title="رفع ملف (صورة، فيديو، صوت، أو كود)">
+                    <i class="fas fa-upload" style="font-size: 15px;"></i></button>
+                <input type="file" id="globalFileInput" accept="image/*,video/*,audio/*,.html,.css,.js,.ts,.py,.php,.txt,.json,.md,.sql,.xml,.java,.c,.cpp,.cs,.go,.rs" style="display:none" onchange="handleGlobalFileUpload(event)" multiple>
             </div>
             <div class="file-explorer" id="fileExplorer"></div>
             <div class="sidebar-actions">
-<button onclick="saveProject()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Save the open project">
-    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.137,24a2.8,2.8,0,0,1-1.987-.835L12,17.051,5.85,23.169a2.8,2.8,0,0,1-3.095.609A2.8,2.8,0,0,1,1,21.154V5A5,5,0,0,1,6,0H18a5,5,0,0,1,5,5V21.154a2.8,2.8,0,0,1-1.751,2.624A2.867,2.867,0,0,1,20.137,24ZM6,2A3,3,0,0,0,3,5V21.154a.843.843,0,0,0,1.437.6h0L11.3,14.933a1,1,0,0,1,1.41,0l6.855,6.819a.843.843,0,0,0,1.437-.6V5a3,3,0,0,0-3-3Z" fill="#fff"/></svg></button>
-<button onclick="startNewProject()" style="background-color: #dc3545; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer; grid-column: 1 / -1; margin-bottom: 5px;" title="Starting a new project and whistling the editor">
-    <i class="fas fa-plus-circle"></i> Scan and start a new project
+                <button onclick="saveProject()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Save the open project">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.137,24a2.8,2.8,0,0,1-1.987-.835L12,17.051,5.85,23.169a2.8,2.8,0,0,1-3.095.609A2.8,2.8,0,0,1,1,21.154V5A5,5,0,0,1,6,0H18a5,5,0,0,1,5,5V21.154a2.8,2.8,0,0,1-1.751,2.624A2.867,2.867,0,0,1,20.137,24ZM6,2A3,3,0,0,0,3,5V21.154a.843.843,0,0,0,1.437.6h0L11.3,14.933a1,1,0,0,1,1.41,0l6.855,6.819a.843.843,0,0,0,1.437-.6V5a3,3,0,0,0-3-3Z" fill="#fff"/></svg></button>
+                <button onclick="startNewProject()" style="background-color: #dc3545; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer; grid-column: 1 / -1; margin-bottom: 5px;" title="Starting a new project and whistling the editor">
+                    <i class="fas fa-plus-circle"></i> Scan and start a new project
                 </button>
-<button id="downloadZipBtn" onclick="downloadProjectAsZip()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Download ZIP">
-<svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#fff"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z" fill="#fff"/></svg></button>
-<button onclick="createNewProjectWorkspace()" style="background-color: #dc3545; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Clean the workspace and start a new project">
-<i class="fas fa-broom"></i></button>
+                <button id="downloadZipBtn" onclick="downloadProjectAsZip()" style="background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Download ZIP">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.878,18.122a3,3,0,0,0,4.244,0l3.211-3.211A1,1,0,0,0,15.919,13.5l-2.926,2.927L13,1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1l-.009,15.408L8.081,13.5a1,1,0,0,0-1.414,1.415Z" fill="#fff"/><path d="M23,16h0a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V17a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1v4a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V17A1,1,0,0,0,23,16Z" fill="#fff"/></svg></button>
+                <button onclick="createNewProjectWorkspace()" style="background-color: #dc3545; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px; cursor: pointer;" title="Clean the workspace and start a new project">
+                    <i class="fas fa-broom"></i>
+                </button>
             </div>
         </div>
 
         <div class="editor-section">
             <div class="editor-title">
                 <span id="editorLanguageLabel">Code Editor</span>
-<span class="current-file-name" id="currentFileNameDisplay">There is no open file</span>
-<button class="editor-toolbar" id="sidebarToggleBtn" onclick="toggleSidebar()" style="position: fixed; top: 15px; right: 10px; z-index: 1001; background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px 10px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                <span class="current-file-name" id="currentFileNameDisplay">There is no open file</span>
+                <button class="editor-toolbar" id="sidebarToggleBtn" onclick="toggleSidebar()" style="position: fixed; top: 15px; right: 10px; z-index: 1001; background-color: #2d2d2d; color: white; border: 1px solid #fff; border-radius: 5px; padding: 5px 10px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
                         <g fill="#fff"><rect x="1" y="1" width="6" height="6" rx="1" ry="1"></rect><rect x="9" y="1" width="6" height="6" rx="1" ry="1"></rect><rect x="1" y="9" width="6" height="6" rx="1" ry="1"></rect><rect x="9" y="9" width="6" height="6" rx="1" ry="1"></rect></g>
                     </svg>
@@ -273,12 +274,12 @@
             <div class="editor-toolbar" id="shortcutsToolbar">
                 <button class="shortcut-btn" onclick="editor.undo()"><svg viewBox="0 0 24 24" width="16" height="16"><path d="m23,12c0,.935-.364,1.814-1.025,2.475l-9.291,9.377c-.098.099-.226.148-.355.148-.127,0-.254-.048-.352-.145-.196-.194-.197-.511-.003-.707l9.292-9.379c.474-.474.734-1.101.734-1.769s-.26-1.295-.732-1.768L11.974.852c-.194-.196-.193-.513.003-.707.197-.195.514-.192.707.003l9.292,9.379c.66.659,1.024,1.538,1.024,2.473Zm-10,0c0-.668-.26-1.296-.729-1.765L2.356.149c-.194-.198-.51-.2-.707-.006-.197.193-.2.51-.006.707l9.917,10.089c.284.283.439.659.439,1.06s-.156.777-.442,1.063L1.644,23.149c-.194.197-.191.514.006.707.098.096.224.144.351.144.129,0,.259-.05.356-.149l9.911-10.083c.472-.472.732-1.1.732-1.768Z" fill="#fff"/></svg> Retreat</button>
                 
-<button class="shortcut-btn" onclick="formatCurrentCode()"><i class="fas fa-magic"></i>Code formatting</button>
-<button class="shortcut-btn" onclick="editor.execCommand('find')"><i class="fas fa-search"></i> Search</button>
+                <button class="shortcut-btn" onclick="formatCurrentCode()"><i class="fas fa-magic"></i>Code formatting</button>
+                <button class="shortcut-btn" onclick="editor.execCommand('find')"><i class="fas fa-search"></i> Search</button>
                 <button class="shortcut-btn" onclick="editor.execCommand('replace')"><i class="fas fa-exchange-alt"></i> Substitution</button>
 
-<div class="custom-dropdown">
-<button class="dropdown-btn" onclick="toggleDropdown('drop-html')"> HTML</button>
+                <div class="custom-dropdown">
+                    <button class="dropdown-btn" onclick="toggleDropdown('drop-html')"> HTML</button>
                     <div id="drop-html" class="dropdown-content">
                         <span class="snippet-item" data-code="<!DOCTYPE html>\n<html>\n<head>\n<title></title>\n</head>\n<body>\n\n</body>\n</html>"> HTML </span>
                         <span class="snippet-item" data-code='<img src="" alt=""/>'> img</span>
@@ -354,7 +355,6 @@
         let currentTargetFolderId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // إعداد المحرر بشكل صحيح
             editor = CodeMirror.fromTextArea(document.getElementById("codeTextArea"), {
                 mode: "htmlmixed",
                 theme: "dracula",
@@ -369,37 +369,28 @@
                     "Cmd-F": "find"
                 }
             });
-editor.on("inputRead", function(cm, change) {
-    // التأكد من أن التغيير ناتج عن إدخال نصي حقيقي وليس حذقاً أو أمراً داخلياً
-    if (change.origin !== "+input") return;
-    
-    // دمج النص المدخل للتحقق من طوله ومحتواه (يتضمن الأقواس والنقاط وعلامات التنصيص)
-    let text = change.text.join("");
-    if (!text || text === " ") return; // تجاهل المسافات الفارغة والأسطر الجديدة
-    
-    // استخدام requestAnimationFrame لضمان تزامن العرض مع تحديث واجهة CodeMirror
-    requestAnimationFrame(() => {
-        // منع فتح نافذة تلميحات جديدة إذا كانت هناك نافذة نشطة بالفعل وتعمل
-        if (cm.state.completionActive) return;
-        
-        let currentMode = cm.getOption("mode");
-        let hintOptions = { completeSingle: false };
-        
-        // استدعاء آلية showHint بشكل مباشر وصحيح حسب لغة المحرر الحالية
-        if (currentMode === "css") {
-            cm.showHint({ hint: CodeMirror.hint.css, ...hintOptions });
-        } else if (currentMode === "javascript" || currentMode === "text/typescript") {
-            cm.showHint({ hint: CodeMirror.hint.javascript, ...hintOptions });
-        } else if (currentMode === "htmlmixed" || currentMode === "xml") {
-            cm.showHint({ hint: CodeMirror.hint.html, ...hintOptions });
-        } else {
-            // تشغيل محرك anyword كخيار احتياطي ممتاز لباقي اللغات المدعومة لديك (مثل Python, PHP, SQL...)
-            if (CodeMirror.hint.anyword) {
-                cm.showHint({ hint: CodeMirror.hint.anyword, ...hintOptions });
-            }
-        }
-    });
-});
+            
+            editor.on("inputRead", function(cm, change) {
+                if (change.origin !== "+input") return;
+                let text = change.text.join("");
+                if (!text || text === " ") return;
+                requestAnimationFrame(() => {
+                    if (cm.state.completionActive) return;
+                    let currentMode = cm.getOption("mode");
+                    let hintOptions = { completeSingle: false };
+                    if (currentMode === "css") {
+                        cm.showHint({ hint: CodeMirror.hint.css, ...hintOptions });
+                    } else if (currentMode === "javascript" || currentMode === "text/typescript") {
+                        cm.showHint({ hint: CodeMirror.hint.javascript, ...hintOptions });
+                    } else if (currentMode === "htmlmixed" || currentMode === "xml") {
+                        cm.showHint({ hint: CodeMirror.hint.html, ...hintOptions });
+                    } else {
+                        if (CodeMirror.hint.anyword) {
+                            cm.showHint({ hint: CodeMirror.hint.anyword, ...hintOptions });
+                        }
+                    }
+                });
+            });
 
             editor.on("change", () => {
                 if (currentOpenFile && currentOpenFile.fileType !== 'image' && currentOpenFile.fileType !== 'video' && currentOpenFile.fileType !== 'audio') {
@@ -648,24 +639,21 @@ editor.on("inputRead", function(cm, change) {
             
             saveProject(); renderFileExplorer();
         }
-function createNewProjectWorkspace() {
-    if(confirm("Are you sure you want to clean up the workspace and start a whole new project?)")) {
-        // 1. مسح المعرف القديم لمنع تحديث المشروع السابق بالخطأ
-        localStorage.removeItem('currentPublishedProjectId'); 
-        
-        // 2. إعادة الملفات لوضعها الافتراضي الفارغ
-        fileSystem = getDefaultFileSystem(); 
-        saveProject(); 
-        renderFileExplorer();
-        openDefaultFirstFile();
-        
-        // 3. تنظيف شاشة المخرجات والمحرر
-        if (currentOpenFile) {
-            editor.setValue(currentOpenFile.content);
+
+        function createNewProjectWorkspace() {
+            if(confirm("Are you sure you want to clean up the workspace and start a whole new project?)")) {
+                localStorage.removeItem('currentPublishedProjectId'); 
+                fileSystem = getDefaultFileSystem(); 
+                saveProject(); 
+                renderFileExplorer();
+                openDefaultFirstFile();
+                if (currentOpenFile) {
+                    editor.setValue(currentOpenFile.content);
+                }
+                document.getElementById('terminalOutput').textContent = '';
+            }
         }
-        document.getElementById('terminalOutput').textContent = '';
-    }
-}
+
         function findNodeById(nodes, id) {
             for (let n of nodes) {
                 if (n.id === id) return n;
@@ -782,76 +770,71 @@ function createNewProjectWorkspace() {
             saveProject(); renderFileExplorer();
         }
 
-   function handleGlobalFileUpload(event) {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-    
-    // نحتفظ بمعرف المجلد المستهدف حتى لا نفقده أثناء قراءة الملفات المتعددة
-    const targetFolderId = currentTargetFolderId;
-    
-    // نمر على كل الملفات المرفوعة
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const ext = file.name.split('.').pop().toLowerCase();
-        let fileType = 'txt';
-        let isBinaryMedia = false;
-        
-        if (file.type.startsWith('image/')) {
-            fileType = 'image';
-            isBinaryMedia = true;
-        } else if (file.type.startsWith('video/')) {
-            fileType = 'video';
-            isBinaryMedia = true;
-        } else if (file.type.startsWith('audio/')) {
-            fileType = 'audio';
-            isBinaryMedia = true;
-        } else {
-            const allowedExts = ['html', 'css', 'js', 'ts', 'py', 'php', 'txt', 'json', 'md', 'sql', 'xml', 'java', 'c', 'cpp', 'cs', 'go', 'rs'];
-            if (allowedExts.includes(ext)) {
-                fileType = ext;
-            } else {
-                fileType = 'txt';
+        function handleGlobalFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            
+            const targetFolderId = currentTargetFolderId;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+                let fileType = 'txt';
+                let isBinaryMedia = false;
+                
+                if (file.type.startsWith('image/')) {
+                    fileType = 'image';
+                    isBinaryMedia = true;
+                } else if (file.type.startsWith('video/')) {
+                    fileType = 'video';
+                    isBinaryMedia = true;
+                } else if (file.type.startsWith('audio/')) {
+                    fileType = 'audio';
+                    isBinaryMedia = true;
+                } else {
+                    const allowedExts = ['html', 'css', 'js', 'ts', 'py', 'php', 'txt', 'json', 'md', 'sql', 'xml', 'java', 'c', 'cpp', 'cs', 'go', 'rs'];
+                    if (allowedExts.includes(ext)) {
+                        fileType = ext;
+                    } else {
+                        fileType = 'txt';
+                    }
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: (isBinaryMedia ? 'media_' : 'file_') + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                        name: file.name,
+                        type: 'file',
+                        fileType: fileType,
+                        content: e.target.result
+                    };
+                    
+                    if (targetFolderId) {
+                        let insertSuccess = findAndAddMediaToFolder(fileSystem, targetFolderId, newFile);
+                        if (!insertSuccess) fileSystem.push(newFile);
+                    } else {
+                        fileSystem.push(newFile);
+                    }
+                    
+                    saveProject();
+                    renderFileExplorer();
+                    
+                    if (i === files.length - 1) {
+                        openFile(newFile);
+                    }
+                };
+                
+                if (isBinaryMedia) {
+                    reader.readAsDataURL(file);
+                } else {
+                    reader.readAsText(file);
+                }
             }
+            
+            currentTargetFolderId = null;
+            event.target.value = '';
         }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const newFile = {
-                // إضافة سلسلة عشوائية لتجنب تطابق الـ ID عند رفع عدة ملفات في نفس اللحظة
-                id: (isBinaryMedia ? 'media_' : 'file_') + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
-                name: file.name,
-                type: 'file',
-                fileType: fileType,
-                content: e.target.result
-            };
-            
-            if (targetFolderId) {
-                let insertSuccess = findAndAddMediaToFolder(fileSystem, targetFolderId, newFile);
-                if (!insertSuccess) fileSystem.push(newFile);
-            } else {
-                fileSystem.push(newFile);
-            }
-            
-            saveProject();
-            renderFileExplorer();
-            
-            // فتح الملف الأخير فقط في المحرر لتجنب التداخل
-            if (i === files.length - 1) {
-                openFile(newFile);
-            }
-        };
-        
-        if (isBinaryMedia) {
-            reader.readAsDataURL(file);
-        } else {
-            reader.readAsText(file);
-        }
-    }
-    
-    // إعادة تعيين المتغيرات بعد الانتهاء من حلقة التكرار
-    currentTargetFolderId = null;
-    event.target.value = '';
-}
 
         function findAndAddMediaToFolder(nodes, folderId, newFile) {
             for (let i = 0; i < nodes.length; i++) {
@@ -885,85 +868,72 @@ function createNewProjectWorkspace() {
             return map;
         }
 
-// 1. الدالة الذكية والمطورة لتجميع المشروع (تحل مشاكل JS والروابط)
-function compileSpecificHtml(htmlFileNode, allFilesMap, processedFiles = new Set()) {
-    // حماية من التكرار اللانهائي
-    if (processedFiles.has(htmlFileNode.name)) return "#";
-    processedFiles.add(htmlFileNode.name);
-    
-    let compiledHtml = htmlFileNode.content;
-    
-    // أولاً: دمج ملفات الجافاسكريبت مباشرة (Inline) لتفادي أخطاء الـ Base64
-    compiledHtml = compiledHtml.replace(/<script\s+[^>]*src=["']([^"']+)["'][^>]*>[\s\S]*?<\/script>/gi, (match, p1) => {
-        const filename = p1.split('/').pop();
-        if (allFilesMap[filename] && (allFilesMap[filename].fileType === 'js' || allFilesMap[filename].fileType === 'ts')) {
-            return `<script>\n${allFilesMap[filename].content}\n<\/script>`;
-        }
-        return match;
-    });
-
-    // ثانياً: دمج ملفات CSS مباشرة (Inline)
-    compiledHtml = compiledHtml.replace(/<link\s+[^>]*href=["']([^"']+)["'][^>]*>/gi, (match, p1) => {
-        const filename = p1.split('/').pop();
-        if (allFilesMap[filename] && allFilesMap[filename].fileType === 'css') {
-            return `<style>\n${allFilesMap[filename].content}\n<\/style>`;
-        }
-        return match;
-    });
-    
-    // ثالثاً: معالجة الصور والوسائط المتعددة (Base64 كما هي)
-    compiledHtml = compiledHtml.replace(/src=["']([^"']+)["']/gi, (match, p1) => {
-        const filename = p1.split('/').pop();
-        if (allFilesMap[filename]) {
-            const file = allFilesMap[filename];
-            if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
-                return `src="${file.content}"`;
-            }
-        }
-        return match;
-    });
-    
-    // رابعاً: معالجة الروابط لصفحات HTML الأخرى (تجاوز حظر المتصفحات)
-    compiledHtml = compiledHtml.replace(/href=["']([^"']+)["']/gi, (match, p1) => {
-        const filename = p1.split('/').pop();
-        
-        // تجاهل روابط CSS لأننا عالجناها سابقاً
-        if (match.toLowerCase().includes('rel="stylesheet"')) return match; 
-        
-        if (allFilesMap[filename]) {
-            const file = allFilesMap[filename];
-            if (file.fileType === 'html' && file !== htmlFileNode) {
-                let linkedCompiled = compileSpecificHtml(file, allFilesMap, new Set(processedFiles));
-                if (linkedCompiled !== "#") {
-                    const b64 = btoa(unescape(encodeURIComponent(linkedCompiled)));
-                    // خدعة ذكية: استبدال الرابط بدالة جافاسكريبت تقوم بفتح الصفحة الجديدة فوراً 
-                    return `href="javascript:void(0);" onclick="document.open(); document.write(decodeURIComponent(escape(atob('${b64}')))); document.close();"`;
+        function compileSpecificHtml(htmlFileNode, allFilesMap, processedFiles = new Set()) {
+            if (processedFiles.has(htmlFileNode.name)) return "#";
+            processedFiles.add(htmlFileNode.name);
+            
+            let compiledHtml = htmlFileNode.content;
+            
+            compiledHtml = compiledHtml.replace(/<script\s+[^>]*src=["']([^"']+)["'][^>]*>[\s\S]*?<\/script>/gi, (match, p1) => {
+                const filename = p1.split('/').pop();
+                if (allFilesMap[filename] && (allFilesMap[filename].fileType === 'js' || allFilesMap[filename].fileType === 'ts')) {
+                    return `<script>\n${allFilesMap[filename].content}\n<\/script>`;
                 }
-            }
+                return match;
+            });
+
+            compiledHtml = compiledHtml.replace(/<link\s+[^>]*href=["']([^"']+)["'][^>]*>/gi, (match, p1) => {
+                const filename = p1.split('/').pop();
+                if (allFilesMap[filename] && allFilesMap[filename].fileType === 'css') {
+                    return `<style>\n${allFilesMap[filename].content}\n<\/style>`;
+                }
+                return match;
+            });
+            
+            compiledHtml = compiledHtml.replace(/src=["']([^"']+)["']/gi, (match, p1) => {
+                const filename = p1.split('/').pop();
+                if (allFilesMap[filename]) {
+                    const file = allFilesMap[filename];
+                    if (file.fileType === 'image' || file.fileType === 'video' || file.fileType === 'audio') {
+                        return `src="${file.content}"`;
+                    }
+                }
+                return match;
+            });
+            
+            compiledHtml = compiledHtml.replace(/href=["']([^"']+)["']/gi, (match, p1) => {
+                const filename = p1.split('/').pop();
+                if (match.toLowerCase().includes('rel="stylesheet"')) return match; 
+                if (allFilesMap[filename]) {
+                    const file = allFilesMap[filename];
+                    if (file.fileType === 'html' && file !== htmlFileNode) {
+                        let linkedCompiled = compileSpecificHtml(file, allFilesMap, new Set(processedFiles));
+                        if (linkedCompiled !== "#") {
+                            const b64 = btoa(unescape(encodeURIComponent(linkedCompiled)));
+                            return `href="javascript:void(0);" onclick="document.open(); document.write(decodeURIComponent(escape(atob('${b64}')))); document.close();"`;
+                        }
+                    }
+                }
+                return match;
+            });
+            
+            return compiledHtml;
         }
-        return match;
-    });
-    
-    return compiledHtml;
-}
 
-// 2. تحديث الدالة الرئيسية التي يتم استدعاؤها عند النشر أو المعاينة
-function compileVirtualProject() {
-    const allFilesMap = getAllFilesFlat(fileSystem);
-    let activeHtmlFile = null;
+        function compileVirtualProject() {
+            const allFilesMap = getAllFilesFlat(fileSystem);
+            let activeHtmlFile = null;
 
-    // تحديد الصفحة المفتوحة حالياً، أو الصفحة الرئيسية كخيار افتراضي
-    if (currentOpenFile && currentOpenFile.fileType === 'html') {
-        activeHtmlFile = currentOpenFile;
-    } else {
-        activeHtmlFile = allFilesMap['index.html'] || Object.values(allFilesMap).find(f => f.fileType === 'html');
-    }
+            if (currentOpenFile && currentOpenFile.fileType === 'html') {
+                activeHtmlFile = currentOpenFile;
+            } else {
+                activeHtmlFile = allFilesMap['index.html'] || Object.values(allFilesMap).find(f => f.fileType === 'html');
+            }
 
-    if (!activeHtmlFile) return null;
+            if (!activeHtmlFile) return null;
 
-    // تمرير الصفحة لدالة التجميع الذكية
-    return compileSpecificHtml(activeHtmlFile, allFilesMap);
-}
+            return compileSpecificHtml(activeHtmlFile, allFilesMap);
+        }
 
         function showTerminal(initialText = "") {
             const terminal = document.getElementById('terminalPanel');
@@ -1043,7 +1013,7 @@ function compileVirtualProject() {
                     } else if (result.message) {
                         appendTerminal("[server message]:\n" + result.message);
                     } else {
-                        appendTerminal("\Implemented successfully (without Text outputs).");
+                        appendTerminal("\nImplemented successfully (without Text outputs).");
                     }
                 } catch(error) {
                     appendTerminal("\n[Connection error]: Server access failed.");
@@ -1054,107 +1024,139 @@ function compileVirtualProject() {
         }
 
         function closeFullscreenPreview() { document.getElementById('fullscreenPreview').classList.remove('active'); }
-async function exportToCommunityProjects() {
-    const token = localStorage.getItem('token');
-    const author = localStorage.getItem('currentUser');
-    if (!token || !author) { 
-        alert("Error: You must first log in to publish projects."); 
-        return; 
-    }
-    
-    const finalBundle = compileVirtualProject();
-    if (!finalBundle) {
-        alert("Error: There is no valid HTML file to package and publish..");
-        return;
-    }
 
-    const publishedProjectId = localStorage.getItem('currentPublishedProjectId');
-    let isUpdate = false;
-
-    if (publishedProjectId) {
-        // رسالة أوضح للمستخدم
-        const userChoice = confirm("هذا المشروع مرتبط بمشروع قمت بنشره مسبقاً.\n\n- اضغط 'موافق' (OK) لتحديث المشروع الحالي في المجتمع.\n- اضغط 'إلغاء' (Cancel) لنشره كمشروع جديد منفصل تماماً.");
-        
-        if (userChoice) {
-            isUpdate = true;
-        } else {
-            // توكيد إضافي لمنع الخطأ
-            const confirmNew = confirm("سيتم فك الارتباط بالمشروع القديم ونشر هذا الكود كمشروع جديد. هل أنت متأكد؟");
-            if (!confirmNew) return; // الخروج إذا تراجع المستخدم
+        // ============================================
+        // الدالة المعدلة لنشر المشاريع - الحل الرئيسي
+        // ============================================
+        async function exportToCommunityProjects() {
+            const token = localStorage.getItem('token');
+            const author = localStorage.getItem('currentUser');
+            if (!token || !author) { 
+                alert("Error: You must first log in to publish projects."); 
+                return; 
+            }
             
-            isUpdate = false;
-        }
-    }
+            const finalBundle = compileVirtualProject();
+            if (!finalBundle) {
+                alert("Error: There is no valid HTML file to package and publish.");
+                return;
+            }
 
-    let title = "", description = "";
-    if (!isUpdate) {
-        title = prompt("أدخل عنواناً للمشروع لنشره في المجتمع:");
-        if (!title || title.trim() === "") return; // التوقف إذا لم يدخل عنواناً، دون حذف الـ ID القديم
+            const publishedProjectId = localStorage.getItem('currentPublishedProjectId');
+            let isUpdate = false;
 
-        description = prompt("أدخل وصفاً مبسطاً للمشروع:");
-        if (!description || description.trim() === "") {
-            description = "لا يوجد وصف متوفر لهذا المشروع.";
-        }
-        
-        // نقوم بحذف المعرف القديم هنا فقط بعد تأكدنا من أنه سيدخل بيانات المشروع الجديد
-        if (publishedProjectId) {
-            localStorage.removeItem('currentPublishedProjectId');
-        }
-    }
-    
-    try {
-        let url = 'https://my-backend-api-bntd.onrender.com/api/projects';
-        let method = 'POST'; 
-        
-        let payload = {
-            html: finalBundle,
-            css: "", 
-            js: ""
-        };
-
-        if (isUpdate) {
-            url = `https://my-backend-api-bntd.onrender.com/api/projects/${publishedProjectId}`;
-            method = 'PUT'; 
-        } else {
-            payload.title = title.trim();
-            payload.description = description.trim();
-            payload.author = author;
-        }
-
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        const data = await response.json().catch(() => ({}));
-
-        if (response.ok) {
-            if (!isUpdate) {
-                const newId = (data.project && data.project._id) || data._id || (data.project && data.project.id) || data.id;
-                if (newId) {
-                    localStorage.setItem('currentPublishedProjectId', newId);
+            if (publishedProjectId) {
+                const userChoice = confirm("هذا المشروع مرتبط بمشروع قمت بنشره مسبقاً.\n\n- اضغط 'موافق' (OK) لتحديث المشروع الحالي في المجتمع.\n- اضغط 'إلغاء' (Cancel) لنشره كمشروع جديد منفصل تماماً.");
+                
+                if (userChoice) {
+                    isUpdate = true;
+                } else {
+                    const confirmNew = confirm("سيتم فك الارتباط بالمشروع القديم ونشر هذا الكود كمشروع جديد. هل أنت متأكد؟");
+                    if (!confirmNew) return;
+                    isUpdate = false;
                 }
             }
 
-            alert(isUpdate ? "✅ تم تحديث مشروعك بنجاح!" : "🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح.");
-            window.location.href = "index.html"; 
-        } else {
-            if (response.status === 404 || data.msg === "The project does not exist.") {
-                localStorage.removeItem('currentPublishedProjectId');
-                alert("⚠️ هذا المشروع لم يعد موجوداً في السيرفر (ربما تم حذفه). يرجى الضغط على النشر مرة أخرى ليتم رفعه كجديد.");
-            } else {
-                alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
+            let title = "", description = "";
+            if (!isUpdate) {
+                title = prompt("أدخل عنواناً للمشروع لنشره في المجتمع:");
+                if (!title || title.trim() === "") return;
+
+                description = prompt("أدخل وصفاً مبسطاً للمشروع:");
+                if (!description || description.trim() === "") {
+                    description = "لا يوجد وصف متوفر لهذا المشروع.";
+                }
+                
+                if (publishedProjectId) {
+                    localStorage.removeItem('currentPublishedProjectId');
+                }
+            }
+            
+            try {
+                let url = 'https://my-backend-api-bntd.onrender.com/api/projects';
+                let method = 'POST'; 
+                
+                let payload = {
+                    html: finalBundle,
+                    css: "", 
+                    js: ""
+                };
+
+                if (isUpdate) {
+                    url = `https://my-backend-api-bntd.onrender.com/api/projects/${publishedProjectId}`;
+                    method = 'PUT'; 
+                } else {
+                    payload.title = title.trim();
+                    payload.description = description.trim();
+                    payload.author = author;
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    // ============================================
+                    // 🔥 التعديل الرئيسي: حفظ المشروع محلياً أيضاً
+                    // ============================================
+                    const projectId = (data.project && data.project._id) || data._id || (data.project && data.project.id) || data.id || Date.now().toString();
+                    
+                    if (!isUpdate) {
+                        localStorage.setItem('currentPublishedProjectId', projectId);
+                        
+                        // حفظ المشروع في localStorage
+                        let localProjects = JSON.parse(localStorage.getItem('codeProjects') || '[]');
+                        const newProject = {
+                            id: projectId,
+                            title: title.trim(),
+                            description: description.trim(),
+                            author: author,
+                            html: finalBundle,
+                            timestamp: Date.now(),
+                            views: 0,
+                            likes: 0,
+                            comments: []
+                        };
+                        // تجنب التكرار
+                        const exists = localProjects.some(p => p.id === projectId);
+                        if (!exists) {
+                            localProjects.push(newProject);
+                            localStorage.setItem('codeProjects', JSON.stringify(localProjects));
+                        }
+                    } else {
+                        // تحديث المشروع في localStorage
+                        let localProjects = JSON.parse(localStorage.getItem('codeProjects') || '[]');
+                        const index = localProjects.findIndex(p => p.id === publishedProjectId);
+                        if (index !== -1) {
+                            localProjects[index].html = finalBundle;
+                            localProjects[index].title = title || localProjects[index].title;
+                            localProjects[index].description = description || localProjects[index].description;
+                            localStorage.setItem('codeProjects', JSON.stringify(localProjects));
+                        }
+                    }
+
+                    alert(isUpdate ? "✅ تم تحديث مشروعك بنجاح!" : "🎉 تهانينا! تم نشر مشروعك المتكامل بنجاح.");
+                    window.location.href = "index.html"; 
+                } else {
+                    if (response.status === 404 || data.msg === "The project does not exist.") {
+                        localStorage.removeItem('currentPublishedProjectId');
+                        alert("⚠️ هذا المشروع لم يعد موجوداً في السيرفر (ربما تم حذفه). يرجى الضغط على النشر مرة أخرى ليتم رفعه كجديد.");
+                    } else {
+                        alert("حدث خطأ في السيرفر: " + (data.msg || data.message || "فشل العملية"));
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert("فشل الاتصال بالسيرفر. يرجى التأكد من اتصالك بالإنترنت.");
             }
         }
-    } catch (error) {
-        console.error(error);
-        alert("فشل الاتصال بالسيرفر. يرجى التأكد من اتصالك بالإنترنت.");
-    }
-}
 
         function downloadProjectAsZip() {
             const zip = new JSZip();
@@ -1176,20 +1178,17 @@ async function exportToCommunityProjects() {
             addToZip(fileSystem, zip);
             zip.generateAsync({type:"blob"}).then(function(content) { saveAs(content, "MyWebProject.zip"); });
         }
+
         function startNewProject() {
-    if(confirm("هل أنت متأكد أنك تريد تفريغ المحرر للبدء بمشروع جديد كلياً؟ (سيتم مسح الأكواد الحالية من الشاشة)")) {
-        // 1. إعادة بناء الملفات الافتراضية
-        fileSystem = getDefaultFileSystem();
-        saveProject();
-        renderFileExplorer();
-        openDefaultFirstFile();
-        
-        // 2. فك الارتباط بالمشروع القديم تماماً
-        localStorage.removeItem('currentPublishedProjectId');
-        
-        alert("✅ تم تنظيف مساحة العمل بنجاح! أي كود ستكتبه وتنشره الآن سيكون مشروعاً جديداً ومستقلاً.");
-    }
-                        }
+            if(confirm("هل أنت متأكد أنك تريد تفريغ المحرر للبدء بمشروع جديد كلياً؟ (سيتم مسح الأكواد الحالية من الشاشة)")) {
+                fileSystem = getDefaultFileSystem();
+                saveProject();
+                renderFileExplorer();
+                openDefaultFirstFile();
+                localStorage.removeItem('currentPublishedProjectId');
+                alert("✅ تم تنظيف مساحة العمل بنجاح! أي كود ستكتبه وتنشره الآن سيكون مشروعاً جديداً ومستقلاً.");
+            }
+        }
     </script>
 </body>
 </html>
