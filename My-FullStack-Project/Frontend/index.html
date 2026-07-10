@@ -472,6 +472,24 @@
     <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script>
+        // دالة لحساب الوقت المنقضي (منذ كم دقيقة/ساعة/يوم)
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    const diffMonth = Math.floor(diffDay / 30);
+    const diffYear = Math.floor(diffDay / 365);
+    
+    if (diffSec < 60) return 'الآن';
+    if (diffMin < 60) return diffMin + ' دقيقة' + (diffMin > 1 ? 'ات' : '');
+    if (diffHour < 24) return diffHour + ' ساعة' + (diffHour > 1 ? 'ات' : '');
+    if (diffDay < 30) return diffDay + ' يوم' + (diffDay > 1 ? 'اً' : '');
+    if (diffMonth < 12) return diffMonth + ' شهر' + (diffMonth > 1 ? 'اً' : '');
+    return diffYear + ' سنة' + (diffYear > 1 ? 'ات' : '');
+        }
         // ==========================================
         // 1. أدوات التحكم الأساسية
         // ==========================================
@@ -1112,32 +1130,447 @@
                 const commentCountDisplay = document.createElement('span'); let commentsArr = project.comments || []; commentCountDisplay.textContent = commentsArr.length; commentCountDisplay.style.cssText = 'color: #fff; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-top: 5px;';
                 commentBtn.appendChild(commentIcon); commentBtn.appendChild(commentCountDisplay);
                 commentBtn.onclick = function(e) {
-                    e.stopPropagation(); 
-                    if (document.getElementById('mediaCommentPanel')) { document.getElementById('mediaCommentPanel').remove(); return; }
-                    const panelOverlay = document.createElement('div'); panelOverlay.id = 'mediaCommentPanel'; panelOverlay.style.cssText = 'position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: rgba(0, 0, 0, 0.95); z-index: 1001; display: flex; flex-direction: column; padding: 20px; border-top-left-radius: 25px; border-top-right-radius: 25px; transition: all 0.3s ease; backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.2); box-sizing: border-box;';
-                    const closePanelBtn = document.createElement('button'); closePanelBtn.style.cssText = 'align-self: center; background: rgba(255,255,255,0.3); border: none; margin-bottom: 15px; width: 40px; height: 5px; border-radius: 10px; cursor: pointer;'; closePanelBtn.onclick = (event) => { event.stopPropagation(); panelOverlay.remove(); };
-                    const panelTitle = document.createElement('h3'); panelTitle.textContent = 'التعليقات'; panelTitle.style.cssText = 'color: #fff; text-align: center; margin: 0 0 15px 0; font-family: sans-serif;';
-                    const commentsList = document.createElement('div'); commentsList.style.cssText = 'flex: 1; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;';
-                    const renderComments = () => {
-                        let allProj = getCodeProjects(); let currProj = allProj.find(p => p.id === project.id); commentsList.innerHTML = ''; const currentComments = currProj.comments || [];
-                        if (currentComments.length === 0) { commentsList.innerHTML = '<p style="text-align: center; color: #888; margin-top: 20px;">لا توجد تعليقات حتى الآن. كن أول من يعلق!</p>'; } 
-                        else { currentComments.forEach(c => { const cDiv = document.createElement('div'); cDiv.style.cssText = 'background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: right;'; cDiv.innerHTML = `<div style="display: flex; justify-content: space-between; margin-bottom: 5px; flex-direction: row-reverse;"><strong style="color: #4da3ff; font-size: 0.9em;">${c.author}</strong><span style="font-size: 0.7em; color: #888;">${new Date(c.date).toLocaleDateString()}</span></div><p style="margin: 0; color: #eee; font-size: 0.95em; line-height: 1.4;">${c.text}</p>`; commentsList.appendChild(cDiv); }); commentsList.scrollTop = commentsList.scrollHeight; }
-                        commentCountDisplay.textContent = currentComments.length;
-                    };
-                    renderComments();
-                    const inputArea = document.createElement('div'); inputArea.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 25px; flex-direction: row-reverse;';
-                    const cInput = document.createElement('input'); cInput.type = 'text'; cInput.placeholder = 'اكتب تعليقاً...'; cInput.style.cssText = 'flex: 1; padding: 12px 15px; border-radius: 20px; border: none; outline: none; background: transparent; color: #fff; font-size: 0.9em; text-align: right;';
-                    const cSubmit = document.createElement('button'); cSubmit.innerHTML = '<i class="fas fa-paper-plane"></i>'; cSubmit.style.cssText = 'background: #007bff; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s;';
-                    cSubmit.onclick = (event) => {
-                        event.stopPropagation(); const text = cInput.value.trim(); if (!text) return;
-                        const currentUser = getCurrentUser(); if (!currentUser) { alert('عذراً، يجب عليك تسجيل الدخول أولاً لتتمكن من التعليق.'); return; }
-                        let allProj = getCodeProjects(); let currProj = allProj.find(p => p.id === project.id);
-                        if (!currProj.comments) currProj.comments = []; currProj.comments.push({ author: currentUser, text: text, date: new Date().toISOString() });
-                        saveCodeProjects(allProj.map(p => p.id === currProj.id ? currProj : p)); cInput.value = ''; renderComments();
-                    };
-                    cInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); cSubmit.click(); } });
-                    inputArea.appendChild(cInput); inputArea.appendChild(cSubmit); panelOverlay.appendChild(closePanelBtn); panelOverlay.appendChild(panelTitle); panelOverlay.appendChild(commentsList); panelOverlay.appendChild(inputArea); card.appendChild(panelOverlay);
+    e.stopPropagation();
+    
+    // إزالة لوحة التعليقات القديمة إذا كانت موجودة
+    if (document.getElementById('mediaCommentPanel')) {
+        document.getElementById('mediaCommentPanel').remove();
+        return;
+    }
+    
+    // إنشاء لوحة التعليقات
+    const panelOverlay = document.createElement('div');
+    panelOverlay.id = 'mediaCommentPanel';
+    panelOverlay.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        background: rgba(0, 0, 0, 0.92);
+        z-index: 1001;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 20px 10px;
+        border-top-left-radius: 25px;
+        border-top-right-radius: 25px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(15px);
+        border-top: 1px solid rgba(255,255,255,0.15);
+        box-sizing: border-box;
+        animation: slideUp 0.3s ease;
+    `;
+    
+    // إضافة أنماط التحريك
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .comment-item {
+            animation: fadeIn 0.2s ease;
+        }
+        .comment-item:hover {
+            background: rgba(255,255,255,0.08) !important;
+        }
+        .reply-item {
+            margin-right: 40px;
+            border-right: 2px solid rgba(77, 163, 255, 0.3);
+            padding-right: 12px;
+        }
+        .comment-actions button {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .comment-actions button:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .comment-actions .delete-btn:hover {
+            color: #ff6b6b;
+        }
+        .comment-actions .reply-btn:hover {
+            color: #4da3ff;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // زر إغلاق (شريط علوي)
+    const closePanelBtn = document.createElement('button');
+    closePanelBtn.style.cssText = `
+        align-self: center;
+        background: rgba(255,255,255,0.25);
+        border: none;
+        margin-bottom: 12px;
+        width: 40px;
+        height: 4px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+    `;
+    closePanelBtn.onmouseover = () => { closePanelBtn.style.background = 'rgba(255,255,255,0.4)'; };
+    closePanelBtn.onmouseout = () => { closePanelBtn.style.background = 'rgba(255,255,255,0.25)'; };
+    closePanelBtn.onclick = (event) => {
+        event.stopPropagation();
+        panelOverlay.remove();
+        styleSheet.remove();
+    };
+    
+    // عنوان اللوحة مع عدد التعليقات
+    const panelHeader = document.createElement('div');
+    panelHeader.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 0 5px;
+        flex-direction: row-reverse;
+    `;
+    
+    const panelTitle = document.createElement('h3');
+    panelTitle.style.cssText = `
+        color: #fff;
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+    `;
+    
+    const commentCountBadge = document.createElement('span');
+    commentCountBadge.style.cssText = `
+        background: rgba(77, 163, 255, 0.2);
+        color: #4da3ff;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+    `;
+    commentCountBadge.id = 'commentCountBadge';
+    
+    panelHeader.appendChild(panelTitle);
+    panelHeader.appendChild(commentCountBadge);
+    
+    // قائمة التعليقات
+    const commentsList = document.createElement('div');
+    commentsList.style.cssText = `
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-left: 5px;
+        padding-right: 5px;
+    `;
+    
+    // تنسيق شريط التمرير
+    const scrollStyle = document.createElement('style');
+    scrollStyle.textContent = `
+        #commentsList::-webkit-scrollbar {
+            width: 4px;
+        }
+        #commentsList::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #commentsList::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+        #commentsList::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    `;
+    document.head.appendChild(scrollStyle);
+    commentsList.id = 'commentsList';
+    
+    // دالة عرض التعليقات
+    const renderComments = () => {
+        let allProj = getCodeProjects();
+        let currProj = allProj.find(p => p.id === project.id);
+        commentsList.innerHTML = '';
+        
+        if (!currProj) return;
+        
+        const currentComments = currProj.comments || [];
+        commentCountBadge.textContent = currentComments.length + ' تعليق' + (currentComments.length > 1 ? 'ات' : '');
+        panelTitle.textContent = '💬 التعليقات';
+        
+        if (currentComments.length === 0) {
+            commentsList.innerHTML = `
+                <div style="
+                    text-align: center;
+                    color: #666;
+                    margin-top: 30px;
+                    font-size: 14px;
+                ">
+                    <i class="fas fa-comment-slash" style="font-size: 24px; display: block; margin-bottom: 10px; color: #444;"></i>
+                    لا توجد تعليقات حتى الآن.<br>كن أول من يعلق!
+                </div>
+            `;
+            return;
+        }
+        
+        // عرض التعليقات مع الردود
+        currentComments.forEach((c, index) => {
+            const isOwner = getCurrentUser() === c.author;
+            const isProjectOwner = getCurrentUser() === project.author;
+            const canDelete = isOwner || isProjectOwner;
+            
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment-item';
+            commentDiv.style.cssText = `
+                background: rgba(255,255,255,0.05);
+                padding: 10px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.05);
+                transition: all 0.2s;
+            `;
+            
+            // صورة المستخدم + الاسم + الوقت
+            const userInfo = document.createElement('div');
+            userInfo.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5px;
+                flex-direction: row-reverse;
+            `;
+            
+            const userLeft = document.createElement('div');
+            userLeft.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-direction: row-reverse;';
+            
+            const avatarImg = document.createElement('img');
+            avatarImg.src = getUserAvatar(c.author);
+            avatarImg.style.cssText = `
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 1px solid rgba(255,255,255,0.1);
+            `;
+            
+            const nameSpan = document.createElement('strong');
+            nameSpan.style.cssText = `
+                color: #4da3ff;
+                font-size: 0.85em;
+                font-weight: 600;
+            `;
+            nameSpan.textContent = c.author;
+            
+            userLeft.appendChild(avatarImg);
+            userLeft.appendChild(nameSpan);
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.style.cssText = 'font-size: 0.65em; color: #666;';
+            timeSpan.textContent = getTimeAgo(new Date(c.date));
+            
+            userInfo.appendChild(userLeft);
+            userInfo.appendChild(timeSpan);
+            
+            // نص التعليق
+            const textP = document.createElement('p');
+            textP.style.cssText = `
+                margin: 4px 0 6px 0;
+                color: #eee;
+                font-size: 0.9em;
+                line-height: 1.5;
+                word-break: break-word;
+            `;
+            textP.textContent = c.text;
+            
+            // أزرار التفاعل (رد، حذف)
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'comment-actions';
+            actionsDiv.style.cssText = `
+                display: flex;
+                gap: 8px;
+                margin-top: 4px;
+                flex-direction: row-reverse;
+            `;
+            
+            // زر الرد
+            const replyBtn = document.createElement('button');
+            replyBtn.className = 'reply-btn';
+            replyBtn.textContent = '↩ رد';
+            replyBtn.onclick = (e) => {
+                e.stopPropagation();
+                // وضع @اسم المستخدم في حقل الإدخال
+                const inputField = document.getElementById('commentInputField');
+                if (inputField) {
+                    inputField.value = `@${c.author} `;
+                    inputField.focus();
+                }
+            };
+            actionsDiv.appendChild(replyBtn);
+            
+            // زر الحذف (إذا كان المالك أو صاحب المشروع)
+            if (canDelete) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '🗑 حذف';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
+                        let allProj = getCodeProjects();
+                        let currProj = allProj.find(p => p.id === project.id);
+                        if (currProj && currProj.comments) {
+                            currProj.comments.splice(index, 1);
+                            saveCodeProjects(allProj.map(p => p.id === currProj.id ? currProj : p));
+                            renderComments();
+                        }
+                    }
                 };
+                actionsDiv.appendChild(deleteBtn);
+            }
+            
+            commentDiv.appendChild(userInfo);
+            commentDiv.appendChild(textP);
+            commentDiv.appendChild(actionsDiv);
+            commentsList.appendChild(commentDiv);
+        });
+        
+        // التمرير إلى أسفل القائمة
+        commentsList.scrollTop = commentsList.scrollHeight;
+    };
+    
+    // حقل إدخال التعليق
+    const inputArea = document.createElement('div');
+    inputArea.style.cssText = `
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: rgba(255,255,255,0.08);
+        padding: 4px 4px 4px 12px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,0.08);
+        margin-top: 5px;
+        flex-direction: row-reverse;
+        transition: border-color 0.3s;
+    `;
+    
+    const cInput = document.createElement('input');
+    cInput.id = 'commentInputField';
+    cInput.type = 'text';
+    cInput.placeholder = 'اكتب تعليقاً...';
+    cInput.style.cssText = `
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 25px;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: #fff;
+        font-size: 0.9em;
+        text-align: right;
+        font-family: inherit;
+    `;
+    cInput.placeholder = '✏️ اكتب تعليقاً...';
+    
+    // إظهار عدد الأحرف المتبقية
+    const charCount = document.createElement('span');
+    charCount.style.cssText = `
+        color: #666;
+        font-size: 11px;
+        padding: 0 5px;
+        min-width: 30px;
+        text-align: center;
+    `;
+    charCount.textContent = '200';
+    
+    cInput.addEventListener('input', function() {
+        const remaining = 200 - this.value.length;
+        charCount.textContent = remaining < 0 ? '0' : remaining;
+        charCount.style.color = remaining < 20 ? '#ff6b6b' : '#666';
+    });
+    
+    cInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            cSubmit.click();
+        }
+    });
+    
+    const cSubmit = document.createElement('button');
+    cSubmit.innerHTML = '<i class="fas fa-paper-plane" style="font-size: 16px;"></i>';
+    cSubmit.style.cssText = `
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    `;
+    cSubmit.onmouseover = () => { cSubmit.style.transform = 'scale(1.05)'; };
+    cSubmit.onmouseout = () => { cSubmit.style.transform = 'scale(1)'; };
+    
+    cSubmit.onclick = (event) => {
+        event.stopPropagation();
+        const text = cInput.value.trim();
+        if (!text) {
+            // اهتزاز بسيط للتنبيه
+            inputArea.style.borderColor = '#ff6b6b';
+            setTimeout(() => { inputArea.style.borderColor = 'rgba(255,255,255,0.08)'; }, 500);
+            return;
+        }
+        
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+            alert('عذراً، يجب عليك تسجيل الدخول أولاً لتتمكن من التعليق.');
+            return;
+        }
+        
+        let allProj = getCodeProjects();
+        let currProj = allProj.find(p => p.id === project.id);
+        if (!currProj.comments) currProj.comments = [];
+        
+        currProj.comments.push({
+            author: currentUser,
+            text: text,
+            date: new Date().toISOString()
+        });
+        
+        saveCodeProjects(allProj.map(p => p.id === currProj.id ? currProj : p));
+        cInput.value = '';
+        charCount.textContent = '200';
+        renderComments();
+    };
+    
+    inputArea.appendChild(cInput);
+    inputArea.appendChild(charCount);
+    inputArea.appendChild(cSubmit);
+    
+    // تجميع اللوحة
+    panelOverlay.appendChild(closePanelBtn);
+    panelOverlay.appendChild(panelHeader);
+    panelOverlay.appendChild(commentsList);
+    panelOverlay.appendChild(inputArea);
+    
+    // إضافة اللوحة إلى البطاقة
+    card.appendChild(panelOverlay);
+    
+    // عرض التعليقات فوراً
+    renderComments();
+    
+    // التركيز على حقل الإدخال
+    setTimeout(() => { cInput.focus(); }, 300);
+};
                 
                 const viewSiteBtn = document.createElement('button'); viewSiteBtn.title = "فتح صفحة المشروع"; viewSiteBtn.style.cssText = 'background: rgba(0, 123, 255, 0.8); border: 2px solid #fff; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-top: 5px;';
                 const linkIcon = document.createElement('i'); linkIcon.className = 'fas fa-external-link-alt'; linkIcon.style.cssText = 'color: #fff; font-size: 18px;';
