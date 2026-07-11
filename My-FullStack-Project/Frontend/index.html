@@ -1019,65 +1019,77 @@ function getTimeAgo(date) {
                 card.style.cssText = 'height: 100dvh; width: 100vw; scroll-snap-align: start; position: relative; flex: 0 0 100dvh; overflow: hidden; background-color: #000;';
                 const htmlContent = project.htmlCode || project.html || ''; const cssContent = project.cssCode || project.css || ''; const jsContent = project.jsCode || project.js || '';
                 
-                const mediaFixCss = `html { scroll-snap-type: x mandatory !important; overflow-x: auto !important; overflow-y: hidden !important; width: 100% !important; height: 100% !important; margin: 0 !important; } body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; align-items: center !important; font-size: 0 !important; color: transparent !important; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; } body * { display: contents !important; } img, video, canvas, audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; }`;
-               
+                const mediaFixCss = `
+    html { scroll-snap-type: x mandatory !important; overflow-x: auto !important; overflow-y: hidden !important; width: 100% !important; height: 100% !important; margin: 0 !important; } 
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; align-items: center !important; } 
+    html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; } 
+    body * { display: contents !important; } 
+    
+    /* تنسيق الصور والفيديوهات والكانفاس واليوتيوب (iframe) لتأخذ الشاشة كاملة */
+    img, video, canvas, iframe { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; border: none !important; } 
+    
+    /* تنسيق مشغل الصوتيات ليحافظ على حجمه الطبيعي */
+    audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 60px !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; margin: auto !important; }
+`;
                 const gestureScript = `<script> 
-                    let touchStartX = 0; 
-                    let touchStartY = 0; 
-                    
-                    document.addEventListener('touchstart', function(e) { 
-                        touchStartX = e.changedTouches[0].clientX; 
-                        touchStartY = e.changedTouches[0].clientY; 
-                    }, {passive: true}); 
-                    
-                    document.addEventListener('touchend', function(e) { 
-                        const touchEndX = e.changedTouches[0].clientX; 
-                        const touchEndY = e.changedTouches[0].clientY; 
-                        const deltaX = touchEndX - touchStartX; 
-                        const deltaY = touchEndY - touchStartY; 
-                        
-                        if (Math.abs(deltaY) > 30 && Math.abs(deltaY) > Math.abs(deltaX)) { 
-                            window.parent.postMessage({action: 'hideUI', id: '${project.id}'}, '*'); 
-                        } 
-                    }, {passive: true}); 
-                    
-                    document.addEventListener('click', function(e) { 
-                        if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO') { 
-                            e.preventDefault(); 
-                            e.stopPropagation(); 
-                            window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
-                        } 
-                    }, true); 
-                    
-                    window.addEventListener('message', function(e) { 
-                        const mediaEls = Array.from(document.querySelectorAll('img, video, audio, canvas'));
-                        if(mediaEls.length === 0) return;
-                        
-                        let closestEl = mediaEls[0];
-                        let minDiff = Infinity;
-                        mediaEls.forEach(el => {
-                            const rect = el.getBoundingClientRect();
-                            const diff = Math.abs(rect.left);
-                            if(diff < minDiff) {
-                                minDiff = diff;
-                                closestEl = el;
-                            }
-                        });
+    let touchStartX = 0; 
+    let touchStartY = 0; 
+    
+    document.addEventListener('touchstart', function(e) { 
+        touchStartX = e.changedTouches[0].clientX; 
+        touchStartY = e.changedTouches[0].clientY; 
+    }, {passive: true}); 
+    
+    document.addEventListener('touchend', function(e) { 
+        const touchEndX = e.changedTouches[0].clientX; 
+        const touchEndY = e.changedTouches[0].clientY; 
+        const deltaX = touchEndX - touchStartX; 
+        const deltaY = touchEndY - touchStartY; 
+        
+        if (Math.abs(deltaY) > 30 && Math.abs(deltaY) > Math.abs(deltaX)) { 
+            window.parent.postMessage({action: 'hideUI', id: '${project.id}'}, '*'); 
+        } 
+    }, {passive: true}); 
+    
+    document.addEventListener('click', function(e) { 
+        // استثناء iframe و video و audio حتى لا تختفي الواجهة عند التفاعل مع المشغل
+        if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO' && e.target.tagName !== 'IFRAME') { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
+        } 
+    }, true); 
+    
+    window.addEventListener('message', function(e) { 
+        // إضافة iframe للبحث عن الوسائط المضمنة
+        const mediaEls = Array.from(document.querySelectorAll('img, video, audio, canvas, iframe'));
+        if(mediaEls.length === 0) return;
+        
+        let closestEl = mediaEls[0];
+        let minDiff = Infinity;
+        mediaEls.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            const diff = Math.abs(rect.left);
+            if(diff < minDiff) {
+                minDiff = diff;
+                closestEl = el;
+            }
+        });
 
-                        let currentIndex = mediaEls.indexOf(closestEl);
+        let currentIndex = mediaEls.indexOf(closestEl);
 
-                        if (e.data.action === 'scrollNext') { 
-                            if(currentIndex < mediaEls.length - 1) {
-                                mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
-                            }
-                        } 
-                        else if (e.data.action === 'scrollPrev') { 
-                            if(currentIndex > 0) {
-                                mediaEls[currentIndex - 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
-                            }
-                        } 
-                    }); 
-                <\/script>`;
+        if (e.data.action === 'scrollNext') { 
+            if(currentIndex < mediaEls.length - 1) {
+                mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+            }
+        } 
+        else if (e.data.action === 'scrollPrev') { 
+            if(currentIndex > 0) {
+                mediaEls[currentIndex - 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+            }
+        } 
+    }); 
+<\/script>`;
 
                 const iframe = document.createElement('iframe');
                 iframe.style.cssText = 'width: 100vw; height: 100dvh; border: none; display: block; background-color: #000;';
