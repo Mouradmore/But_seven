@@ -929,9 +929,6 @@ function getTimeAgo(date) {
         // 5. مشغل الوسائط المباشر
         // ==========================================
                                                     mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
-      // ==========================================
-// 🔥 دالة عرض الوسائط الذكية والمحسنة (بدون إغراق المتصفح بـ iframes)
-// ==========================================
 function displayMediaDirectly(keyword) {
     const existingBtn = document.getElementById('galleryCloseBtn');
     if (existingBtn) existingBtn.remove();
@@ -1040,7 +1037,7 @@ function displayMediaDirectly(keyword) {
         // في حال لم يجد وسم مباشر (البحث عن روابط في النص المكتوب)
         return null;
     }
-
+    
     // بناء الشرائح بشكل مباشر خفيف وسريع
     filtered.forEach((project) => {
         const slide = document.createElement('div');
@@ -1071,7 +1068,8 @@ function displayMediaDirectly(keyword) {
     galleryWrapper.appendChild(galleryGrid);
     projectsListDiv.appendChild(galleryWrapper);
     document.body.style.overflow = 'hidden';
-}          
+}
+
         window.resetToCodes = function() {
             document.body.style.overflow = '';
             const closeBtn = document.getElementById('galleryCloseBtn');
@@ -1100,7 +1098,6 @@ function displayMediaDirectly(keyword) {
                 };
             });
         }
-
         // ==========================================
         // 6. تشغيل الأحداث والربط مع السيرفر
         // ==========================================
