@@ -928,676 +928,157 @@ function getTimeAgo(date) {
         // ==========================================
         // 5. مشغل الوسائط المباشر
         // ==========================================
-        function displayMediaDirectly(keyword) {
-            const existingBtn = document.getElementById('galleryCloseBtn');
-            if (existingBtn) existingBtn.remove();
-            
-            if (!window.mediaUiToggleListenerAdded) {
-                window.addEventListener('message', function(e) {
-                    if (e.data && e.data.id) {
-                        const uiElement = document.getElementById('ui-media-' + e.data.id);
-                        const closeBtn = document.getElementById('galleryCloseBtn');
-                        if (uiElement) {
-                            if (e.data.action === 'hideUI') {
-                                uiElement.style.transform = 'translateY(30px) scale(0.9)'; uiElement.style.opacity = '0'; uiElement.style.pointerEvents = 'none';
-                                if (closeBtn) { closeBtn.style.opacity = '0'; closeBtn.style.pointerEvents = 'none'; }
-                            } else if (e.data.action === 'toggleUI') {
-                                if (uiElement.style.opacity === '0') {
-                                    uiElement.style.transform = 'translateY(0) scale(1)'; uiElement.style.opacity = '1'; uiElement.style.pointerEvents = 'auto';
-                                    if (closeBtn) { closeBtn.style.opacity = '1'; closeBtn.style.pointerEvents = 'auto'; }
-                                } else {
-                                    uiElement.style.transform = 'translateY(30px) scale(0.9)'; uiElement.style.opacity = '0'; uiElement.style.pointerEvents = 'none';
-                                    if (closeBtn) { closeBtn.style.opacity = '0'; closeBtn.style.pointerEvents = 'none'; }
-                                }
-                            }
-                        }
-                    }
-                });
-                window.mediaUiToggleListenerAdded = true;
-            }
-
-            const allProjects = getCodeProjects();
-            const filtered = allProjects.filter(project => {
-                const htmlContent = (project.htmlCode || project.html || '').toLowerCase();
-                const titleMatch = (project.title || '').toLowerCase();
-                const descMatch = (project.description || '').toLowerCase();
-                if (keyword === 'image') return htmlContent.includes('<img');
-                else if (keyword === 'video') return htmlContent.includes('<video') || htmlContent.includes('youtube.com/embed');
-                else if (keyword === 'music') return htmlContent.includes('<audio') || htmlContent.includes('soundcloud.com');
-                else if (keyword === 'gaming') return htmlContent.includes('<canvas') || titleMatch.includes('لعبة') || titleMatch.includes('game') || descMatch.includes('لعبة') || descMatch.includes('game');
-                return titleMatch.includes(keyword) || descMatch.includes(keyword);
-            });
-            
-            if (document.querySelector('.pagination')) { document.querySelector('.pagination').style.display = 'none'; }
-            projectsListDiv.innerHTML = '';
-            
-            if (filtered.length === 0) {
-                let sectionName = keyword === 'image' ? 'Photo' : keyword === 'video' ? 'video' : keyword === 'music' ? 'audio' : 'Games';
-                projectsListDiv.innerHTML = `<div style="text-align: center; margin-top: 50px; font-size: 1.1em; color: #555; grid-column: 1/-1;"><p>No projects contain (${sectionName}) yet.</p><button onclick="resetToCodes()" style="margin-top:15px; background:#6c757d; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Back</button></div>`;
-                return;
-            }
-            
-            const galleryWrapper = document.createElement('div');
-            galleryWrapper.style.position = 'fixed'; galleryWrapper.style.top = '0px'; galleryWrapper.style.left = '0'; galleryWrapper.style.right = '0'; galleryWrapper.style.bottom = '0'; galleryWrapper.style.backgroundColor = '#000'; galleryWrapper.style.zIndex = '999';
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.id = 'galleryCloseBtn';
-            closeBtn.innerHTML = '<svg onclick="window.close()" style="cursor: pointer; width: 30px; height: 30px;" viewBox="0 0 24 24" fill="none" stroke="#0056b3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-            closeBtn.style.position = 'absolute'; closeBtn.style.top = '20px'; closeBtn.style.left = '20px'; closeBtn.style.zIndex = '1000'; closeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'; closeBtn.style.backdropFilter = 'blur(5px)'; closeBtn.style.color = '#fff'; closeBtn.style.border = '1px solid rgba(0,0,0,0.3)'; closeBtn.style.padding = '8px 16px'; closeBtn.style.borderRadius = '10px'; closeBtn.style.cursor = 'pointer'; closeBtn.style.fontWeight = 'bold'; closeBtn.style.transition = 'all 0.3s ease'; 
-            closeBtn.onclick = resetToCodes;
-            
-            const galleryGrid = document.createElement('div');
-            galleryGrid.style.cssText = 'width: 100vw; height: 100dvh; display: flex; flex-direction: column; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; background-color: #000;';
-            
-            galleryGrid.addEventListener('scroll', function() {
-                const iframes = galleryGrid.querySelectorAll('iframe');
-                iframes.forEach(iframe => {
-                    try {
-                        const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if (innerDoc) {
-                            const mediaElements = innerDoc.querySelectorAll('video, audio');
-                            mediaElements.forEach(media => { if (!media.paused) media.pause(); });
-                        }
-                    } catch (err) {}
-                });
-            });
-            
-            document.body.style.overflow = 'hidden';
-
-            const nextProjectBtn = document.createElement('div');
-            nextProjectBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="32" height="32"><path d="M12,19c-1.049,0-2.036-.409-2.778-1.151l-3.925-3.875c-.393-.388-.397-1.021-.009-1.414,.387-.394,1.021-.396,1.414-.009l3.929,3.88c.737,.737,2.003,.733,2.731,.004l3.935-3.884c.392-.388,1.023-.385,1.414,.009,.388,.393,.384,1.026-.01,1.414l-3.93,3.88c-.736,.738-1.723,1.146-2.772,1.146Zm.706-5.327l5.999-5.964c.392-.389,.394-1.022,.004-1.414-.39-.393-1.022-.395-1.414-.004l-5.294,5.263L6.705,6.291c-.391-.389-1.024-.386-1.415,.004-.389,.392-.387,1.025,.004,1.415l6.001,5.964c.195,.194,.45,.291,.705,.291s.51-.097,.705-.291Z" fill="yellow"/></svg>';
-            nextProjectBtn.style.cssText = 'position: fixed; bottom: 80px; right: 20px; width: 45px; height: 45px;border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; cursor: pointer; z-index: 1005; backdrop-filter: blur(5px);  transition: 0.3s;';
-            nextProjectBtn.onclick = () => { galleryGrid.scrollBy({ top: window.innerHeight, behavior: 'smooth' }); };
-            
-            const prevProjectBtn = document.createElement('div');
-            prevProjectBtn.innerHTML = '';
-            prevProjectBtn.style.cssText = '';
-            prevProjectBtn.onclick = () => { galleryGrid.scrollBy({ top: -window.innerHeight, behavior: 'smooth' }); };
-
-            filtered.forEach(project => {
-                const card = document.createElement('div');
-                card.style.cssText = 'height: 100dvh; width: 100vw; scroll-snap-align: start; position: relative; flex: 0 0 100dvh; overflow: hidden; background-color: #000;';
-                const htmlContent = project.htmlCode || project.html || ''; const cssContent = project.cssCode || project.css || ''; const jsContent = project.jsCode || project.js || '';
-                
-                const mediaFixCss = `
-    html { scroll-snap-type: x mandatory !important; overflow-x: auto !important; overflow-y: hidden !important; width: 100% !important; height: 100% !important; margin: 0 !important; } 
-    body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: #000 !important; display: flex !important; flex-direction: row !important; align-items: center !important; } 
-    html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; } 
-    body * { display: contents !important; } 
+                                                    mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+      // ==========================================
+// 🔥 دالة عرض الوسائط الذكية والمحسنة (بدون إغراق المتصفح بـ iframes)
+// ==========================================
+function displayMediaDirectly(keyword) {
+    const existingBtn = document.getElementById('galleryCloseBtn');
+    if (existingBtn) existingBtn.remove();
     
-    /* تنسيق الصور والفيديوهات والكانفاس واليوتيوب (iframe) لتأخذ الشاشة كاملة */
-    img, video, canvas, iframe { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 100dvh !important; object-fit: contain !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; background-color: #000 !important; margin: 0 !important; padding: 0 !important; border: none !important; } 
+    // الحصول على جميع المشاريع
+    let allProjects = getCodeProjects();
+    let filtered = [];
     
-    /* تنسيق مشغل الصوتيات ليحافظ على حجمه الطبيعي */
-    audio { display: block !important; flex: 0 0 100vw !important; width: 100vw !important; height: 60px !important; scroll-snap-align: start !important; scroll-snap-stop: always !important; margin: auto !important; }
-`;
-                const gestureScript = `<script> 
-    let touchStartX = 0; 
-    let touchStartY = 0; 
-    
-    document.addEventListener('touchstart', function(e) { 
-        touchStartX = e.changedTouches[0].clientX; 
-        touchStartY = e.changedTouches[0].clientY; 
-    }, {passive: true}); 
-    
-    document.addEventListener('touchend', function(e) { 
-        const touchEndX = e.changedTouches[0].clientX; 
-        const touchEndY = e.changedTouches[0].clientY; 
-        const deltaX = touchEndX - touchStartX; 
-        const deltaY = touchEndY - touchStartY; 
-        
-        if (Math.abs(deltaY) > 30 && Math.abs(deltaY) > Math.abs(deltaX)) { 
-            window.parent.postMessage({action: 'hideUI', id: '${project.id}'}, '*'); 
-        } 
-    }, {passive: true}); 
-    
-    document.addEventListener('click', function(e) { 
-        // استثناء iframe و video و audio حتى لا تختفي الواجهة عند التفاعل مع المشغل
-        if(e.target.tagName !== 'VIDEO' && e.target.tagName !== 'AUDIO' && e.target.tagName !== 'IFRAME') { 
-            e.preventDefault(); 
-            e.stopPropagation(); 
-            window.parent.postMessage({action: 'toggleUI', id: '${project.id}'}, '*'); 
-        } 
-    }, true); 
-    
-    window.addEventListener('message', function(e) { 
-        // إضافة iframe للبحث عن الوسائط المضمنة
-        const mediaEls = Array.from(document.querySelectorAll('img, video, audio, canvas, iframe'));
-        if(mediaEls.length === 0) return;
-        
-        let closestEl = mediaEls[0];
-        let minDiff = Infinity;
-        mediaEls.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const diff = Math.abs(rect.left);
-            if(diff < minDiff) {
-                minDiff = diff;
-                closestEl = el;
-            }
+    // فلاتر البحث المحسنة
+    if (keyword === 'image') {
+        filtered = allProjects.filter(p => {
+            const html = (p.html || '').toLowerCase();
+            return html.includes('<img') || html.includes('data:image/') || html.includes('.jpg') || html.includes('.png') || html.includes('صورة');
         });
-
-        let currentIndex = mediaEls.indexOf(closestEl);
-
-        if (e.data.action === 'scrollNext') { 
-            if(currentIndex < mediaEls.length - 1) {
-                mediaEls[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
-            }
-        } 
-        else if (e.data.action === 'scrollPrev') { 
-            if(currentIndex > 0) {
-                mediaEls[currentIndex - 1].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
-            }
-        } 
-    }); 
-<\/script>`;
-
-                const iframe = document.createElement('iframe');
-                iframe.style.cssText = 'width: 100vw; height: 100dvh; border: none; display: block; background-color: #000;';
-                iframe.sandbox = 'allow-scripts allow-same-origin';
-                iframe.srcdoc = "<!DOCTYPE html><html dir='ltr'><head><meta charset='UTF-8'>" + gestureScript + "<style>" + cssContent + " " + mediaFixCss + "</style></head><body>" + htmlContent + "<script>" + jsContent + "<\/script></body></html>";
-                card.appendChild(iframe);
-                
-                const mediaTagsMatch = htmlContent.match(/<(img|video|audio|canvas)/gi);
-                const mediaCount = mediaTagsMatch ? mediaTagsMatch.length : 0;
-
-                if (mediaCount > 1) {
-                    const nextArrow = document.createElement('div'); 
-                    nextArrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="32" height="32"><path d="M10.48,19a1,1,0,0,1-.7-.29L5.19,14.12a3,3,0,0,1,0-4.24L9.78,5.29a1,1,0,0,1,1.41,0,1,1,0,0,1,0,1.42L6.6,11.29a1,1,0,0,0,0,1.42l4.59,4.58a1,1,0,0,1,0,1.42A1,1,0,0,1,10.48,19Z" fill="yellow"/><path d="M17.48,19a1,1,0,0,1-.7-.29l-6-6a1,1,0,0,1,0-1.42l6-6a1,1,0,0,1,1.41,0,1,1,0,0,1,0,1.42L12.9,12l5.29,5.29a1,1,0,0,1,0,1.42A1,1,0,0,1,17.48,19Z" fill="yellow"/></svg>'; 
-                    nextArrow.style.cssText = 'position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; cursor: pointer; z-index: 1002; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.3s; backdrop-filter: blur(5px);'; 
-                    nextArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollNext' }, '*'); };
-                    
-                    const prevArrow = document.createElement('div'); 
-                    prevArrow.innerHTML = ''; 
-                    prevArrow.style.cssText = ''; 
-                    prevArrow.onclick = (e) => { e.stopPropagation(); iframe.contentWindow.postMessage({ action: 'scrollPrev' }, '*'); };
-                    
-                    card.appendChild(nextArrow); 
-                    card.appendChild(prevArrow);
-                }  
-                
-                const overlayUI = document.createElement('div');
-                overlayUI.id = 'ui-media-' + project.id; 
-                overlayUI.style.cssText = 'position: absolute; bottom: 40px; left: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 1000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; transform: translateY(0) scale(1);'; 
-                
-                const authorDiv = document.createElement('div'); authorDiv.style.cssText = 'text-align: center; display: flex; flex-direction: column; align-items: center;';
-                const authorImg = document.createElement('img'); authorImg.src = getUserAvatar(project.author || 'Visitor'); authorImg.style.cssText = 'width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; background-color: #fff;';
-                const authorNameSpan = document.createElement('span'); authorNameSpan.textContent = project.author || 'Visitor'; authorNameSpan.style.cssText = 'color: #fff; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-top: 5px;';
-                authorDiv.appendChild(authorImg); authorDiv.appendChild(authorNameSpan);
-                
-                const likeBtn = document.createElement('button'); likeBtn.style.cssText = 'background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center;';
-                let likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]'); let isLiked = likedProjects.includes(project.id);
-                const heartIcon = document.createElement('i'); heartIcon.className = 'fas fa-heart'; heartIcon.style.cssText = 'font-size: 30px; filter: drop-shadow(0px 0px 4px rgba(0,0,0,0.6)); transition: color 0.2s; color: ' + (isLiked ? '#dc3545' : '#ffffff') + ';';
-                const likeCount = document.createElement('span'); likeCount.textContent = project.likes || 0; likeCount.style.cssText = 'color: #fff; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-top: 5px;';
-                likeBtn.appendChild(heartIcon); likeBtn.appendChild(likeCount);
-                likeBtn.onclick = function(e) {
-                    e.stopPropagation(); let allProjects = getCodeProjects(); let currentProj = allProjects.find(p => p.id === project.id); if (!currentProj) return;
-                    likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
-                    if (likedProjects.includes(project.id)) { currentProj.likes = Math.max(0, (currentProj.likes || 0) - 1); likedProjects = likedProjects.filter(id => id !== project.id); heartIcon.style.color = '#ffffff'; } 
-                    else { currentProj.likes = (currentProj.likes || 0) + 1; likedProjects.push(project.id); heartIcon.style.color = '#dc3545'; }
-                    likeCount.textContent = currentProj.likes; localStorage.setItem('likedProjects', JSON.stringify(likedProjects)); saveCodeProjects(allProjects.map(p => p.id === currentProj.id ? currentProj : p));
-                };
-                
-                const commentBtn = document.createElement('button'); commentBtn.style.cssText = 'background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center;';
-                const commentIcon = document.createElement('i'); commentIcon.className = 'fas fa-comment-dots'; commentIcon.style.cssText = 'color: #ffffff; font-size: 30px; filter: drop-shadow(0px 0px 4px rgba(0,0,0,0.6));';
-                const commentCountDisplay = document.createElement('span'); let commentsArr = project.comments || []; commentCountDisplay.textContent = commentsArr.length; commentCountDisplay.style.cssText = 'color: #fff; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-top: 5px;';
-                commentBtn.appendChild(commentIcon); commentBtn.appendChild(commentCountDisplay);
-                commentBtn.onclick = function(e) {
-    e.stopPropagation();
+    } else if (keyword === 'video') {
+        filtered = allProjects.filter(p => {
+            const html = (p.html || '').toLowerCase();
+            return html.includes('<video') || html.includes('youtube.com/embed') || html.includes('youtu.be') || html.includes('.mp4') || html.includes('فيديو');
+        });
+    } else if (keyword === 'music') {
+        filtered = allProjects.filter(p => {
+            const html = (p.html || '').toLowerCase();
+            return html.includes('<audio') || html.includes('soundcloud.com') || html.includes('.mp3') || html.includes('موسيقى');
+        });
+    }
     
-    // إزالة لوحة التعليقات القديمة إذا كانت موجودة
-    if (document.getElementById('mediaCommentPanel')) {
-        document.getElementById('mediaCommentPanel').remove();
+    if (document.querySelector('.pagination')) {
+        document.querySelector('.pagination').style.display = 'none';
+    }
+    projectsListDiv.innerHTML = '';
+    
+    if (filtered.length === 0) {
+        let sectionName = keyword === 'image' ? 'صور' : keyword === 'video' ? 'فيديو' : 'موسيقى';
+        let emoji = keyword === 'image' ? '🖼️' : keyword === 'video' ? '🎬' : '🎵';
+        projectsListDiv.innerHTML = `
+            <div style="text-align: center; margin-top: 50px; font-size: 1.1em; color: #555; grid-column: 1/-1; padding: 40px 20px;">
+                <p style="font-size: 48px; margin-bottom: 10px;">${emoji}</p>
+                <p style="font-size: 20px; font-weight: bold; color: #333;">لا توجد مشاريع تحتوي على (${sectionName})</p>
+                <button onclick="resetToCodes()" style="margin-top:15px; background:#6c757d; color:#fff; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:bold;">العودة</button>
+            </div>
+        `;
         return;
     }
     
-    // إنشاء لوحة التعليقات
-    const panelOverlay = document.createElement('div');
-    panelOverlay.id = 'mediaCommentPanel';
-    panelOverlay.style.cssText = `
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 60%;
-        background: rgba(0, 0, 0, 0.92);
-        z-index: 1001;
-        display: flex;
-        flex-direction: column;
-        padding: 20px 20px 10px;
-        border-top-left-radius: 25px;
-        border-top-right-radius: 25px;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(15px);
-        border-top: 1px solid rgba(255,255,255,0.15);
-        box-sizing: border-box;
-        animation: slideUp 0.3s ease;
-    `;
+    // إنشاء الحاوية الرئيسية للمعرض الثابت
+    const galleryWrapper = document.createElement('div');
+    galleryWrapper.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background-color:#000; z-index:999; overflow:hidden;';
     
-    // إضافة أنماط التحريك
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = `
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .comment-item {
-            animation: fadeIn 0.2s ease;
-        }
-        .comment-item:hover {
-            background: rgba(255,255,255,0.08) !important;
-        }
-        .reply-item {
-            margin-right: 40px;
-            border-right: 2px solid rgba(77, 163, 255, 0.3);
-            padding-right: 12px;
-        }
-        .comment-actions button {
-            background: none;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .comment-actions button:hover {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
-        .comment-actions .delete-btn:hover {
-            color: #ff6b6b;
-        }
-        .comment-actions .reply-btn:hover {
-            color: #4da3ff;
-        }
-    `;
-    document.head.appendChild(styleSheet);
+    // زر الإغلاق
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'galleryCloseBtn';
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = 'position:fixed; top:20px; right:20px; z-index:1000; background:rgba(255,255,255,0.2); border:none; color:#fff; width:44px; height:44px; border-radius:50%; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;';
+    closeBtn.onclick = resetToCodes;
     
-    // زر إغلاق (شريط علوي)
-    const closePanelBtn = document.createElement('button');
-    closePanelBtn.style.cssText = `
-        align-self: center;
-        background: rgba(255,255,255,0.25);
-        border: none;
-        margin-bottom: 12px;
-        width: 40px;
-        height: 4px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background 0.3s;
-    `;
-    closePanelBtn.onmouseover = () => { closePanelBtn.style.background = 'rgba(255,255,255,0.4)'; };
-    closePanelBtn.onmouseout = () => { closePanelBtn.style.background = 'rgba(255,255,255,0.25)'; };
-    closePanelBtn.onclick = (event) => {
-        event.stopPropagation();
-        panelOverlay.remove();
-        styleSheet.remove();
-    };
+    // حاوية التمرير العمودي (Full Screen Snap)
+    const galleryGrid = document.createElement('div');
+    galleryGrid.style.cssText = 'width:100vw; height:100vh; display:flex; flex-direction:column; overflow-y:auto; scroll-snap-type:y mandatory; background:#000;';
     
-    // عنوان اللوحة مع عدد التعليقات
-    const panelHeader = document.createElement('div');
-    panelHeader.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        padding: 0 5px;
-        flex-direction: row-reverse;
-    `;
-    
-    const panelTitle = document.createElement('h3');
-    panelTitle.style.cssText = `
-        color: #fff;
-        margin: 0;
-        font-family: sans-serif;
-        font-size: 16px;
-        font-weight: 600;
-    `;
-    
-    const commentCountBadge = document.createElement('span');
-    commentCountBadge.style.cssText = `
-        background: rgba(77, 163, 255, 0.2);
-        color: #4da3ff;
-        padding: 2px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-    `;
-    commentCountBadge.id = 'commentCountBadge';
-    
-    panelHeader.appendChild(panelTitle);
-    panelHeader.appendChild(commentCountBadge);
-    
-    // قائمة التعليقات
-    const commentsList = document.createElement('div');
-    commentsList.style.cssText = `
-        flex: 1;
-        overflow-y: auto;
-        margin-bottom: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding-left: 5px;
-        padding-right: 5px;
-    `;
-    
-    // تنسيق شريط التمرير
-    const scrollStyle = document.createElement('style');
-    scrollStyle.textContent = `
-        #commentsList::-webkit-scrollbar {
-            width: 4px;
-        }
-        #commentsList::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        #commentsList::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-        }
-        #commentsList::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.3);
-        }
-    `;
-    document.head.appendChild(scrollStyle);
-    commentsList.id = 'commentsList';
-    
-    // دالة عرض التعليقات
-    const renderComments = () => {
-        let allProj = getCodeProjects();
-        let currProj = allProj.find(p => p.id === project.id);
-        commentsList.innerHTML = '';
+    // دالة مساعدة لاستخراج العنصر أو الرابط المناسب
+    function extractMediaElement(htmlStr) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlStr, 'text/html');
         
-        if (!currProj) return;
-        
-        const currentComments = currProj.comments || [];
-        commentCountBadge.textContent = currentComments.length + ' تعليق' + (currentComments.length > 1 ? 'ات' : '');
-        panelTitle.textContent = '💬 التعليقات';
-        
-        if (currentComments.length === 0) {
-            commentsList.innerHTML = `
-                <div style="
-                    text-align: center;
-                    color: #666;
-                    margin-top: 30px;
-                    font-size: 14px;
-                ">
-                    <i class="fas fa-comment-slash" style="font-size: 24px; display: block; margin-bottom: 10px; color: #444;"></i>
-                    لا توجد تعليقات حتى الآن.<br>كن أول من يعلق!
-                </div>
-            `;
-            return;
+        // 1. إذا كان يوتيوب أو ساوند كلاود (نحتاج iframe هنا فقط مجبرين)
+        const iframe = doc.querySelector('iframe');
+        if (iframe) {
+            const newIframe = document.createElement('iframe');
+            newIframe.src = iframe.src;
+            newIframe.style.cssText = 'width:100vw; height:100vh; border:none; background:#000;';
+            newIframe.allow = 'autoplay; encrypted-media';
+            return newIframe;
         }
         
-        // عرض التعليقات مع الردود
-        currentComments.forEach((c, index) => {
-            const isOwner = getCurrentUser() === c.author;
-            const isProjectOwner = getCurrentUser() === project.author;
-            const canDelete = isOwner || isProjectOwner;
-            
-            const commentDiv = document.createElement('div');
-            commentDiv.className = 'comment-item';
-            commentDiv.style.cssText = `
-                background: rgba(255,255,255,0.05);
-                padding: 10px 14px;
-                border-radius: 12px;
-                border: 1px solid rgba(255,255,255,0.05);
-                transition: all 0.2s;
-            `;
-            
-            // صورة المستخدم + الاسم + الوقت
-            const userInfo = document.createElement('div');
-            userInfo.style.cssText = `
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 5px;
-                flex-direction: row-reverse;
-            `;
-            
-            const userLeft = document.createElement('div');
-            userLeft.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-direction: row-reverse;';
-            
-            const avatarImg = document.createElement('img');
-            avatarImg.src = getUserAvatar(c.author);
-            avatarImg.style.cssText = `
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                object-fit: cover;
-                border: 1px solid rgba(255,255,255,0.1);
-            `;
-            
-            const nameSpan = document.createElement('strong');
-            nameSpan.style.cssText = `
-                color: #4da3ff;
-                font-size: 0.85em;
-                font-weight: 600;
-            `;
-            nameSpan.textContent = c.author;
-            
-            userLeft.appendChild(avatarImg);
-            userLeft.appendChild(nameSpan);
-            
-            const timeSpan = document.createElement('span');
-            timeSpan.style.cssText = 'font-size: 0.65em; color: #666;';
-            timeSpan.textContent = getTimeAgo(new Date(c.date));
-            
-            userInfo.appendChild(userLeft);
-            userInfo.appendChild(timeSpan);
-            
-            // نص التعليق
-            const textP = document.createElement('p');
-            textP.style.cssText = `
-                margin: 4px 0 6px 0;
-                color: #eee;
-                font-size: 0.9em;
-                line-height: 1.5;
-                word-break: break-word;
-            `;
-            textP.textContent = c.text;
-            
-            // أزرار التفاعل (رد، حذف)
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'comment-actions';
-            actionsDiv.style.cssText = `
-                display: flex;
-                gap: 8px;
-                margin-top: 4px;
-                flex-direction: row-reverse;
-            `;
-            
-            // زر الرد
-            const replyBtn = document.createElement('button');
-            replyBtn.className = 'reply-btn';
-            replyBtn.textContent = '↩ رد';
-            replyBtn.onclick = (e) => {
-                e.stopPropagation();
-                // وضع @اسم المستخدم في حقل الإدخال
-                const inputField = document.getElementById('commentInputField');
-                if (inputField) {
-                    inputField.value = `@${c.author} `;
-                    inputField.focus();
-                }
-            };
-            actionsDiv.appendChild(replyBtn);
-            
-            // زر الحذف (إذا كان المالك أو صاحب المشروع)
-            if (canDelete) {
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn';
-                deleteBtn.textContent = '🗑 حذف';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
-                        let allProj = getCodeProjects();
-                        let currProj = allProj.find(p => p.id === project.id);
-                        if (currProj && currProj.comments) {
-                            currProj.comments.splice(index, 1);
-                            saveCodeProjects(allProj.map(p => p.id === currProj.id ? currProj : p));
-                            renderComments();
-                        }
-                    }
-                };
-                actionsDiv.appendChild(deleteBtn);
-            }
-            
-            commentDiv.appendChild(userInfo);
-            commentDiv.appendChild(textP);
-            commentDiv.appendChild(actionsDiv);
-            commentsList.appendChild(commentDiv);
-        });
+        // 2. إذا كانت صورة عادية
+        const img = doc.querySelector('img');
+        if (img) {
+            const newImg = document.createElement('img');
+            newImg.src = img.src;
+            newImg.style.cssText = 'width:100vw; height:100vh; object-fit:contain; background:#000;';
+            return newImg;
+        }
         
-        // التمرير إلى أسفل القائمة
-        commentsList.scrollTop = commentsList.scrollHeight;
-    };
-    
-    // حقل إدخال التعليق
-    const inputArea = document.createElement('div');
-    inputArea.style.cssText = `
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        background: rgba(255,255,255,0.08);
-        padding: 4px 4px 4px 12px;
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,0.08);
-        margin-top: 5px;
-        flex-direction: row-reverse;
-        transition: border-color 0.3s;
-    `;
-    
-    const cInput = document.createElement('input');
-    cInput.id = 'commentInputField';
-    cInput.type = 'text';
-    cInput.placeholder = 'اكتب تعليقاً...';
-    cInput.style.cssText = `
-        flex: 1;
-        padding: 10px 12px;
-        border-radius: 25px;
-        border: none;
-        outline: none;
-        background: transparent;
-        color: #fff;
-        font-size: 0.9em;
-        text-align: right;
-        font-family: inherit;
-    `;
-    cInput.placeholder = '✏️ اكتب تعليقاً...';
-    
-    // إظهار عدد الأحرف المتبقية
-    const charCount = document.createElement('span');
-    charCount.style.cssText = `
-        color: #666;
-        font-size: 11px;
-        padding: 0 5px;
-        min-width: 30px;
-        text-align: center;
-    `;
-    charCount.textContent = '200';
-    
-    cInput.addEventListener('input', function() {
-        const remaining = 200 - this.value.length;
-        charCount.textContent = remaining < 0 ? '0' : remaining;
-        charCount.style.color = remaining < 20 ? '#ff6b6b' : '#666';
+        // 3. إذا كان فيديو مخصص
+        const video = doc.querySelector('video');
+        if (video) {
+            const newVideo = document.createElement('video');
+            newVideo.src = video.src || (video.querySelector('source') ? video.querySelector('source').src : '');
+            newVideo.controls = true;
+            newVideo.autoplay = true;
+            newVideo.style.cssText = 'width:100vw; height:100vh; object-fit:contain; background:#000;';
+            return newVideo;
+        }
+        
+        // 4. إذا كان ملف صوتي
+        const audio = doc.querySelector('audio');
+        if (audio) {
+            const newAudio = document.createElement('audio');
+            newAudio.src = audio.src || (audio.querySelector('source') ? audio.querySelector('source').src : '');
+            newAudio.controls = true;
+            newAudio.autoplay = true;
+            newAudio.style.cssText = 'width:90vw; max-width:500px; height:54px; margin:auto;';
+            return newAudio;
+        }
+        
+        // في حال لم يجد وسم مباشر (البحث عن روابط في النص المكتوب)
+        return null;
+    }
+
+    // بناء الشرائح بشكل مباشر خفيف وسريع
+    filtered.forEach((project) => {
+        const slide = document.createElement('div');
+        slide.style.cssText = 'height:100vh; width:100vw; scroll-snap-align:start; position:relative; flex:0 0 100vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center;';
+        
+        const mediaElement = extractMediaElement(project.html || project.htmlCode || '');
+        
+        if (mediaElement) {
+            slide.appendChild(mediaElement);
+        } else {
+            // كود احتياطي في حال عدم العثور على الوسم مباشرة (يعرض نص توضيحي)
+            const fallback = document.createElement('div');
+            fallback.style.cssText = 'color:#fff; text-align:center; font-size:18px;';
+            fallback.innerHTML = `⚠️ تعذر استخراج الوسائط المباشرة من مشروع: <br><strong>${project.title}</strong>`;
+            slide.appendChild(fallback);
+        }
+        
+        // شريط معلومات المشروع السفلي
+        const info = document.createElement('div');
+        info.style.cssText = 'position:absolute; bottom:30px; left:50%; transform:translateX(-50%); color:#fff; text-align:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); padding:10px 20px; border-radius:12px; font-size:14px; max-width:80%; z-index:10;';
+        info.innerHTML = `<strong>${project.title || 'مشروع'}</strong> <span style="color:#888; margin:0 10px;">—</span> <span style="color:#ccc;">${project.author || 'مستخدم'}</span>`;
+        slide.appendChild(info);
+        
+        galleryGrid.appendChild(slide);
     });
     
-    cInput.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            cSubmit.click();
-        }
-    });
-    
-    const cSubmit = document.createElement('button');
-    cSubmit.innerHTML = '<i class="fas fa-paper-plane" style="font-size: 16px;"></i>';
-    cSubmit.style.cssText = `
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.3s;
-        flex-shrink: 0;
-    `;
-    cSubmit.onmouseover = () => { cSubmit.style.transform = 'scale(1.05)'; };
-    cSubmit.onmouseout = () => { cSubmit.style.transform = 'scale(1)'; };
-    
-    cSubmit.onclick = (event) => {
-        event.stopPropagation();
-        const text = cInput.value.trim();
-        if (!text) {
-            // اهتزاز بسيط للتنبيه
-            inputArea.style.borderColor = '#ff6b6b';
-            setTimeout(() => { inputArea.style.borderColor = 'rgba(255,255,255,0.08)'; }, 500);
-            return;
-        }
-        
-        const currentUser = getCurrentUser();
-        if (!currentUser) {
-            alert('عذراً، يجب عليك تسجيل الدخول أولاً لتتمكن من التعليق.');
-            return;
-        }
-        
-        let allProj = getCodeProjects();
-        let currProj = allProj.find(p => p.id === project.id);
-        if (!currProj.comments) currProj.comments = [];
-        
-        currProj.comments.push({
-            author: currentUser,
-            text: text,
-            date: new Date().toISOString()
-        });
-        
-        saveCodeProjects(allProj.map(p => p.id === currProj.id ? currProj : p));
-        cInput.value = '';
-        charCount.textContent = '200';
-        renderComments();
-    };
-    
-    inputArea.appendChild(cInput);
-    inputArea.appendChild(charCount);
-    inputArea.appendChild(cSubmit);
-    
-    // تجميع اللوحة
-    panelOverlay.appendChild(closePanelBtn);
-    panelOverlay.appendChild(panelHeader);
-    panelOverlay.appendChild(commentsList);
-    panelOverlay.appendChild(inputArea);
-    
-    // إضافة اللوحة إلى البطاقة
-    card.appendChild(panelOverlay);
-    
-    // عرض التعليقات فوراً
-    renderComments();
-    
-    // التركيز على حقل الإدخال
-    setTimeout(() => { cInput.focus(); }, 300);
-};
+    galleryWrapper.appendChild(closeBtn);
+    galleryWrapper.appendChild(galleryGrid);
+    projectsListDiv.appendChild(galleryWrapper);
+    document.body.style.overflow = 'hidden';
+}      
+
                 
-                const viewSiteBtn = document.createElement('button'); viewSiteBtn.title = "فتح صفحة المشروع"; viewSiteBtn.style.cssText = 'background: rgba(0, 123, 255, 0.8); border: 2px solid #fff; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-top: 5px;';
-                const linkIcon = document.createElement('i'); linkIcon.className = 'fas fa-external-link-alt'; linkIcon.style.cssText = 'color: #fff; font-size: 18px;';
-                viewSiteBtn.appendChild(linkIcon); viewSiteBtn.onclick = function(e) { e.stopPropagation(); window.location.href = 'view.html?id=' + project.id; };
-                
-                overlayUI.appendChild(authorDiv); overlayUI.appendChild(likeBtn); overlayUI.appendChild(commentBtn); overlayUI.appendChild(viewSiteBtn);
-                card.appendChild(overlayUI); galleryGrid.appendChild(card);
-            });
-            
-            galleryWrapper.appendChild(closeBtn); 
-            galleryWrapper.appendChild(galleryGrid); 
-            galleryWrapper.appendChild(nextProjectBtn);
-            galleryWrapper.appendChild(prevProjectBtn);
-            projectsListDiv.appendChild(galleryWrapper);
-        }
+    
+    
+        
+    
+    
 
         window.resetToCodes = function() {
             document.body.style.overflow = '';
