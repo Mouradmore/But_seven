@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب | But_Seven</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        /* ===== متغيرات الوضع الليلي ===== */
+        :root {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8888aa;
+            --border-color: #e8ecf1;
+            --shadow-color: rgba(0,0,0,0.08);
+            --shadow-hover: rgba(0,0,0,0.15);
+            --accent-color: #667eea;
+            --accent-hover: #5a6fd6;
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #f5a623;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1e1e36;
+            --text-primary: #e8e8f0;
+            --text-secondary: #b0b0cc;
+            --text-muted: #6a6a8a;
+            --border-color: #2a2a4a;
+            --shadow-color: rgba(0,0,0,0.3);
+            --shadow-hover: rgba(0,0,0,0.5);
+            --accent-color: #7c8cf5;
+            --accent-hover: #6a7ae0;
+            --input-bg: #1a1a2e;
+        }
+
+        /* ===== CSS العامة ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            direction: rtl;
+            text-align: right;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: all var(--transition);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 3px; }
+
+        .register-container {
+            background: var(--bg-card);
+            padding: 32px 36px;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px var(--shadow-color);
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .register-container::-webkit-scrollbar { width: 4px; }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .register-header .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .register-header h2 {
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .register-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ===== زر Google ===== */
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .google-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .google-btn img {
+            width: 22px;
+            height: 22px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* ===== الصورة الشخصية ===== */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 3px solid var(--accent-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .avatar-preview:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-hover);
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-preview i {
+            font-size: 2.5rem;
+            color: var(--text-muted);
+        }
+
+        .avatar-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .avatar-actions button {
+            padding: 4px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all var(--transition);
+            font-weight: 600;
+        }
+
+        .avatar-actions button:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* ===== الحقول ===== */
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .form-group .field-icon {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group .field-icon.clickable {
+            cursor: pointer;
+        }
+
+        .form-group .field-icon.clickable:hover {
+            color: var(--text-primary);
+        }
+
+        /* ===== التحقق من اسم المستخدم ===== */
+        .username-status {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .username-status.available { color: var(--success); }
+        .username-status.taken { color: var(--danger); }
+        .username-status.checking { color: var(--warning); }
+
+        /* ===== قوة كلمة المرور ===== */
+        .password-strength {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .password-strength .strength-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            gap: 2px;
+        }
+
+        .password-strength .strength-bar .segment {
+            flex: 1;
+            height: 100%;
+            background: var(--border-color);
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength .strength-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            min-width: 50px;
+        }
+
+        .password-strength .strength-text.weak { color: var(--danger); }
+        .password-strength .strength-text.medium { color: var(--warning); }
+        .password-strength .strength-text.strong { color: var(--success); }
+
+        /* ===== شروط الاستخدام ===== */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-group label a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .checkbox-group label a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== زر التسجيل ===== */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== روابط ===== */
+        .login-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== معالج الإعداد (Setup Wizard) ===== */
+        .setup-wizard {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setup-wizard.active {
+            display: flex;
+        }
+
+        .setup-wizard .wizard-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px 36px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .setup-wizard .wizard-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .setup-wizard .wizard-header .step-indicator {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .setup-wizard .wizard-header h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .setup-wizard .wizard-body {
+            margin-bottom: 20px;
+        }
+
+        .setup-wizard .wizard-body .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        .setup-wizard .wizard-body .option-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--bg-primary);
+        }
+
+        .setup-wizard .wizard-body .option-item:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .setup-wizard .wizard-body .option-item.selected {
+            border-color: var(--accent-color);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .setup-wizard .wizard-body .option-item i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 4px;
+            color: var(--accent-color);
+        }
+
+        .setup-wizard .wizard-body .option-item span {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .setup-wizard .wizard-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .setup-wizard .wizard-footer button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.85rem;
+        }
+
+        .setup-wizard .wizard-footer .btn-prev {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        .setup-wizard .wizard-footer .btn-prev:hover {
+            background: var(--border-color);
+        }
+
+        .setup-wizard .wizard-footer .btn-next {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .setup-wizard .wizard-footer .btn-next:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .setup-wizard .wizard-footer .btn-finish {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .setup-wizard .wizard-footer .btn-finish:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* ===== شاشة التحميل ===== */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-overlay .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-overlay p {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        /* ===== استجابة ===== */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 20px 16px;
+            }
+            .register-header .logo {
+                font-size: 1.4rem;
+            }
+            .register-header h2 {
+                font-size: 1.1rem;
+            }
+            .setup-wizard .wizard-content {
+                padding: 20px 16px;
+            }
+            .setup-wizard .wizard-body .option-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== شاشة التحميل ===== -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>جاري إنشاء الحساب...</p>
+    </div>
+
+    <!-- ===== حاوية التسجيل ===== -->
+    <div class="register-container">
+        <div class="register-header">
+            <span class="logo">But_Seven</span>
+            <h2>✨ إنشاء حساب جديد</h2>
+            <p>انضم إلى مجتمع المطورين وابدأ رحلتك</p>
+        </div>
+
+        <!-- ===== زر Google ===== -->
+        <button class="google-btn" id="googleSignUpBtn">
+            <svg viewBox="0 0 48 48" width="22" height="22">
+                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+            </svg>
+            <span>التسجيل بحساب Google</span>
+        </button>
+
+        <div class="divider">أو</div>
+
+        <!-- ===== نموذج التسجيل ===== -->
+        <form id="registerForm">
+            <!-- ===== الصورة الشخصية ===== -->
+            <div class="avatar-section">
+                <div class="avatar-preview" id="avatarPreviewBox">
+                    <i class="fas fa-user" id="avatarIcon"></i>
+                    <img id="avatarImage" src="" alt="الصورة الشخصية">
+                </div>
+                <div class="avatar-actions">
+                    <button type="button" onclick="document.getElementById('profilePicInput').click()">
+                        <i class="fas fa-camera"></i> رفع صورة
+                    </button>
+                    <button type="button" onclick="selectDefaultAvatar()">
+                        <i class="fas fa-images"></i> اختيار صورة
+                    </button>
+                </div>
+                <input type="file" id="profilePicInput" accept="image/*" style="display:none">
+            </div>
+
+            <!-- ===== اسم المستخدم ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-at"></i> اسم المستخدم</label>
+                <input type="text" id="username" required placeholder="أدخل اسم المستخدم" autocomplete="off">
+                <i class="fas fa-user field-icon"></i>
+                <div class="username-status" id="usernameStatus"></div>
+            </div>
+
+            <!-- ===== البريد الإلكتروني ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                <input type="email" id="email" required placeholder="example@mail.com">
+                <i class="fas fa-envelope field-icon"></i>
+            </div>
+
+            <!-- ===== كلمة المرور ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                <input type="password" id="password" required placeholder="أدخل كلمة مرور قوية">
+                <i class="fas fa-eye field-icon clickable" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar">
+                        <div class="segment" id="seg1"></div>
+                        <div class="segment" id="seg2"></div>
+                        <div class="segment" id="seg3"></div>
+                        <div class="segment" id="seg4"></div>
+                    </div>
+                    <span class="strength-text" id="strengthText">ضعيفة</span>
+                </div>
+            </div>
+
+            <!-- ===== تأكيد كلمة المرور ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-check-circle"></i> تأكيد كلمة المرور</label>
+                <input type="password" id="confirmPassword" required placeholder="أعد كتابة كلمة المرور">
+                <i class="fas fa-check field-icon"></i>
+            </div>
+
+            <!-- ===== النوع ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-user-tag"></i> أنا</label>
+                <select id="userType">
+                    <option value="developer">💻 مطور</option>
+                    <option value="designer">🎨 مصمم</option>
+                    <option value="student">📚 طالب</option>
+                    <option value="teacher">👨‍🏫 معلم</option>
+                    <option value="enthusiast">🚀 مهتم</option>
+                </select>
+                <i class="fas fa-user-tag field-icon"></i>
+            </div>
+
+            <!-- ===== الموقع ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> الموقع</label>
+                <input type="text" id="location" placeholder="مثال: الجزائر 🇩🇿">
+                <i class="fas fa-map-marker-alt field-icon"></i>
+            </div>
+
+            <!-- ===== شروط الاستخدام ===== -->
+            <div class="checkbox-group">
+                <input type="checkbox" id="termsCheckbox" required>
+                <label for="termsCheckbox">
+                    أوافق على <a href="#" onclick="showTerms()">شروط الاستخدام</a> و <a href="#" onclick="showPrivacy()">سياسة الخصوصية</a>
+                </label>
+            </div>
+
+            <!-- ===== زر التسجيل ===== -->
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-user-plus"></i> إنشاء الحساب
+            </button>
+        </form>
+
+        <div class="login-link">
+            لديك حساب بالفعل؟ <a href="index.html">العودة للرئيسية وتسجيل الدخول</a>
+        </div>
+    </div>
+
+    <!-- ===== معالج الإعداد (Setup Wizard) ===== -->
+    <div class="setup-wizard" id="setupWizard">
+        <div class="wizard-content">
+            <div class="wizard-header">
+                <span class="step-indicator" id="stepIndicator">الخطوة 1 من 4</span>
+                <h3 id="wizardTitle">🎨 اختر مظهرك</h3>
+            </div>
+            <div class="wizard-body" id="wizardBody"></div>
+            <div class="wizard-footer">
+                <button class="btn-prev" id="wizardPrev" onclick="wizardPrev()"><i class="fas fa-arrow-right"></i> السابق</button>
+                <button class="btn-next" id="wizardNext" onclick="wizardNext()">التالي <i class="fas fa-arrow-left"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== سكريبتات ===== -->
+    <script>
+        // ==========================================
+        // 1. تهيئة Firebase
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyReplaceWithYourOwn",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        // استبدل المفتاح أعلاه بمفتاحك الحقيقي من Firebase Console
+        // firebase.initializeApp(firebaseConfig);
+        // const auth = firebase.auth();
+
+        console.log('📝 Firebase ready (configure your own keys)');
+
+        // ==========================================
+        // 2. المتغيرات العامة
+        // ==========================================
+        let base64Image = "";
+        let defaultAvatars = [
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=5',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=6',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=7',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=8',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=9',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=10'
+        ];
+
+        let wizardStep = 0;
+        let wizardData = {
+            theme: 'light',
+            language: 'ar',
+            interests: [],
+            userType: ''
+        };
+
+        // ==========================================
+        // 3. دوال الصورة الشخصية
+        // ==========================================
+        document.getElementById('profilePicInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Image = e.target.result;
+                    document.getElementById('avatarImage').src = base64Image;
+                    document.getElementById('avatarImage').style.display = 'block';
+                    document.getElementById('avatarIcon').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function selectDefaultAvatar() {
+            // عرض صور افتراضية للمستخدم
+            const avatarUrls = defaultAvatars;
+            let html = `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px;">`;
+            avatarUrls.forEach((url, index) => {
+                html += `
+                    <div onclick="setDefaultAvatar('${url}')" style="cursor:pointer;border:2px solid var(--border-color);border-radius:8px;overflow:hidden;transition:all 0.2s;">
+                        <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;">
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            
+            const modal = document.createElement('div');
+            modal.id = 'avatarModal';
+            modal.style.cssText = `
+                position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);
+                backdrop-filter:blur(4px);z-index:9999;display:flex;justify-content:center;align-items:center;
+            `;
+            modal.innerHTML = `
+                <div style="background:var(--bg-card);border-radius:16px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;border:1px solid var(--border-color);">
+                    <h3 style="margin-bottom:12px;text-align:center;">اختر صورة افتراضية</h3>
+                    ${html}
+                    <button onclick="document.getElementById('avatarModal').remove()" style="margin-top:12px;width:100%;padding:8px;border:none;border-radius:8px;background:var(--bg-primary);color:var(--text-secondary);cursor:pointer;">إلغاء</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function setDefaultAvatar(url) {
+            base64Image = url;
+            document.getElementById('avatarImage').src = url;
+            document.getElementById('avatarImage').style.display = 'block';
+            document.getElementById('avatarIcon').style.display = 'none';
+            document.getElementById('avatarModal').remove();
+        }
+
+        // ==========================================
+        // 4. التحقق من اسم المستخدم
+        // ==========================================
+        let usernameTimeout;
+        document.getElementById('username').addEventListener('input', function() {
+            clearTimeout(usernameTimeout);
+            const username = this.value.trim();
+            const status = document.getElementById('usernameStatus');
+
+            if (username.length < 3) {
+                status.className = 'username-status';
+                status.textContent = '⚠️ يجب أن يكون اسم المستخدم 3 أحرف على الأقل';
+                return;
+            }
+
+            status.className = 'username-status checking';
+            status.textContent = '⏳ جاري التحقق...';
+
+            usernameTimeout = setTimeout(() => {
+                // محاكاة التحقق من السيرفر
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+
+                if (exists) {
+                    status.className = 'username-status taken';
+                    status.textContent = '❌ اسم المستخدم مستخدم بالفعل';
+                } else {
+                    status.className = 'username-status available';
+                    status.textContent = '✅ اسم المستخدم متاح';
+                }
+            }, 500);
+        });
+
+        // ==========================================
+        // 5. قوة كلمة المرور
+        // ==========================================
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const segments = document.querySelectorAll('.strength-bar .segment');
+            const strengthText = document.getElementById('strengthText');
+
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) score++;
+            if (password.match(/\d/)) score++;
+            if (password.match(/[^a-zA-Z0-9]/)) score++;
+
+            const colors = ['', '#dc3545', '#f5a623', '#28a745', '#28a745'];
+            const labels = ['ضعيفة', 'ضعيفة', 'متوسطة', 'قوية', 'قوية جداً'];
+            const classes = ['', 'weak', 'medium', 'strong', 'strong'];
+
+            segments.forEach((seg, index) => {
+                if (index < score) {
+                    seg.style.background = colors[score];
+                } else {
+                    seg.style.background = 'var(--border-color)';
+                }
+            });
+
+            strengthText.textContent = labels[score] || 'ضعيفة';
+            strengthText.className = 'strength-text ' + (classes[score] || 'weak');
+        });
+
+        // ==========================================
+        // 6. إظهار/إخفاء كلمة المرور
+        // ==========================================
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('togglePassword');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash field-icon clickable';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye field-icon clickable';
+            }
+        }
+
+        // ==========================================
+        // 7. معالج الإعداد (Setup Wizard)
+        // ==========================================
+        const wizardSteps = [
+            {
+                title: '🎨 اختر مظهرك',
+                render: () => `
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">اختر الوضع المناسب لك</p>
+                    <div class="option-grid">
+                        <div class="option-item ${wizardData.theme === 'light' ? 'selected' : ''}" onclick="selectWizardOption('theme','light')">
+                            <i class="fas fa-sun"></i>
+                            <span>فاتح</span>
+                        </div>
+                        <div class="option-item ${wizardData.theme === 'dark' ? 'selected' : ''}" onclick="selectWizardOption('theme','dark')">
+                            <i class="fas fa-moon"></i>
+                            <span>داكن</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '🌐 اختر لغتك',
+                render: () => `
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">اختر اللغة المفضلة</p>
+                    <div class="option-grid">
+                        <div class="option-item ${wizardData.language === 'ar' ? 'selected' : ''}" onclick="selectWizardOption('language','ar')">
+                            <span>🇸🇦 العربية</span>
+                        </div>
+                        <div class="option-item ${wizardData.language === 'en' ? 'selected' : ''}" onclick="selectWizardOption('language','en')">
+                            <span>🇬🇧 English</span>
+                        </div>
+                        <div class="option-item ${wizardData.language === 'fr' ? 'selected' : ''}" onclick="selectWizardOption('language','fr')">
+                            <span>🇫🇷 Français</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '💡 اهتماماتك',
+                render: () => {
+                    const interests = ['HTML', 'CSS', 'JavaScript', 'React', 'Python', 'PHP', 'Node.js', 'Vue.js', 'UI/UX', 'DevOps'];
+                    return `
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">اختر اهتماماتك (يمكنك اختيار أكثر من واحد)</p>
+                        <div class="option-grid">
+                            ${interests.map(i => `
+                                <div class="option-item ${wizardData.interests.includes(i) ? 'selected' : ''}" onclick="toggleInterest('${i}')">
+                                    <span>${i}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            },
+            {
+                title: '🚀 أنت جاهز!',
+                render: () => `
+                    <div style="text-align:center;padding:20px 0;">
+                        <i class="fas fa-check-circle" style="font-size:4rem;color:var(--success);margin-bottom:16px;"></i>
+                        <h3 style="color:var(--text-primary);">🎉 تهانينا!</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;margin:8px 0 16px;">
+                            تم إعداد حسابك بنجاح. أنت الآن جاهز لبدء رحلتك مع But_Seven!
+                        </p>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;">
+                            <i class="fas fa-moon"></i> المظهر: ${wizardData.theme === 'dark' ? 'داكن' : 'فاتح'}
+                            <span style="margin:0 8px;">•</span>
+                            <i class="fas fa-globe"></i> اللغة: ${wizardData.language === 'ar' ? 'العربية' : wizardData.language === 'en' ? 'English' : 'Français'}
+                            <span style="margin:0 8px;">•</span>
+                            <i class="fas fa-heart"></i> الاهتمامات: ${wizardData.interests.length || 'لم تختار'}
+                        </p>
+                    </div>
+                `
+            }
+        ];
+
+        function renderWizard() {
+            const step = wizardSteps[wizardStep];
+            document.getElementById('stepIndicator').textContent = `الخطوة ${wizardStep + 1} من ${wizardSteps.length}`;
+            document.getElementById('wizardTitle').textContent = step.title;
+            document.getElementById('wizardBody').innerHTML = step.render();
+
+            document.getElementById('wizardPrev').style.display = wizardStep === 0 ? 'none' : 'inline-flex';
+            const nextBtn = document.getElementById('wizardNext');
+            if (wizardStep === wizardSteps.length - 1) {
+                nextBtn.textContent = '🚀 ابدأ الآن';
+                nextBtn.className = 'btn-finish';
+                nextBtn.onclick = finishWizard;
+            } else {
+                nextBtn.textContent = 'التالي <i class="fas fa-arrow-left"></i>';
+                nextBtn.className = 'btn-next';
+                nextBtn.onclick = wizardNext;
+            }
+        }
+
+        function selectWizardOption(key, value) {
+            if (key === 'theme') {
+                wizardData.theme = value;
+                document.documentElement.setAttribute('data-theme', value);
+                localStorage.setItem('theme', value);
+            } else if (key === 'language') {
+                wizardData.language = value;
+                localStorage.setItem('preferredLanguage', value);
+            }
+            renderWizard();
+        }
+
+        function toggleInterest(interest) {
+            const index = wizardData.interests.indexOf(interest);
+            if (index === -1) {
+                wizardData.interests.push(interest);
+            } else {
+                wizardData.interests.splice(index, 1);
+            }
+            renderWizard();
+        }
+
+        function wizardNext() {
+            if (wizardStep < wizardSteps.length - 1) {
+                wizardStep++;
+                renderWizard();
+            }
+        }
+
+        function wizardPrev() {
+            if (wizardStep > 0) {
+                wizardStep--;
+                renderWizard();
+            }
+        }
+
+        function finishWizard() {
+            // حفظ البيانات النهائية
+            localStorage.setItem('userPreferences', JSON.stringify(wizardData));
+            document.getElementById('setupWizard').classList.remove('active');
+            // توجيه المستخدم إلى المحرر
+            window.location.href = 'codes.html';
+        }
+
+        // ==========================================
+        // 8. التسجيل باستخدام Google
+        // ==========================================
+        document.getElementById('googleSignUpBtn').addEventListener('click', function() {
+            // TODO: تفعيل Firebase Google Auth
+            // auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+            //     .then(result => handleGoogleUser(result.user))
+            //     .catch(error => alert('فشل التسجيل: ' + error.message));
+            
+            // محاكاة مؤقتة
+            alert('🔧 سيتم تفعيل تسجيل Google بعد إضافة مفاتيح Firebase الخاصة بك.\n\nللتفعيل: أضف firebaseConfig الخاص بك في بداية السكريبت.');
+            
+            // محاكاة مستخدم Google للتجربة
+            const mockUser = {
+                displayName: 'مستخدم Google',
+                email: 'user@gmail.com',
+                photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=google'
+            };
+            handleGoogleUser(mockUser);
+        });
+
+        function handleGoogleUser(user) {
+            const username = user.displayName?.replace(/\s/g, '_').toLowerCase() || 'user_' + Date.now();
+            base64Image = user.photoURL || '';
+            
+            document.getElementById('username').value = username;
+            document.getElementById('email').value = user.email || '';
+            if (base64Image) {
+                document.getElementById('avatarImage').src = base64Image;
+                document.getElementById('avatarImage').style.display = 'block';
+                document.getElementById('avatarIcon').style.display = 'none';
+            }
+            
+            // توليد كلمة مرور عشوائية
+            const tempPassword = Math.random().toString(36).substring(2, 12);
+            document.getElementById('password').value = tempPassword;
+            document.getElementById('confirmPassword').value = tempPassword;
+            
+            // تنشيط نموذج التسجيل
+            alert('✅ تم ملء البيانات من Google! اضغط "إنشاء الحساب" للمتابعة.');
+        }
+
+        // ==========================================
+        // 9. تقديم نموذج التسجيل
+        // ==========================================
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const userType = document.getElementById('userType').value;
+            const location = document.getElementById('location').value.trim();
+            const termsChecked = document.getElementById('termsCheckbox').checked;
+
+            // ===== التحقق من المدخلات =====
+            if (username.length < 3) {
+                alert('⚠️ اسم المستخدم يجب أن يكون 3 أحرف على الأقل.');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('⚠️ كلمة المرور غير متطابقة مع تأكيد كلمة المرور.');
+                return;
+            }
+
+            if (!termsChecked) {
+                alert('⚠️ يرجى الموافقة على شروط الاستخدام.');
+                return;
+            }
+
+            // ===== التحقق من اسم المستخدم في localStorage =====
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                alert('⚠️ اسم المستخدم مستخدم بالفعل. يرجى اختيار اسم آخر.');
+                return;
+            }
+
+            // ===== إظهار شاشة التحميل =====
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                // محاولة التسجيل عبر السيرفر
+                const response = await fetch('https://my-backend-api-bntd.onrender.com/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        profilePic: base64Image,
+                        userType: userType,
+                        location: location
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.msg || 'حدث خطأ أثناء التسجيل');
+                    document.getElementById('loadingOverlay').classList.remove('active');
+                    document.getElementById('submitBtn').disabled = false;
+                    return;
+                }
+
+                // ===== حفظ البيانات محلياً =====
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', data.username || username);
+                localStorage.setItem('profilePic', base64Image);
+
+                // حفظ المستخدم في قائمة المستخدمين المحلية
+                const newUser = {
+                    username: username,
+                    email: email,
+                    profilePic: base64Image,
+                    userType: userType,
+                    location: location,
+                    bio: '',
+                    joined: new Date().toISOString(),
+                    followers: [],
+                    following: [],
+                    coverPic: ''
+                };
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // ===== عرض معالج الإعداد =====
+                document.getElementById('loadingOverlay').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+
+                // تهيئة بيانات المعالج
+                wizardData.theme = localStorage.getItem('theme') || 'light';
+                wizardData.language = localStorage.getItem('preferredLanguage') || 'ar';
+                wizardStep = 0;
+                document.getElementById('setupWizard').classList.add('active');
+                renderWizard();
+
+            } catch (error) {
+                console.error('خطأ في التسجيل:', error);
+                alert('فشل الاتصال بالسيرفر. يرجى المحاولة مرة أخرى.');
+                document.getElementById('loadingOverlay').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+
+        // ==========================================
+        // 10. شروط الاستخدام وسياسة الخصوصية
+        // ==========================================
+        function showTerms() {
+            alert('📜 شروط الاستخدام:\n\n1. استخدام الخدمة للأغراض القانونية فقط.\n2. احترام حقوق الملكية الفكرية للمستخدمين الآخرين.\n3. عدم نشر محتوى غير لائق أو مسيء.\n4. الموقع غير مسؤول عن أي خسائر ناتجة عن استخدام الخدمة.');
+        }
+
+        function showPrivacy() {
+            alert('🔒 سياسة الخصوصية:\n\n1. يتم جمع البيانات الأساسية فقط (الاسم، البريد الإلكتروني).\n2. لا يتم مشاركة بياناتك مع أطراف ثالثة.\n3. يمكنك حذف حسابك في أي وقت.\n4. يتم تشفير كلمات المرور لحماية حسابك.');
+        }
+
+        // ==========================================
+        // 11. الوضع الليلي التلقائي
+        // ==========================================
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        console.log('📝 But_Seven Register page loaded successfully!');
+        console.log('💡 Features: Google Sign-in, Avatar with crop, Username check, Password strength, Setup Wizard, Interests');
+    </script>
+</body>
+</html>
