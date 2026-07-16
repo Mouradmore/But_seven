@@ -1,25 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>But_Seven - Create • Share • Discover Amazing Web Projects</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
-    <link rel="stylesheet" href="style/all.min.css" type="text/css" media="all" />
-    <link rel="stylesheet" href="style/codemirror.min.css" type="text/css" media="all" />
-    <link rel="stylesheet" href="style/dracula.min.css" type="text/css" media="all" />
+    <title>But_Seven • Create • Share • Discover Amazing Web Projects</title>
 
     <style>
-        /* ===== إخفاء واجهة جوجل الافتراضية ===== */
+        /* ===== Hide Google translate default UI ===== */
         .skiptranslate iframe { display: none !important; }
         body { top: 0 !important; }
         #google_translate_element { display: none !important; }
         .goog-te-banner-frame { display: none !important; }
 
-        /* ===== متغيرات الوضع الليلي ===== */
+        /* ===== Dark mode variables ===== */
         :root {
             --bg-primary: #f4f6f9;
             --bg-secondary: #ffffff;
@@ -41,6 +35,8 @@
             --header-bg: #ffffff;
             --header-shadow: 0 2px 20px rgba(0,0,0,0.08);
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --comment-bg: #f8f9fc;
+            --reply-bg: #f0f2f6;
         }
 
         [data-theme="dark"] {
@@ -63,32 +59,29 @@
             --input-border: #333355;
             --header-bg: #12122a;
             --header-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            --comment-bg: #25254a;
+            --reply-bg: #1a1a3a;
         }
 
-        /* ===== CSS العامة ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* ===== Global ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            direction: rtl;
-            text-align: right;
+            direction: ltr;
+            text-align: left;
             transition: background-color var(--transition), color var(--transition);
             min-height: 100vh;
         }
 
-        /* ===== شريط التمرير المخصص ===== */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-hover); }
 
-        /* ===== الهيدر ===== */
+        /* ===== Header ===== */
         header {
             background-color: var(--header-bg);
             backdrop-filter: blur(10px);
@@ -127,7 +120,6 @@
             gap: 15px;
         }
 
-        /* ===== زر الوضع الليلي ===== */
         .theme-toggle {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -148,7 +140,7 @@
             border-color: var(--accent-color);
         }
 
-        /* ===== Hero Section ===== */
+        /* ===== Hero ===== */
         .hero-section {
             background: var(--gradient-hero);
             padding: 80px 24px 60px;
@@ -161,7 +153,7 @@
             content: '';
             position: absolute;
             top: -50%;
-            right: -50%;
+            left: -50%;
             width: 200%;
             height: 200%;
             background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
@@ -170,7 +162,7 @@
 
         @keyframes heroGlow {
             0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(-20%, -20%) scale(1.2); }
+            100% { transform: translate(20%, 20%) scale(1.2); }
         }
 
         .hero-content {
@@ -269,7 +261,7 @@
             transform: translateY(-3px);
         }
 
-        /* ===== إحصائيات الموقع ===== */
+        /* ===== Stats ===== */
         .stats-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -316,7 +308,7 @@
             color: var(--accent-color);
         }
 
-        /* ===== أزرار الفلتر ===== */
+        /* ===== Filters ===== */
         .filter-section {
             max-width: 1200px;
             margin: 0 auto 24px;
@@ -330,7 +322,7 @@
         .filter-section .filter-label {
             font-weight: 600;
             color: var(--text-secondary);
-            margin-left: 10px;
+            margin-right: 10px;
             font-size: 0.9rem;
         }
 
@@ -357,7 +349,7 @@
             border-color: var(--accent-color);
         }
 
-        /* ===== أقسام المشاريع ===== */
+        /* ===== Sections ===== */
         .section-title {
             max-width: 1200px;
             margin: 32px auto 16px;
@@ -388,7 +380,7 @@
 
         .section-title .view-all:hover {
             color: var(--accent-hover);
-            transform: translateX(-4px);
+            transform: translateX(4px);
         }
 
         .container {
@@ -399,12 +391,12 @@
 
         #projects-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 16px;
         }
 
-        /* ===== بطاقة المشروع المحسّنة ===== */
+        /* ===== Project Card ===== */
         .project-card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -422,8 +414,8 @@
             content: '';
             position: absolute;
             top: 0;
-            right: 0;
             left: 0;
+            right: 0;
             height: 3px;
             background: var(--gradient-hero);
             opacity: 0;
@@ -469,6 +461,7 @@
             font-size: 0.85rem;
             overflow: hidden;
             border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .project-card .project-preview img {
@@ -567,7 +560,166 @@
             background: #218838;
         }
 
-        /* ===== الترقيم ===== */
+        /* ===== Comment Section inside card ===== */
+        .comment-section {
+            margin-top: 16px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .comment-section .comment {
+            background: var(--comment-bg);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .comment-section .comment .comment-author {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .comment-section .comment .comment-text {
+            margin: 4px 0 8px 0;
+            color: var(--text-secondary);
+        }
+
+        .comment-section .comment .comment-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .comment-section .comment .comment-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .comment-section .comment .comment-actions button:hover {
+            background: var(--bg-primary);
+            color: var(--accent-color);
+        }
+
+        .comment-section .replies {
+            margin-top: 8px;
+            padding-left: 20px;
+            border-left: 2px dashed var(--border-color);
+        }
+
+        .comment-section .replies .reply {
+            background: var(--reply-bg);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+
+        .comment-section .replies .reply .reply-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comment-section .replies .reply .reply-text {
+            margin: 2px 0 4px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .comment-section .reply-form {
+            display: none;
+            margin-top: 8px;
+            padding: 10px;
+            background: var(--reply-bg);
+            border-radius: 10px;
+        }
+
+        .comment-section .reply-form.active {
+            display: block;
+        }
+
+        .comment-section .reply-form input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .comment-section .reply-form .reply-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-section .reply-form .reply-actions button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .comment-section .reply-form .reply-actions .submit-reply {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .comment-section .reply-form .reply-actions .submit-reply:hover {
+            background: var(--accent-hover);
+        }
+
+        .comment-section .reply-form .reply-actions .cancel-reply {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        .comment-section .reply-form .reply-actions .cancel-reply:hover {
+            background: var(--border-color);
+        }
+
+        .comment-section .new-comment-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .comment-section .new-comment-form input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .comment-section .new-comment-form button {
+            padding: 10px 20px;
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .comment-section .new-comment-form button:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ===== Pagination ===== */
         .pagination {
             display: flex;
             justify-content: center;
@@ -603,20 +755,20 @@
             font-weight: 500;
         }
 
-        /* ===== القائمة الجانبية ===== */
+        /* ===== Sidebar ===== */
         .sidebar {
             height: 100%;
             width: 0;
             position: fixed;
             z-index: 200;
             top: 0;
-            right: 0;
+            left: 0;
             background: var(--bg-secondary);
             overflow-x: hidden;
             transition: 0.3s;
             padding-top: 60px;
-            box-shadow: -4px 0 30px rgba(0,0,0,0.2);
-            border-left: 1px solid var(--border-color);
+            box-shadow: 4px 0 30px rgba(0,0,0,0.2);
+            border-right: 1px solid var(--border-color);
         }
 
         .sidebar .sidebar-header {
@@ -639,13 +791,13 @@
             align-items: center;
             gap: 12px;
             transition: all var(--transition);
-            border-right: 3px solid transparent;
+            border-left: 3px solid transparent;
         }
 
         .sidebar a:hover {
             color: var(--accent-color);
             background: var(--bg-primary);
-            border-right-color: var(--accent-color);
+            border-left-color: var(--accent-color);
         }
 
         .sidebar a i {
@@ -657,7 +809,7 @@
         .sidebar .closebtn {
             position: absolute;
             top: 20px;
-            left: 20px;
+            right: 20px;
             font-size: 28px;
             cursor: pointer;
             color: var(--text-secondary);
@@ -669,7 +821,7 @@
             transform: rotate(90deg);
         }
 
-        /* ===== المودال ===== */
+        /* ===== Modal ===== */
         .modal {
             display: none;
             position: fixed;
@@ -704,7 +856,7 @@
         .modal-content .close-button {
             position: absolute;
             top: 15px;
-            left: 20px;
+            right: 20px;
             font-size: 24px;
             cursor: pointer;
             color: var(--text-muted);
@@ -760,7 +912,7 @@
             transform: translateY(-2px);
         }
 
-        /* ===== التوثيقات ===== */
+        /* ===== Auth buttons ===== */
         .auth-buttons button,
         .auth-buttons a {
             background: transparent;
@@ -795,7 +947,7 @@
             color: var(--text-primary);
         }
 
-        /* ===== البحث ===== */
+        /* ===== Search ===== */
         .search-container {
             max-width: 600px;
             margin: 20px auto;
@@ -845,14 +997,10 @@
             border-color: var(--accent-color);
         }
 
-        /* ===== استجابة للشاشات الصغيرة ===== */
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .hero-section h1 {
-                font-size: 2rem;
-            }
-            .hero-section p {
-                font-size: 1rem;
-            }
+            .hero-section h1 { font-size: 2rem; }
+            .hero-section p { font-size: 1rem; }
             .hero-buttons .btn-primary,
             .hero-buttons .btn-secondary {
                 padding: 12px 24px;
@@ -863,74 +1011,26 @@
                 gap: 12px;
                 margin-top: -20px;
             }
-            .stat-card .stat-number {
-                font-size: 1.6rem;
-            }
-            #projects-list {
-                grid-template-columns: 1fr;
-            }
-            .filter-section {
-                gap: 6px;
-            }
-            .filter-btn {
-                padding: 6px 14px;
-                font-size: 0.75rem;
-            }
-            header h1 {
-                font-size: 1.1rem;
-            }
-            header h1 .logo-text {
-                font-size: 1rem;
-            }
-            .sidebar a {
-                font-size: 0.9rem;
-                padding: 10px 16px;
-            }
+            .stat-card .stat-number { font-size: 1.6rem; }
+            #projects-list { grid-template-columns: 1fr; }
+            .filter-section { gap: 6px; }
+            .filter-btn { padding: 6px 14px; font-size: 0.75rem; }
+            header h1 { font-size: 1.1rem; }
+            header h1 .logo-text { font-size: 1rem; }
+            .sidebar a { font-size: 0.9rem; padding: 10px 16px; }
         }
 
         @media (max-width: 480px) {
-            .hero-section h1 {
-                font-size: 1.6rem;
-            }
-            .stats-section {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-            .stat-card {
-                padding: 16px;
-            }
-            .stat-card .stat-number {
-                font-size: 1.3rem;
-            }
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
+            .hero-section h1 { font-size: 1.6rem; }
+            .stats-section { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .stat-card { padding: 16px; }
+            .stat-card .stat-number { font-size: 1.3rem; }
+            .hero-buttons { flex-direction: column; align-items: center; }
             .hero-buttons .btn-primary,
-            .hero-buttons .btn-secondary {
-                width: 100%;
-                justify-content: center;
-            }
+            .hero-buttons .btn-secondary { width: 100%; justify-content: center; }
         }
 
-        /* ===== أنماط الإنجازات ===== */
-        .achievement-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-primary);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .achievement-badge i {
-            color: #f5a623;
-        }
-
-        /* ===== زر العودة للأعلى ===== */
+        /* ===== Misc ===== */
         .back-to-top {
             position: fixed;
             bottom: 30px;
@@ -962,7 +1062,6 @@
             box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
         }
 
-        /* ===== تنسيق عنصر الترجمة ===== */
         .sidebar .custom-language-selector {
             display: flex;
             justify-content: center;
@@ -981,10 +1080,32 @@
             font-family: inherit;
             width: 90%;
         }
+
+        /* ===== Toast notification ===== */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-hover);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
-    <!-- ===== القائمة الجانبية ===== -->
+    <!-- ===== Sidebar ===== -->
     <div id="mySidebar" class="sidebar">
         <span class="closebtn" onclick="closeSidebar()">
             <i class="fas fa-times"></i>
@@ -992,23 +1113,23 @@
         <div class="sidebar-header">
             <h3><i class="fas fa-code"></i> But_Seven</h3>
         </div>
-        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
-        <a href="#" onclick="checkAndGoToCodes()"><i class="fas fa-edit"></i> محرر الأكواد</a>
-        <a href="profile.html"><i class="fas fa-user"></i> الملف الشخصي</a>
-        <a href="library.html"><i class="fas fa-book"></i> المكتبة</a>
-        <a href="#" onclick="filterProjects('trending')"><i class="fas fa-fire"></i> الرائجة</a>
-        <a href="#" onclick="filterProjects('newest')"><i class="fas fa-clock"></i> الأحدث</a>
-        <a href="#" onclick="filterProjects('favorites')"><i class="fas fa-star"></i> المفضلة</a>
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="#" onclick="checkAndGoToCodes()"><i class="fas fa-edit"></i> Code Editor</a>
+        <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        <a href="library.html"><i class="fas fa-book"></i> Library</a>
+        <a href="#" onclick="filterProjects('trending')"><i class="fas fa-fire"></i> Trending</a>
+        <a href="#" onclick="filterProjects('newest')"><i class="fas fa-clock"></i> Newest</a>
+        <a href="#" onclick="filterProjects('favorites')"><i class="fas fa-star"></i> Favorites</a>
         <div class="custom-language-selector">
             <select id="langSelect" onchange="changeLanguage(this.value)">
                 <option value="ar">العربية</option>
-                <option value="en">English</option>
+                <option value="en" selected>English</option>
                 <option value="fr">Français</option>
             </select>
         </div>
     </div>
 
-    <!-- ===== الهيدر ===== -->
+    <!-- ===== Header ===== -->
     <header>
         <h1>
             <span onclick="openSidebar()" style="cursor:pointer;">
@@ -1017,7 +1138,7 @@
             <span class="logo-text">But_Seven</span>
         </h1>
         <div class="header-actions">
-            <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع الليلي">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
                 <i class="fas fa-moon" id="themeIcon"></i>
             </button>
             <div class="auth-buttons">
@@ -1026,7 +1147,7 @@
                     <button id="registerBtnHeader"><i class="fas fa-user-plus"></i></button>
                 </div>
                 <div id="loggedInUserDisplay">
-                    <span hidden>مرحباً، <span id="currentUsername"></span></span>
+                    <span hidden>Welcome, <span id="currentUsername"></span></span>
                     <a href="profile.html" style="border: none; padding: 0; display: inline-flex; align-items: center; text-decoration: none;">
                         <img id="headerProfilePic" src="" alt="Profile" style="display: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color);">
                         <i id="defaultProfileIcon" class="fas fa-user-circle" style="font-size: 36px; color: var(--text-muted);"></i>
@@ -1039,111 +1160,114 @@
         </div>
     </header>
 
-    <!-- ===== عنصر جوجل ترانسليت (مخفي) ===== -->
+    <!-- ===== Google Translate hidden ===== -->
     <div id="google_translate_element" style="display: none;"></div>
 
-    <!-- ===== Hero Section ===== -->
+    <!-- ===== Hero ===== -->
     <section class="hero-section">
         <div class="hero-content">
             <div class="hero-badge">
-                <i class="fas fa-rocket"></i> منصة المطورين العربية الأولى
+                <i class="fas fa-rocket"></i> #1 Arab Developer Platform
             </div>
             <h1>
-                أنشئ <span>شارك</span> اكتشف
+                Create <span>Share</span> Discover
             </h1>
-            <p>مشاريع ويب مذهلة من مجتمع المطورين. ابدأ مشروعك الآن وانضم إلى آلاف المبدعين.</p>
+            <p>Amazing web projects from the developer community. Start your project now and join thousands of creators.</p>
             <div class="hero-buttons">
                 <a href="#" onclick="checkAndGoToCodes()" class="btn-primary">
-                    <i class="fas fa-code"></i> ابدأ البرمجة
+                    <i class="fas fa-code"></i> Start Coding
                 </a>
                 <a href="#projects-section" class="btn-secondary">
-                    <i class="fas fa-compass"></i> استكشف المشاريع
+                    <i class="fas fa-compass"></i> Explore Projects
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- ===== إحصائيات الموقع ===== -->
+    <!-- ===== Stats ===== -->
     <div class="stats-section" id="statsSection">
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
             <span class="stat-number" id="statProjects">0</span>
-            <span class="stat-label">مشروع</span>
+            <span class="stat-label">Projects</span>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-users"></i></div>
             <span class="stat-number" id="statDevelopers">0</span>
-            <span class="stat-label">مطور</span>
+            <span class="stat-label">Developers</span>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-eye"></i></div>
             <span class="stat-number" id="statViews">0</span>
-            <span class="stat-label">مشاهدة</span>
+            <span class="stat-label">Views</span>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-heart"></i></div>
             <span class="stat-number" id="statLikes">0</span>
-            <span class="stat-label">إعجاب</span>
+            <span class="stat-label">Likes</span>
         </div>
     </div>
 
-    <!-- ===== البحث ===== -->
+    <!-- ===== Search ===== -->
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="ابحث عن مشروع، مطور، أو وسم..." oninput="searchProjects()">
+        <input type="text" id="searchInput" placeholder="Search for project, developer, or tag..." oninput="searchProjects()">
         <button onclick="searchProjects()"><i class="fas fa-search"></i></button>
     </div>
 
-    <!-- ===== الفلاتر ===== -->
+    <!-- ===== Filters ===== -->
     <div class="filter-section">
-        <span class="filter-label"><i class="fas fa-filter"></i> الفلاتر:</span>
-        <button class="filter-btn active" data-filter="all" onclick="filterProjects('all')">الكل</button>
+        <span class="filter-label"><i class="fas fa-filter"></i> Filters:</span>
+        <button class="filter-btn active" data-filter="all" onclick="filterProjects('all')">All</button>
         <button class="filter-btn" data-filter="html" onclick="filterProjects('html')">HTML</button>
         <button class="filter-btn" data-filter="css" onclick="filterProjects('css')">CSS</button>
         <button class="filter-btn" data-filter="javascript" onclick="filterProjects('javascript')">JavaScript</button>
         <button class="filter-btn" data-filter="react" onclick="filterProjects('react')">React</button>
         <button class="filter-btn" data-filter="python" onclick="filterProjects('python')">Python</button>
-        <button class="filter-btn" data-filter="game" onclick="filterProjects('game')">🎮 ألعاب</button>
+        <button class="filter-btn" data-filter="game" onclick="filterProjects('game')">🎮 Games</button>
         <button class="filter-btn" data-filter="ai" onclick="filterProjects('ai')">🤖 AI</button>
     </div>
 
-    <!-- ===== المشاريع ===== -->
+    <!-- ===== Projects ===== -->
     <div class="section-title" id="projects-section">
-        <h2><i class="fas fa-code" style="color: var(--accent-color);"></i> <span id="sectionTitle">جميع المشاريع</span></h2>
-        <a href="#" class="view-all" onclick="filterProjects('all')">عرض الكل <i class="fas fa-arrow-left"></i></a>
+        <h2><i class="fas fa-code" style="color: var(--accent-color);"></i> <span id="sectionTitle">All Projects</span></h2>
+        <a href="#" class="view-all" onclick="filterProjects('all')">View All <i class="fas fa-arrow-right"></i></a>
     </div>
 
     <div class="container">
         <div id="projects-list"></div>
         <div class="pagination">
-            <button id="prevPageBtn"><i class="fas fa-chevron-right"></i> السابق</button>
-            <span id="currentPageDisplay">الصفحة 1 من 1</span>
-            <button id="nextPageBtn">التالي <i class="fas fa-chevron-left"></i></button>
+            <button id="prevPageBtn"><i class="fas fa-chevron-left"></i> Previous</button>
+            <span id="currentPageDisplay">Page 1 of 1</span>
+            <button id="nextPageBtn">Next <i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 
-    <!-- ===== مودال تسجيل الدخول ===== -->
+    <!-- ===== Login Modal ===== -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-button" data-modal="loginModal">&times;</span>
-            <h3><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h3>
+            <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
             <form id="loginForm">
-                <input type="text" id="loginUsername" placeholder="اسم المستخدم" required>
-                <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
-                <button type="submit">تسجيل الدخول</button>
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
             </form>
         </div>
     </div>
 
-    <!-- ===== زر العودة للأعلى ===== -->
+    <!-- ===== Toast ===== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== Back to top ===== -->
     <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ===== السكريبتات ===== -->
+    <!-- ===== Scripts ===== -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
-                pageLanguage: 'ar',
+                pageLanguage: 'en',
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
                 autoDisplay: false
             }, 'google_translate_element');
@@ -1154,7 +1278,7 @@
 
     <script>
         // ==========================================
-        // 1. إدارة الوضع الليلي
+        // 1. Theme management
         // ==========================================
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -1173,13 +1297,12 @@
             }
         }
 
-        // تحميل الوضع الليلي المحفوظ
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeIcon(savedTheme);
 
         // ==========================================
-        // 2. أدوات التحكم الأساسية
+        // 2. Core utils
         // ==========================================
         function openSidebar() { document.getElementById("mySidebar").style.width = "280px"; }
 
@@ -1189,7 +1312,7 @@
             if (localStorage.getItem('currentUser')) {
                 window.location.href = "codes.html";
             } else {
-                alert("يرجى إنشاء حساب أولاً للوصول إلى محرر الأكواد ومشاريعك!");
+                showToast("Please create an account first to access the code editor!");
                 openModal(document.getElementById('loginModal'));
             }
         }
@@ -1210,6 +1333,14 @@
 
         function closeModal(modalElement) { modalElement.style.display = 'none'; }
 
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
         const loginModal = document.getElementById('loginModal');
         const loginBtnHeader = document.getElementById('loginBtnHeader');
         const registerBtnHeader = document.getElementById('registerBtnHeader');
@@ -1225,12 +1356,12 @@
         const sectionTitle = document.getElementById('sectionTitle');
 
         let currentPage = 1;
-        const projectsPerPage = 12;
+        const projectsPerPage = 6;
         let currentFilter = 'all';
         let allProjectsCache = [];
 
         // ==========================================
-        // 3. تحديث واجهة المستخدم
+        // 3. UI updates
         // ==========================================
         function updateIndexAuthUI() {
             const currentUser = getCurrentUser();
@@ -1275,7 +1406,7 @@
         }
 
         // ==========================================
-        // 4. استخراج الوسوم من المشروع
+        // 4. Detect tags
         // ==========================================
         function detectProjectTags(project) {
             const tags = [];
@@ -1287,24 +1418,90 @@
             if (css.includes('{') || css.includes('color:') || css.includes('display:')) tags.push('CSS');
             if (js.includes('function') || js.includes('const ') || js.includes('let ')) tags.push('JavaScript');
             if (html.includes('react') || js.includes('react')) tags.push('React');
-            if (html.includes('canvas') || html.includes('game')) tags.push('🎮 ألعاب');
+            if (html.includes('canvas') || html.includes('game')) tags.push('🎮 Games');
             if (html.includes('openai') || html.includes('ai') || html.includes('chatgpt')) tags.push('🤖 AI');
             if (html.includes('python') || html.includes('flask') || html.includes('django')) tags.push('Python');
 
-            if (tags.length === 0) tags.push('ويب');
+            if (tags.length === 0) tags.push('Web');
             return tags.slice(0, 4);
         }
 
         // ==========================================
-        // 5. بناء بطاقات المشاريع
+        // 5. Comments & Replies System (PERSISTENT)
+        // ==========================================
+        function getProjectComments(projectId) {
+            const projects = getCodeProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return [];
+            if (!project.comments) project.comments = [];
+            return project.comments;
+        }
+
+        function saveProjectComments(projectId, comments) {
+            const projects = getCodeProjects();
+            const index = projects.findIndex(p => p.id === projectId);
+            if (index === -1) return;
+            projects[index].comments = comments;
+            saveCodeProjects(projects);
+        }
+
+        function addComment(projectId, author, text) {
+            if (!author) {
+                const currentUser = getCurrentUser();
+                if (!currentUser) {
+                    showToast("Please login to comment!");
+                    openModal(loginModal);
+                    return;
+                }
+                author = currentUser;
+            }
+            const comments = getProjectComments(projectId);
+            comments.push({
+                id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                author: author,
+                text: text.trim(),
+                timestamp: Date.now(),
+                replies: []
+            });
+            saveProjectComments(projectId, comments);
+            return comments;
+        }
+
+        function addReply(projectId, commentId, author, text) {
+            if (!author) {
+                const currentUser = getCurrentUser();
+                if (!currentUser) {
+                    showToast("Please login to reply!");
+                    openModal(loginModal);
+                    return;
+                }
+                author = currentUser;
+            }
+            const comments = getProjectComments(projectId);
+            const comment = comments.find(c => c.id === commentId);
+            if (!comment) return;
+            if (!comment.replies) comment.replies = [];
+            comment.replies.push({
+                id: 'rep_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                author: author,
+                text: text.trim(),
+                timestamp: Date.now()
+            });
+            saveProjectComments(projectId, comments);
+            return comments;
+        }
+
+        // ==========================================
+        // 6. Build cards with comments
         // ==========================================
         function createCardHTML(project, isTrending = false) {
             const authorAvatar = getUserAvatar(project.author);
             const tags = detectProjectTags(project);
+            const comments = getProjectComments(project.id);
 
             const badgeHTML = isTrending ?
-                `<div class="trending-badge" style="position:absolute;top:-10px;right:16px;background:var(--badge-bg);color:var(--badge-text);padding:4px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(255,202,40,0.3);z-index:5;">
-                    <i class="fas fa-fire"></i> رائج
+                `<div style="position:absolute;top:-10px;right:16px;background:var(--badge-bg);color:var(--badge-text);padding:4px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(255,202,40,0.3);z-index:5;">
+                    <i class="fas fa-fire"></i> Trending
                 </div>` :
                 '';
 
@@ -1317,7 +1514,7 @@
 
             if (!currentUser || currentUser !== project.author) {
                 const isFollowing = currentUser ? checkIsFollowing(currentUser, project.author) : false;
-                const btnText = isFollowing ? 'إلغاء المتابعة' : 'متابعة';
+                const btnText = isFollowing ? 'Unfollow' : 'Follow';
                 const btnBg = isFollowing ? 'var(--bg-primary)' : 'var(--accent-color)';
                 const btnColor = isFollowing ? 'var(--text-secondary)' : '#fff';
 
@@ -1325,23 +1522,56 @@
                     `<button onclick="toggleFollow('${project.author}')" style="margin-right:auto;padding:4px 14px;font-size:0.75rem;font-weight:600;border-radius:20px;border:1px solid ${isFollowing ? 'var(--border-color)' : 'var(--accent-color)'};background:${btnBg};color:${btnColor};cursor:pointer;transition:all 0.3s;">${btnText}</button>`;
             }
 
-            let rawDescription = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
+            let rawDescription = project.description ? String(project.description) : "No description for this project.";
             let safeDescription = rawDescription.length > 80 ? rawDescription.substring(0, 80) + '...' : rawDescription;
             const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
 
-            // تقييم عشوائي (محاكاة)
             const rating = (3.5 + Math.random() * 1.5).toFixed(1);
             const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
 
+            // Build comments HTML
+            let commentsHTML = '';
+            if (comments && comments.length > 0) {
+                comments.forEach(comment => {
+                    commentsHTML += `
+                        <div class="comment" data-comment-id="${comment.id}">
+                            <div class="comment-author">${escapeHtml(comment.author)}</div>
+                            <div class="comment-text">${escapeHtml(comment.text)}</div>
+                            <div class="comment-actions">
+                                <button onclick="toggleReplyForm('${project.id}', '${comment.id}')">
+                                    <i class="far fa-comment"></i> Reply
+                                </button>
+                                <span style="color:var(--text-muted);font-size:0.75rem;">${(comment.replies || []).length} replies</span>
+                            </div>
+                            <div id="replyForm-${comment.id}" class="reply-form">
+                                <input type="text" id="replyInput-${comment.id}" placeholder="Write a reply..." />
+                                <div class="reply-actions">
+                                    <button class="submit-reply" onclick="submitReply('${project.id}', '${comment.id}')">Reply</button>
+                                    <button class="cancel-reply" onclick="cancelReply('${comment.id}')">Cancel</button>
+                                </div>
+                            </div>
+                            <div class="replies">
+                                ${(comment.replies || []).map(reply => `
+                                    <div class="reply">
+                                        <div class="reply-author">${escapeHtml(reply.author)}</div>
+                                        <div class="reply-text">${escapeHtml(reply.text)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
             return `
-                <div class="project-card" style="position:relative;">
+                <div class="project-card" data-project-id="${project.id}" style="position:relative;">
                     ${badgeHTML}
                     <div class="project-tags">
                         ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                     <div class="project-preview">
                         <i class="fas fa-code" style="font-size:2rem;color:var(--text-muted);"></i>
-                        <span style="position:absolute;font-size:0.7rem;color:var(--text-muted);margin-top:50px;">معاينة المشروع</span>
+                        <span style="position:absolute;font-size:0.7rem;color:var(--text-muted);margin-top:50px;">Preview</span>
                     </div>
                     <h4>${project.title}</h4>
                     <p>${safeDescription}</p>
@@ -1360,22 +1590,103 @@
                     <div class="project-meta">
                         <span><i class="fas fa-eye"></i> ${project.views || 0}</span>
                         <span><i class="fas fa-heart" style="color:#dc3545;"></i> ${likesCount}</span>
-                        <span><i class="fas fa-comment"></i> ${(project.comments || []).length}</span>
+                        <span><i class="fas fa-comment"></i> ${comments.length}</span>
                     </div>
                     <div class="actions">
                         <button class="view-code-btn" data-project-id="${project.id}">
-                            <i class="fas fa-external-link-alt"></i> عرض
+                            <i class="fas fa-external-link-alt"></i> View
                         </button>
                         <button onclick="shareProject('${project.id}', this)" class="share-btn">
                             <i class="fas fa-share-alt"></i>
                         </button>
-                        <button class="delete-project-btn" data-project-id="${project.id}" style="background:#dc3545;display:none;">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    </div>
+
+                    <!-- ===== COMMENT SECTION ===== -->
+                    <div class="comment-section">
+                        ${commentsHTML}
+                        <div class="new-comment-form">
+                            <input type="text" id="commentInput-${project.id}" placeholder="Write a comment..." />
+                            <button onclick="addCommentFromCard('${project.id}')">Comment</button>
+                        </div>
                     </div>
                 </div>
             `;
         }
+
+        // Comment actions
+        function addCommentFromCard(projectId) {
+            const input = document.getElementById(`commentInput-${projectId}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) {
+                showToast("Please write a comment.");
+                return;
+            }
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                showToast("Please login to comment!");
+                openModal(loginModal);
+                return;
+            }
+            addComment(projectId, currentUser, text);
+            input.value = '';
+            displayCodeProjects();
+            showToast("Comment added!");
+        }
+
+        function toggleReplyForm(projectId, commentId) {
+            const form = document.getElementById(`replyForm-${commentId}`);
+            if (!form) return;
+
+            document.querySelectorAll('.reply-form').forEach(f => {
+                if (f.id !== `replyForm-${commentId}`) {
+                    f.classList.remove('active');
+                }
+            });
+
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                const input = document.getElementById(`replyInput-${commentId}`);
+                if (input) setTimeout(() => input.focus(), 100);
+            }
+        }
+
+        function cancelReply(commentId) {
+            const form = document.getElementById(`replyForm-${commentId}`);
+            if (form) {
+                form.classList.remove('active');
+                const input = document.getElementById(`replyInput-${commentId}`);
+                if (input) input.value = '';
+            }
+        }
+
+        function submitReply(projectId, commentId) {
+            const input = document.getElementById(`replyInput-${commentId}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) {
+                showToast("Please write a reply.");
+                return;
+            }
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                showToast("Please login to reply!");
+                openModal(loginModal);
+                return;
+            }
+            addReply(projectId, commentId, currentUser, text);
+            input.value = '';
+            const form = document.getElementById(`replyForm-${commentId}`);
+            if (form) form.classList.remove('active');
+            displayCodeProjects();
+            showToast("Reply added!");
+        }
+
+        // Make functions globally accessible
+        window.addCommentFromCard = addCommentFromCard;
+        window.toggleReplyForm = toggleReplyForm;
+        window.cancelReply = cancelReply;
+        window.submitReply = submitReply;
 
         function checkIsFollowing(followerUsername, targetUsername) {
             const users = getUsers();
@@ -1389,7 +1700,7 @@
             const shareUrl = `${baseUrl}/view.html?id=${projectId}`;
 
             if (navigator.share) {
-                navigator.share({ title: 'شارك هذا المشروع', url: shareUrl })
+                navigator.share({ title: 'Share this project', url: shareUrl })
                     .catch(() => {});
                 return;
             }
@@ -1425,7 +1736,7 @@
                     document.execCommand('copy');
                     showSuccessMessage(btn);
                 } catch (err) {
-                    prompt("انسخ الرابط للمشاركة:", text);
+                    prompt("Copy link to share:", text);
                 }
                 document.body.removeChild(textArea);
             }
@@ -1435,13 +1746,13 @@
             const currentUsername = getCurrentUser();
 
             if (!currentUsername) {
-                alert("يرجى تسجيل الدخول أولاً لمتابعة المطورين!");
-                openModal(document.getElementById('loginModal'));
+                showToast("Please login first to follow developers!");
+                openModal(loginModal);
                 return;
             }
 
             if (currentUsername === targetUsername) {
-                alert("لا يمكنك متابعة نفسك.");
+                showToast("You cannot follow yourself.");
                 return;
             }
 
@@ -1467,17 +1778,25 @@
             if (isFollowing) {
                 currentUserObj.following = currentUserObj.following.filter(name => name !== targetUsername);
                 targetUserObj.followers = targetUserObj.followers.filter(name => name !== currentUsername);
+                showToast(`Unfollowed ${targetUsername}`);
             } else {
                 currentUserObj.following.push(targetUsername);
                 targetUserObj.followers.push(currentUsername);
+                showToast(`Following ${targetUsername}`);
             }
 
             localStorage.setItem('users', JSON.stringify(users));
             displayCodeProjects();
         };
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // ==========================================
-        // 6. المزامنة مع السيرفر وعرض المشاريع
+        // 7. Sync & display
         // ==========================================
         async function syncProjectsFromBackend() {
             try {
@@ -1488,12 +1807,24 @@
                     serverProjects = serverProjects.map(p => ({
                         ...p,
                         id: p._id || p.id || 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                        timestamp: p.timestamp || new Date(p.createdAt).getTime() || Date.now()
+                        timestamp: p.timestamp || new Date(p.createdAt).getTime() || Date.now(),
+                        comments: p.comments || []
                     }));
+
+                    // Merge with local comments
+                    const localProjects = getCodeProjects();
+                    serverProjects = serverProjects.map(sp => {
+                        const local = localProjects.find(lp => lp.id === sp.id);
+                        if (local && local.comments && local.comments.length > 0) {
+                            sp.comments = local.comments;
+                        }
+                        return sp;
+                    });
+
                     localStorage.setItem('codeProjects', JSON.stringify(serverProjects));
                 }
             } catch (error) {
-                console.error("تعذر جلب المشاريع من السيرفر، سيتم استخدام البيانات المحلية.");
+                console.error("Failed to fetch projects from server, using local data.");
             } finally {
                 displayCodeProjects();
                 updateStats();
@@ -1511,7 +1842,6 @@
             saveCodeProjects(projects);
             allProjectsCache = projects;
 
-            // تطبيق الفلتر
             let filtered = filterProjectsByTag(allProjectsCache, currentFilter);
 
             projectsListDiv.innerHTML = '';
@@ -1521,15 +1851,14 @@
                 projectsListDiv.innerHTML =
                     `<p style="text-align:center;margin-top:50px;font-size:1.1rem;color:var(--text-muted);grid-column:1/-1;">
                         <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                        لا توجد مشاريع لعرضها. <a href="#" onclick="checkAndGoToCodes()" style="color:var(--accent-color);text-decoration:none;">ابدأ مشروعك الأول!</a>
+                        No projects to show. <a href="#" onclick="checkAndGoToCodes()" style="color:var(--accent-color);text-decoration:none;">Start your first project!</a>
                     </p>`;
                 if (prevPageBtn) prevPageBtn.disabled = true;
                 if (nextPageBtn) nextPageBtn.disabled = true;
-                if (currentPageDisplay) currentPageDisplay.textContent = 'الصفحة 0 من 0';
+                if (currentPageDisplay) currentPageDisplay.textContent = 'Page 0 of 0';
                 return;
             }
 
-            // ترتيب المشاريع
             let sorted = [...filtered];
             if (currentFilter === 'trending') {
                 sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -1543,7 +1872,6 @@
             const endIndex = startIndex + projectsPerPage;
             const projectsToDisplay = sorted.slice(startIndex, endIndex);
 
-            // عرض المشروع الرائج في الصفحة الأولى
             if (currentPage === 1 && sorted.length > 0 && currentFilter === 'all') {
                 let topProject = sorted.reduce((a, b) => (a.views || 0) > (b.views || 0) ? a : b);
                 if (topProject && (topProject.views || 0) > 0) {
@@ -1562,7 +1890,7 @@
 
             prevPageBtn.disabled = currentPage === 1;
             nextPageBtn.disabled = endIndex >= sorted.length;
-            currentPageDisplay.innerHTML = `الصفحة ${currentPage} من ${Math.ceil(sorted.length / projectsPerPage) || 1}`;
+            currentPageDisplay.innerHTML = `Page ${currentPage} of ${Math.ceil(sorted.length / projectsPerPage) || 1}`;
 
             document.querySelectorAll('.view-code-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
@@ -1570,8 +1898,6 @@
                     window.location.href = `view.html?id=${projectId}`;
                 });
             });
-            attachDeleteHandlers();
-            updateStats();
         }
 
         function filterProjectsByTag(projects, filter) {
@@ -1586,13 +1912,12 @@
         }
 
         // ==========================================
-        // 7. الفلاتر والبحث
+        // 8. Filters & search
         // ==========================================
         function filterProjects(filter) {
             currentFilter = filter;
             currentPage = 1;
 
-            // تحديث أزرار الفلتر
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.filter === filter) {
@@ -1600,21 +1925,20 @@
                 }
             });
 
-            // تحديث عنوان القسم
             const titles = {
-                'all': 'جميع المشاريع',
-                'trending': '🔥 المشاريع الرائجة',
-                'newest': '🆕 أحدث المشاريع',
-                'favorites': '⭐ المفضلة',
+                'all': 'All Projects',
+                'trending': '🔥 Trending Projects',
+                'newest': '🆕 Newest Projects',
+                'favorites': '⭐ Favorites',
                 'html': 'HTML',
                 'css': 'CSS',
                 'javascript': 'JavaScript',
                 'react': 'React',
                 'python': 'Python',
-                'game': '🎮 ألعاب',
-                'ai': '🤖 الذكاء الاصطناعي'
+                'game': '🎮 Games',
+                'ai': '🤖 AI'
             };
-            sectionTitle.textContent = titles[filter] || 'جميع المشاريع';
+            sectionTitle.textContent = titles[filter] || 'All Projects';
 
             displayCodeProjects();
         }
@@ -1632,8 +1956,6 @@
                 const descMatch = (p.description || '').toLowerCase().includes(query);
                 const authorMatch = (p.author || '').toLowerCase().includes(query);
                 const tagsMatch = detectProjectTags(p).some(t => t.toLowerCase().includes(query));
-
-                // بحث داخل الكود
                 const htmlCode = (p.htmlCode || p.html || '').toLowerCase();
                 const codeMatch = htmlCode.includes(query);
 
@@ -1641,7 +1963,7 @@
             });
 
             currentPage = 1;
-            displayFilteredProjects(filtered, `نتائج البحث: "${query}"`);
+            displayFilteredProjects(filtered, `Search results: "${query}"`);
         }
 
         function displayFilteredProjects(projects, title) {
@@ -1652,7 +1974,7 @@
                 projectsListDiv.innerHTML =
                     `<p style="text-align:center;margin-top:50px;color:var(--text-muted);grid-column:1/-1;">
                         <i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                        لا توجد نتائج مطابقة للبحث.
+                        No matching results.
                     </p>`;
                 return;
             }
@@ -1664,11 +1986,10 @@
             document.querySelectorAll('.view-code-btn').forEach(b => b.addEventListener('click', (e) => {
                 window.location.href = `view.html?id=${e.currentTarget.dataset.projectId}`;
             }));
-            attachDeleteHandlers();
         }
 
         // ==========================================
-        // 8. الإحصائيات
+        // 9. Stats
         // ==========================================
         function updateStats() {
             const projects = getCodeProjects();
@@ -1709,34 +2030,7 @@
         }
 
         // ==========================================
-        // 9. حذف المشاريع
-        // ==========================================
-        function attachDeleteHandlers() {
-            document.querySelectorAll('.delete-project-btn').forEach(button => {
-                const projectId = button.dataset.projectId;
-                const projects = getCodeProjects();
-                const project = projects.find(p => p.id === projectId);
-                const currentUser = getCurrentUser();
-
-                if (project && project.author === currentUser) {
-                    button.style.display = 'block';
-                    button.onclick = (event) => {
-                        if (confirm('هل أنت متأكد من حذف هذا المشروع؟')) {
-                            let allProjects = getCodeProjects();
-                            allProjects = allProjects.filter(p => p.id !== projectId);
-                            saveCodeProjects(allProjects);
-                            alert('تم حذف المشروع بنجاح.');
-                            displayCodeProjects();
-                        }
-                    };
-                } else {
-                    button.style.display = 'none';
-                }
-            });
-        }
-
-        // ==========================================
-        // 10. زر العودة للأعلى
+        // 10. Back to top
         // ==========================================
         window.addEventListener('scroll', function() {
             const btn = document.getElementById('backToTop');
@@ -1748,10 +2042,9 @@
         });
 
         // ==========================================
-        // 11. تشغيل الأحداث
+        // 11. Event listeners
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
-            // تسجيل الدخول
             if (loginBtnHeader) loginBtnHeader.addEventListener('click', (e) => {
                 e.preventDefault();
                 openModal(loginModal);
@@ -1761,14 +2054,12 @@
                 window.location.href = "register.html";
             });
 
-            // إغلاق المودال
             document.querySelectorAll('.close-button').forEach(button => {
                 button.addEventListener('click', (event) => {
                     closeModal(document.getElementById(event.target.dataset.modal));
                 });
             });
 
-            // نموذج تسجيل الدخول
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const username = document.getElementById('loginUsername').value.trim();
@@ -1784,7 +2075,7 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        alert(data.msg || data.message || 'بيانات الدخول غير صحيحة');
+                        showToast(data.msg || data.message || 'Invalid credentials');
                         return;
                     }
 
@@ -1792,27 +2083,25 @@
                     localStorage.setItem('currentUser', data.username);
                     if (data.profilePic) localStorage.setItem('profilePic', data.profilePic);
 
-                    alert(`أهلاً بك مجدداً، ${data.username}!`);
+                    showToast(`Welcome back, ${data.username}!`);
                     closeModal(loginModal);
                     loginForm.reset();
                     updateIndexAuthUI();
                     syncProjectsFromBackend();
                 } catch (error) {
-                    alert('حدث خطأ في الاتصال بالسيرفر');
+                    showToast('Connection error');
                 }
             });
 
-            // تسجيل الخروج
             if (logoutBtnHeader) logoutBtnHeader.addEventListener('click', () => {
                 clearCurrentUser();
                 localStorage.removeItem('token');
                 localStorage.removeItem('profilePic');
-                alert('تم تسجيل الخروج بنجاح.');
+                showToast('Logged out successfully.');
                 updateIndexAuthUI();
                 displayCodeProjects();
             });
 
-            // الترقيم
             if (prevPageBtn) prevPageBtn.addEventListener('click', () => {
                 if (currentPage > 1) {
                     currentPage--;
@@ -1828,34 +2117,52 @@
                 }
             });
 
-            // تشغيل الصفحة
+            // Enter key for comment inputs (delegated)
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const target = e.target;
+                    if (target && target.id && target.id.startsWith('commentInput-')) {
+                        const projectId = target.id.replace('commentInput-', '');
+                        addCommentFromCard(projectId);
+                    }
+                    if (target && target.id && target.id.startsWith('replyInput-')) {
+                        const commentId = target.id.replace('replyInput-', '');
+                        const form = document.getElementById(`replyForm-${commentId}`);
+                        if (form) {
+                            const projectCard = form.closest('.project-card');
+                            if (projectCard) {
+                                const projectId = projectCard.dataset.projectId;
+                                submitReply(projectId, commentId);
+                            }
+                        }
+                    }
+                }
+            });
+
             updateIndexAuthUI();
             syncProjectsFromBackend();
         });
 
         // ==========================================
-        // 12. وظائف الترجمة
+        // 12. Language switcher (translation)
         // ==========================================
         function changeLanguage(langCode) {
-            document.cookie = "googtrans=/ar/" + langCode + "; path=/; domain=" + window.location.hostname;
-            document.cookie = "googtrans=/ar/" + langCode + "; path=/;";
+            document.cookie = "googtrans=/en/" + langCode + "; path=/; domain=" + window.location.hostname;
+            document.cookie = "googtrans=/en/" + langCode + "; path=/;";
             window.location.reload();
         }
 
-        // اكتشاف لغة المتصفح
         window.addEventListener('DOMContentLoaded', () => {
             const hasTranslationCookie = document.cookie.includes('googtrans=');
-
             if (!hasTranslationCookie) {
                 const userLangFull = navigator.language || navigator.userLanguage;
                 const userLangCode = userLangFull.split('-')[0];
                 const supportedLangs = ['ar', 'en', 'fr'];
-
-                if (supportedLangs.includes(userLangCode) && userLangCode !== 'ar') {
+                if (supportedLangs.includes(userLangCode) && userLangCode !== 'en') {
                     changeLanguage(userLangCode);
                 }
             } else {
-                const match = document.cookie.match(/googtrans=\/ar\/([a-z]{2})/);
+                const match = document.cookie.match(/googtrans=\/en\/([a-z]{2})/);
                 if (match && match[1]) {
                     const selectElement = document.getElementById('langSelect');
                     if (selectElement) selectElement.value = match[1];
