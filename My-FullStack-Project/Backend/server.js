@@ -214,7 +214,102 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
         res.status(500).send('خطأ في السيرفر');
     }
 });
+// ==========================================
+// تعديل مسار إضافة تعليق (تم التصحيح هنا)
+// ==========================================
+app.post('/api/projects/:id/comment', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        
+        const newComment = {
+            author: req.user.username,
+            text: req.body.text
+        };
+        
+        project.comments.push(newComment);
+        await project.save();
+        res.json(project); // إرجاع المشروع كاملاً
+    } catch (err) {
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
 
+// ==========================================
+// مسارات الردود الجديدة (إضافة، تعديل، حذف)
+// ==========================================
+
+// 1. إضافة رد
+app.post('/api/projects/:projectId/comment/:commentId/reply', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.projectId);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+        
+        const newReply = {
+            author: req.user.username,
+            text: req.body.text
+        };
+        
+        comment.replies.push(newReply);
+        await project.save();
+        res.json(project);
+    } catch (err) {
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// 2. حذف رد
+app.delete('/api/projects/:projectId/comment/:commentId/reply/:replyId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.projectId);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+        
+        const reply = comment.replies.id(req.params.replyId);
+        if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
+        
+        // السماح بصاحب الرد أو صاحب المشروع بالحذف
+        if (reply.author !== req.user.username && project.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا الرد' });
+        }
+        
+        comment.replies.pull(req.params.replyId);
+        await project.save();
+        res.json(project);
+    } catch (err) {
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// 3. تعديل رد
+app.put('/api/projects/:projectId/comment/:commentId/reply/:replyId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.projectId);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+        
+        const reply = comment.replies.id(req.params.replyId);
+        if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
+        
+        if (reply.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بتعديل هذا الرد' });
+        }
+        
+        reply.text = req.body.text;
+        reply.updatedAt = Date.now();
+        await project.save();
+        res.json(project);
+    } catch (err) {
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
 // تشغيل الخادم
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
