@@ -1,9 +1,20 @@
 const mongoose = require('mongoose');
 
+const ReplySchema = new mongoose.Schema({
+  author: { type: String, required: true },
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date } // يفيد في ميزة "تم التعديل"
+});
+
 const CommentSchema = new mongoose.Schema({
   author: { type: String, required: true },
   text: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  replies: {
+    type: [ReplySchema],
+    default: []
+  }
 });
 
 const ProjectSchema = new mongoose.Schema({
@@ -14,7 +25,7 @@ const ProjectSchema = new mongoose.Schema({
   js: { type: String, default: "" },
   author: { type: String, required: true },
   views: { type: Number, default: 0 },
-  likes: { type: [String], default: [] }, // مصفوفة تحتوي على أسماء المستخدمين الذين وضعوا إعجاباً
+  likes: { type: [String], default: [] },
   comments: [CommentSchema]
 }, { timestamps: true });
 
