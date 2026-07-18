@@ -1204,6 +1204,47 @@
 
     <!-- ===== سكريبتات ===== -->
     <script>
+async function deleteProject(projectId) {
+    // 1. التأكد من رغبة المستخدم في الحذف
+    if (!confirm('هل أنت متأكد أنك تريد حذف هذا المشروع بشكل نهائي؟')) {
+        return;
+    }
+
+    try {
+        // 2. إرسال طلب الحذف إلى الخادم 
+        // افترضنا هنا أن مسار الحذف في الخادم يأخذ الـ ID الخاص بالمشروع
+        const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                // أضفنا التوكن الخاص بالمصادقة لتأكيد هوية المستخدم الذي يحذف مشروعه
+                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+            }
+        });
+
+        if (response.ok) {
+            // 3. إذا نجح الحذف من الخادم، نقوم بحذفه من الـ localStorage محلياً
+            let projects = JSON.parse(localStorage.getItem('codeProjects')) || [];
+            projects = projects.filter(p => p.id !== projectId);
+            localStorage.setItem('codeProjects', JSON.stringify(projects));
+
+            // 4. تحديث الواجهة
+            alert('تم حذف المشروع بنجاح!');
+            
+            // يمكنك هنا استدعاء دالة عرض المشاريع الخاصة بك لتحديث القائمة دون عمل Refresh
+            // أو بكل بساطة إعادة تحميل الصفحة:
+            window.location.reload();
+        } else {
+            // معالجة الأخطاء القادمة من الخادم (مثلاً: ليس لديك صلاحية الحذف)
+            const data = await response.json();
+            alert('حدث خطأ أثناء الحذف: ' + (data.msg || data.message || 'خطأ غير معروف'));
+        }
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('تعذر الاتصال بالخادم لحذف المشروع. تأكد من اتصالك بالإنترنت.');
+    }
+}
+        
         // ==========================================
         // 1. إدارة الوضع الليلي
         // ==========================================
