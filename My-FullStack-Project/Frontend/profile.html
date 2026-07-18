@@ -1204,45 +1204,247 @@
 
     <!-- ===== سكريبتات ===== -->
     <script>
-async function deleteProject(projectId) {
-    // 1. التأكد من رغبة المستخدم في الحذف
-    if (!confirm('هل أنت متأكد أنك تريد حذف هذا المشروع بشكل نهائي؟')) {
+// ==========================================
+// دالة حذف المشروع بشكل كامل (مُحسنة)
+// ==========================================
+window.deleteMyProject = async function(projectId) {
+    // 1. تأكيد الحذف من المستخدم
+    if (!confirm('⚠️ هل أنت متأكد من حذف هذا المشروع نهائياً؟ لا يمكن التراجع عن هذا الإجراء!')) {
         return;
     }
 
+    // 2. عرض مؤشر تحميل (اختياري)
+    const deleteBtn = document.querySelector(`[data-project-id="${projectId}"] .btn-action.delete`);
+    if (deleteBtn) {
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
+        deleteBtn.disabled = true;
+    }
+
     try {
-        // 2. إرسال طلب الحذف إلى الخادم 
-        // افترضنا هنا أن مسار الحذف في الخادم يأخذ الـ ID الخاص بالمشروع
+        // 3. الحصول على التوكن من localStorage
+        const token = localStorage.getItem('token');
+        
+        // 4. إرسال طلب DELETE إلى الخادم
         const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                // أضفنا التوكن الخاص بالمصادقة لتأكيد هوية المستخدم الذي يحذف مشروعه
-                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
+
+        // 5. معالجة استجابة الخادم
+        if (response.ok) {
+            // 5a. حذف المشروع من localStorage
+            let allProjects = getCodeProjects();
+            allProjects = allProjects.filter(p => p.id !== projectId && p._id !== projectId);
+            localStorage.setItem('codeProjects', JSON.stringify(allProjects));
+            
+            // 5b. حذف المشروع من واجهة المستخدم مباشرة (بدون إعادة تحميل الصفحة)
+            const projectCard = document.querySelector(`[data-project-id="${projectId}"]`);
+            if (projectCard) {
+                // إضافة تأثير تلاشي قبل الحذف
+                projectCard.style.transition = 'all 0.3s ease';
+                projectCard.style.opacity = '0';
+                projectCard.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    projectCard.remove();
+                    
+                    // تحديث العداد في قسم المشاريع
+                    const projectsGrid = document.getElementById('userProjectsContainer');
+                    const remainingProjects = projectsGrid.querySelectorAll('.project-card');
+                    
+                    // تحديث عدد المشاريع في العنوان
+                    const sectionTitle = document.querySelector('.section-title span');
+                    if (sectionTitle) {
+                        sectionTitle.textContent = `المشاريع (${remainingProjects.length})`;
+                    }
+                    
+                    // إذا لم يتبقى مشاريع، عرض رسالة "لا توجد مشاريع"
+                    if (remainingProjects.length === 0) {
+                        projectsGrid.innerHTML = `
+                            <div class="no-projects">
+                                <i class="far fa-folder-open" style="font-size:2.5rem;color:var(--text-muted);display:block;margin-bottom:12px;"></i>
+                                <p>لا توجد مشاريع منشورة بعد.</p>
+                                ${window.location.search.includes('username=') ? '' : '<p style="font-size:0.85rem;color:var(--text-muted);">اذهب إلى المحرر وابدأ مشروعك الأول!</p>'}
+                            </div>
+                        `;
+                    }
+                }, 300);
+            }
+            
+            // 5c. إعادة تحميل إحصائيات الملف الشخصي (تحديث الأعداد)
+            updateProfileStats();
+            
+            // 5d. عرض رسالة نجاح
+            showToast('✅ تم حذف المشروع بنجاح!', 'success');
+            
+        } else {
+            // 6. معالجة أخطاء الخادم
+            let errorMessage = 'حدث خطأ أثناء حذف المشروع';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.msg || errorData.message || errorMessage;
+            } catch (e) {
+                // إذا لم تكن الاستجابة بصيغة JSON
+                if (response.status === 401) {
+                    errorMessage = '❌ غير مصرح لك بحذف هذا المشروع. يرجى تسجيل الدخول مرة أخرى.';
+                } else if (response.status === 404) {
+                    errorMessage = '❌ المشروع غير موجود في الخادم.';
+                } else {
+                    errorMessage = `❌ فشل الحذف (${response.status}): ${response.statusText}`;
+                }
+            }
+            showToast(errorMessage, 'error');
+        }
+        
+    } catch (error) {
+        // 7. معالجة أخطاء الشبكة
+        console.error('❌ خطأ في الاتصال بالخادم:', error);
+        showToast('❌ تعذر الاتصال بالخادم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
+        
+    } finally {
+        // 8. إعادة زر الحذف إلى حالته الطبيعية (إذا لم يتم حذف البطاقة)
+        if (deleteBtn && deleteBtn.parentElement) {
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف';
+            deleteBtn.disabled = false;
+        }
+    }
+};
+
+// ==========================================
+// دالة مساعدة لتحديث إحصائيات الملف الشخصي
+// ==========================================
+function updateProfileStats() {
+    const allProjects = getCodeProjects();
+    const urlParams = new URLSearchParams(window.location.search);
+    const profileUsername = urlParams.get('username') || getCurrentUser();
+    const userProjects = allProjects.filter(p => p.author === profileUsername);
+    
+    // حساب الإحصائيات
+    let totalViews = 0;
+    let totalLikes = 0;
+    let totalComments = 0;
+    
+    userProjects.forEach(p => {
+        totalViews += Number(p.views) || 0;
+        totalLikes += Array.isArray(p.likes) ? p.likes.length : (Number(p.likes) || 0);
+        totalComments += Array.isArray(p.comments) ? p.comments.length : 0;
+    });
+    
+    // تحديث الإحصائيات في واجهة المستخدم
+    const statItems = document.querySelectorAll('.stat-item');
+    if (statItems.length >= 6) {
+        // المشاريع (المؤشر الثالث)
+        const projectStat = statItems[2].querySelector('.stat-number');
+        if (projectStat) projectStat.textContent = userProjects.length;
+        
+        // المشاهدات (المؤشر الرابع)
+        const viewsStat = statItems[3].querySelector('.stat-number');
+        if (viewsStat) viewsStat.textContent = totalViews;
+        
+        // الإعجابات (المؤشر الخامس)
+        const likesStat = statItems[4].querySelector('.stat-number');
+        if (likesStat) likesStat.textContent = totalLikes;
+        
+        // التعليقات (المؤشر السادس)
+        const commentsStat = statItems[5].querySelector('.stat-number');
+        if (commentsStat) commentsStat.textContent = totalComments;
+    }
+    
+    // تحديث المستوى
+    const level = Math.min(20, Math.floor(userProjects.length / 2) + Math.floor(totalLikes / 10) + 1);
+    const levelNumber = document.querySelector('.level-number');
+    if (levelNumber) levelNumber.textContent = `المستوى ${level}`;
+}
+
+// ==========================================
+// دالة عرض رسائل منبثقة أنيقة (Toast)
+// ==========================================
+function showToast(message, type = 'info') {
+    // إزالة أي توست موجود
+    const existingToast = document.querySelector('.custom-toast');
+    if (existingToast) existingToast.remove();
+    
+    // إنشاء عنصر التوست
+    const toast = document.createElement('div');
+    toast.className = 'custom-toast';
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        z-index: 9999;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s ease;
+        direction: rtl;
+        text-align: center;
+        max-width: 90%;
+        border: 1px solid rgba(255,255,255,0.1);
+    `;
+    
+    // تعيين الألوان حسب النوع
+    const colors = {
+        success: { bg: '#28a745', color: '#fff' },
+        error: { bg: '#dc3545', color: '#fff' },
+        info: { bg: '#17a2b8', color: '#fff' },
+        warning: { bg: '#f5a623', color: '#fff' }
+    };
+    
+    const colorSet = colors[type] || colors.info;
+    toast.style.backgroundColor = colorSet.bg;
+    toast.style.color = colorSet.color;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // إضافة حركة دخول
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // إزالة التوست بعد 4 ثواني
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// ==========================================
+// مزامنة المشاريع من الخادم (مُحسنة)
+// ==========================================
+async function syncProjectsFromBackend() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects', {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         });
 
         if (response.ok) {
-            // 3. إذا نجح الحذف من الخادم، نقوم بحذفه من الـ localStorage محلياً
-            let projects = JSON.parse(localStorage.getItem('codeProjects')) || [];
-            projects = projects.filter(p => p.id !== projectId);
+            const projects = await response.json();
+            // حفظ في localStorage
             localStorage.setItem('codeProjects', JSON.stringify(projects));
-
-            // 4. تحديث الواجهة
-            alert('تم حذف المشروع بنجاح!');
-            
-            // يمكنك هنا استدعاء دالة عرض المشاريع الخاصة بك لتحديث القائمة دون عمل Refresh
-            // أو بكل بساطة إعادة تحميل الصفحة:
-            window.location.reload();
-        } else {
-            // معالجة الأخطاء القادمة من الخادم (مثلاً: ليس لديك صلاحية الحذف)
-            const data = await response.json();
-            alert('حدث خطأ أثناء الحذف: ' + (data.msg || data.message || 'خطأ غير معروف'));
+            return projects;
         }
     } catch (error) {
-        console.error('Error deleting project:', error);
-        alert('تعذر الاتصال بالخادم لحذف المشروع. تأكد من اتصالك بالإنترنت.');
+        console.warn('⚠️ فشل في مزامنة المشاريع من الخادم:', error);
     }
+    return null;
 }
         
         // ==========================================
