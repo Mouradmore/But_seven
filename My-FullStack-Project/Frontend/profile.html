@@ -1749,7 +1749,7 @@ async function syncProjectsFromBackend() {
                             ${isOwner ? `
                                 <a href="codes.html?edit=${project.id}" class="btn-action edit"><i class="fas fa-edit"></i> تعديل</a>
                              
-<button class="btn-action delete" onclick="deleteMyProject('${project.id || project._id}')">
+<button class="btn-action delete" onclick="deleteMyProject('${project.id || project.id}')">
     <i class="fas fa-trash"></i> حذف
 </button>
                                 <button class="btn-action pin" onclick="pinProject('${project.id}')"><i class="fas fa-thumbtack"></i> تثبيت</button>
