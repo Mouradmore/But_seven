@@ -1766,74 +1766,11 @@ async function syncProjectsFromBackend() {
         // ==========================================
         // 9. دوال إدارة المشاريع
         // ==========================================
-        window.deleteMyProject = async function(projectId) {
-            if (!confirm('هل أنت متأكد من حذف هذا المشروع نهائياً؟')) return;
+        
 
-            let allProjects = getCodeProjects();
-            allProjects = allProjects.filter(p => p.id !== projectId);
-            localStorage.setItem('codeProjects', JSON.stringify(allProjects));
+        
 
-            const token = getToken();
-            if (token) {
-                try {
-                    await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                } catch (e) { console.warn('فشل حذف المشروع من السيرفر:', e); }
-            }
-
-            renderProfilePage();
-            alert('✅ تم حذف المشروع بنجاح!');
-        };
-
-        window.pinProject = function(projectId) {
-            alert('📌 تم تثبيت المشروع في ملفك الشخصي!');
-        };
-
-        window.shareProject = function(projectId) {
-            const url = `${window.location.origin}/view.html?id=${projectId}`;
-            if (navigator.share) {
-                navigator.share({ title: 'شارك هذا المشروع', url: url });
-            } else if (navigator.clipboard) {
-                navigator.clipboard.writeText(url).then(() => alert('✅ تم نسخ الرابط!'));
-            } else {
-                prompt('انسخ الرابط للمشاركة:', url);
-            }
-        };
-
-        window.downloadProject = function(projectId) {
-            const projects = getCodeProjects();
-            const project = projects.find(p => p.id === projectId);
-            if (!project) return alert('المشروع غير موجود!');
-
-            const content = project.htmlCode || project.html || '';
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${project.title || 'project'}.html`;
-            a.click();
-            URL.revokeObjectURL(url);
-        };
-
-        window.duplicateProject = function(projectId) {
-            const projects = getCodeProjects();
-            const project = projects.find(p => p.id === projectId);
-            if (!project) return alert('المشروع غير موجود!');
-
-            const newProject = {
-                ...project,
-                id: 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                title: project.title + ' (نسخة)',
-                timestamp: Date.now()
-            };
-
-            projects.push(newProject);
-            localStorage.setItem('codeProjects', JSON.stringify(projects));
-            renderProfilePage();
-            alert('✅ تم نسخ المشروع بنجاح!');
-        };
+            
 
         // ==========================================
         // 10. الفلاتر والبحث
