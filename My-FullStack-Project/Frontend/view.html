@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>معاينة صفحة الويب - مجتمع البرمجة</title>
+    <style>
+        body, html {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* لمنع التمرير المزدوج خارج الصفحة المعروضة */
+            /*background-color: #f4f6f9;*/
+            direction: rtl;
+        }
+
+        /* شريط علوي أنيق والتحكم */
+        header {
+            background:;
+            height: 60px;
+           /* box-shadow: 0 2px 10px rgba(0,0,0,0.08);*/
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 100;
+            box-sizing: border-box;
+            margin-top: -60px;
+     
+        }
+
+        header .right-side {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header .logo {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #0056b3;
+            text-decoration: none;
+        }
+
+        header .project-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #007bff;
+           /* border-right: 2px solid #ddd;*/
+            padding-right: 15px;
+        }
+
+        header .actions-zone {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+               }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-primary {
+            background-color: #ddd;
+            color: white;
+            margin-bottom:-1300px;
+        }
+
+        .btn-primary:hover {
+            background-color: #ddd;
+        }
+
+        /* إطار عرض الصفحة بالكامل ليظهر كموقع حقيقي */
+        .full-web-frame {
+            width: 100%;
+            height: calc(100vh - 0px ); /* يملأ الشاشة بالكامل أسفل الهيدر */
+            border: none;
+            background: #ffffff;
+            display: block;
+        }
+
+        /* اللوحة الجانبية المنزلقة للتفاعل والتعليقات */
+        .interaction-sidebar {
+            position: fixed;
+            top: 5px;
+            left: -400px; /* مخفي افتراضياً جهة اليسار */
+            width: 360px;
+            height: calc(110vh - 60px);
+            background: #ffffff;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            z-index: 99;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .interaction-sidebar.open {
+            left: 0; /* يظهر بسلاسة عند تفعيله */
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+        }
+
+        .sidebar-header h4 {
+            margin: 0;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .meta-info-box {
+            background: #f1f3f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .meta-info-box p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .stats-row i {
+            color: #007bff;
+        }
+
+        /* زر الإعجاب التفاعلي */
+        .like-action-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            transition: background 0.2s;
+        }
+
+        .like-action-btn.liked {
+            background-color: #e0f0ff;
+            color: #007bff;
+            border-color: #b3d7ff;
+        }
+
+        /* لون القلب الافتراضي (قبل الإعجاب) */
+.like-action-btn svg {
+    fill: #6c757d; /* لون رمادي */
+    transition: fill 0.2s ease;
+}
+
+/* لون القلب بعد الإعجاب */
+.like-action-btn.liked svg {
+    fill: #dc3545; /* لون أحمر */
+}
+
+        /* قسم التعليقات */
+        .comments-list {
+            margin-top: 15px;
+        }
+
+        .comment-card {
+            background: #f8f9fa;
+            border: 1px solid #eef0f2;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .comment-user {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .comment-text {
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: #aaa;
+            position: absolute;
+            left: 10px;
+            top: 12px;
+        }
+
+        .comment-input-form {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background: #fff;
+        }
+
+        .comment-input-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        .comment-input-form button {
+            width: 100%;
+            background: #fff;
+            color: #666;
+            border: 1px solid #999;
+            padding: 9px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .comment-input-form button:hover {
+            background: #218838;
+        }
+
+        /* شاشة التحميل الحافظة للموقع */
+        .loading-screen {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 100%;
+            height: calc(100vh - 60px);
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            color: #666;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="right-side" hidden>
+
+            <span class="project-title" id="topProjectTitle" hidden>جاري جلب الصفحة...</span>
+        </div>
+        
+<div class="actions-zone">
+<button class="btn btn-primary" onclick="toggleSidebar()">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="22" height="22"><path d="m13,10c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Zm4-1c-.552,0-1,.448-1,1s.448,1,1,1,1-.448,1-1-.448-1-1-1Zm-10,0c-.552,0-1,.448-1,1s.448,1,1,1,1-.448,1-1-.448-1-1-1ZM24,3.5v13c0,1.93-1.57,3.5-3.5,3.5h-3.532l-3.985,3.295c-.275.245-.626.368-.978.368-.356,0-.716-.126-1.001-.379l-3.898-3.284h-3.605c-1.93,0-3.5-1.57-3.5-3.5V3.5C0,1.57,1.57,0,3.5,0h17c1.93,0,3.5,1.57,3.5,3.5Zm-1,0c0-1.378-1.121-2.5-2.5-2.5H3.5c-1.379,0-2.5,1.122-2.5,2.5v13c0,1.378,1.121,2.5,2.5,2.5h3.788c.118,0,.232.042.322.118l4.048,3.41c.199.178.485.176.674.008l4.138-3.421c.09-.074.202-.115.318-.115h3.712c1.379,0,2.5-1.122,2.5-2.5V3.5Z"fill="#666"/></svg>  <span id="topCommentsCount">0</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="loadingScreen" class="loading-screen">
+<p><i class="fas fa-spinner fa-spin"></i> Web page is being configured and loaded...</p>
+    </div>
+
+    <iframe id="webOutputFrame" class="full-web-frame"></iframe>
+
+    <div id="interactionSidebar" class="interaction-sidebar">
+        <div class="sidebar-header">
+<h4>Page details and interaction</h4>
+           
+          <button class="close-sidebar" onclick="toggleSidebar()">
+              <svg onclick="window.close()" style="cursor: pointer; width: 48px; height: 48px;" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10"></circle>
+  <line x1="15" y1="9" x2="9" y2="15"></line>
+  <line x1="9" y1="9" x2="15" y2="15"></line>
+</svg>
+</button>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="meta-info-box">
+<p><strong>Responsible developer:</strong> <span id="authorName">---</span></p>
+                <div class="stats-row">
+                    <span>     <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="22" height="22">
+  <path d="M23.688,11.654c-.131-.354-3.287-8.654-11.688-8.654C3.32,3.153,.464,11.306,.185,11.999c.276,.691,3.121,8.85,11.815,9.001,8.681-.154,11.536-8.305,11.815-9l-.127-.346Zm-11.688,7.346c-6.234,0-9.037-5.529-9.671-6.999,.637-1.47,3.448-7.001,9.671-7.001s9.033,5.529,9.671,7c-.638,1.471-3.449,7-9.671,7Zm5-7c0,2.761-2.239,5-5,5-1.669,0-3.138-.826-4.046-2.083l1.503-1.503,1.5,1.5,2.707-2.707,1.293,1.293v-3.429c0-.316-.256-.571-.571-.571h-3.429l1.293,1.293-1.293,1.293-1.5-1.5-2.362,2.362c-.059-.307-.096-.623-.096-.947,0-2.761,2.239-5,5-5s5,2.239,5,5Z" fill=""/>
+</svg><span id="viewsCount">0</span></span>
+                    <span>   <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="22" height="22"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z" fill="red"/></svg>
+<span id="likesCount">0</span></span>
+                </div>
+            </div>
+
+            <button class="like-action-btn" id="likeActionBtn">    <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="22" height="22">
+  <path d="M17.75,1c-2.504,0-4.777,1.851-5.75,4.354-.973-2.504-3.246-4.354-5.75-4.354C2.804,1,0,3.804,0,7.25c0,6.76,9.754,14.07,11.709,15.466l.291,.208,.291-.208c1.956-1.396,11.709-8.707,11.709-15.466,0-3.446-2.804-6.25-6.25-6.25Zm-5.75,20.693C6.859,17.958,1,12.022,1,7.25,1,4.355,3.355,2,6.25,2c2.748,0,5.25,2.86,5.25,6h1c0-3.14,2.502-6,5.25-6,2.895,0,5.25,2.355,5.25,5.25,0,4.772-5.859,10.708-11,14.443Z"/>
+</svg>
+
+ Like the site
+            </button>
+
+<h5>Comments</h5>
+            <div class="comments-list" id="commentsListZone"></div>
+        </div>
+
+        <div class="comment-input-form">
+            <form id="sidebarCommentForm">
+         <textarea id="sidebarCommentInput" rows="2" placeholder="Add your comment here about the page..." required></textarea>
+                <button type="submit">    <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="52" height="42"><path d="M23.119.882a2.966,2.966,0,0,0-2.8-.8l-16,3.37a4.995,4.995,0,0,0-2.853,8.481L3.184,13.65a1,1,0,0,1,.293.708v3.168a2.965,2.965,0,0,0,.3,1.285l-.008.007.026.026A3,3,0,0,0,5.157,20.2l.026.026.007-.008a2.965,2.965,0,0,0,1.285.3H9.643a1,1,0,0,1,.707.292l1.717,1.717A4.963,4.963,0,0,0,15.587,24a5.049,5.049,0,0,0,1.605-.264,4.933,4.933,0,0,0,3.344-3.986L23.911,3.715A2.975,2.975,0,0,0,23.119.882ZM4.6,12.238,2.881,10.521a2.94,2.94,0,0,1-.722-3.074,2.978,2.978,0,0,1,2.5-2.026L20.5,2.086,5.475,17.113V14.358A2.978,2.978,0,0,0,4.6,12.238Zm13.971,7.17a3,3,0,0,1-5.089,1.712L11.762,19.4a2.978,2.978,0,0,0-2.119-.878H6.888L21.915,3.5Z" fill="#666"/></svg> </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // 1. تعريف العناصر (DOM Elements)
+const urlParams = new URLSearchParams(window.location.search);
+const projectId = urlParams.get('id');
+
+const webOutputFrame = document.getElementById('webOutputFrame');
+const topProjectTitle = document.getElementById('topProjectTitle');
+const topCommentsCount = document.getElementById('topCommentsCount');
+const authorName = document.getElementById('authorName');
+const viewsCount = document.getElementById('viewsCount');
+const likesCount = document.getElementById('likesCount');
+const likeActionBtn = document.getElementById('likeActionBtn');
+const commentsListZone = document.getElementById('commentsListZone');
+const sidebarCommentForm = document.getElementById('sidebarCommentForm');
+const sidebarCommentInput = document.getElementById('sidebarCommentInput');
+const loadingScreen = document.getElementById('loadingScreen');
+const interactionSidebar = document.getElementById('interactionSidebar');
+
+let currentProject = null;
+
+// 2. جلب بيانات المشروع من السيرفر (Backend)
+async function fetchProjectData() {
+    if (!projectId) {
+        showError("لم يتم تحديد مشروع لعرضه.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}`);
+        if (!response.ok) throw new Error('المشروع غير موجود');
+        
+        currentProject = await response.json();
+        
+        // تحديث النصوص في الواجهة
+        topProjectTitle.textContent = currentProject.title || "بدون عنوان";
+        authorName.textContent = currentProject.author || "Visitor";
+        viewsCount.textContent = currentProject.views || 0;
+        likesCount.textContent = currentProject.likes ? currentProject.likes.length : 0;
+        topCommentsCount.textContent = currentProject.comments ? currentProject.comments.length : 0;
+        
+        // حقن الكود داخل الإطار (iframe)
+        const htmlContent = currentProject.html || '';
+        const cssContent = currentProject.css || '';
+        const jsContent = currentProject.js || '';
+        
+        // إذا كان الكود مجمعاً وجاهزاً (كما في codes.html) يتم عرضه مباشرة
+        if (htmlContent.includes('<html')) {
+            webOutputFrame.srcdoc = htmlContent;
+        } else {
+            webOutputFrame.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${cssContent}</style></head><body>${htmlContent}<script>${jsContent}<\/script></body></html>`;
+        }
+
+        // إخفاء شاشة التحميل بمجرد اكتمال بناء وتشغيل الكود داخل الإطار
+        webOutputFrame.onload = () => {
+            loadingScreen.style.display = 'none';
+        };
+
+        // التحقق من حالة الإعجاب للمستخدم الحالي لتلوين القلب
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser && currentProject.likes && currentProject.likes.includes(currentUser)) {
+            likeActionBtn.classList.add('liked');
+            likeActionBtn.innerHTML = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z" fill="red"/></svg> Unlike`;
+        }
+
+        // عرض التعليقات
+        renderSidebarComments(currentProject.comments || []);
+        
+    } catch (error) {
+        showError("عذراً، لم نتمكن من العثور على هذا المشروع أو فشل الاتصال بالسيرفر.");
+    }
+}
+
+// دالة مساعدة لعرض الأخطاء
+function showError(msg) {
+    loadingScreen.innerHTML = `<p style='color:red; font-weight:bold;'><i class='fas fa-exclamation-triangle'></i> ${msg}</p>`;
+}
+
+// 3. دوال التفاعل مع الواجهة
+function toggleSidebar() {
+    interactionSidebar.classList.toggle('open');
+}
+
+function renderSidebarComments(comments) {
+    commentsListZone.innerHTML = '';
+    if (comments.length === 0) {
+        commentsListZone.innerHTML = '<p style="text-align: center; color: #aaa; font-size: 0.9rem; margin: 20px 0;">لا توجد تعليقات على هذا المشروع حتى الآن.</p>';
+        return;
+    }
+
+    comments.forEach(comment => {
+        const card = document.createElement('div');
+        card.classList.add('comment-card');
+        card.innerHTML = `
+            <span class="comment-user">${comment.author || 'Visitor'}</span>
+            <span class="comment-text">${comment.text}</span>
+            <span class="comment-time">${new Date(comment.date).toLocaleDateString('ar-EG')}</span>
+        `;
+        commentsListZone.appendChild(card);
+    });
+}
+
+// 4. إرسال الإعجابات والتعليقات إلى السيرفر
+likeActionBtn.addEventListener('click', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return alert('يجب تسجيل الدخول أولاً لتتمكن من الإعجاب.');
+    
+    try {
+        const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}/like`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) throw new Error('فشل التفاعل');
+        const data = await response.json();
+        
+        likesCount.textContent = data.likesCount;
+        
+        if (data.liked) {
+            likeActionBtn.classList.add('liked');
+            likeActionBtn.innerHTML = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z" fill="red"/></svg> Unlike`;
+        } else {
+            likeActionBtn.classList.remove('liked');
+            likeActionBtn.innerHTML = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path d="M17.75,1c-2.504,0-4.777,1.851-5.75,4.354-.973-2.504-3.246-4.354-5.75-4.354C2.804,1,0,3.804,0,7.25c0,6.76,9.754,14.07,11.709,15.466l.291,.208,.291-.208c1.956-1.396,11.709-8.707,11.709-15.466,0-3.446-2.804-6.25-6.25-6.25Zm-5.75,20.693C6.859,17.958,1,12.022,1,7.25,1,4.355,3.355,2,6.25,2c2.748,0,5.25,2.86,5.25,6h1c0-3.14,2.502-6,5.25-6,2.895,0,5.25,2.355,5.25,5.25,0,4.772-5.859,10.708-11,14.443Z" fill="#666"/></svg> Like the site`;
+        }
+    } catch (err) {
+        console.error("خطأ في الإعجاب", err);
+    }
+});
+
+sidebarCommentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const commentText = sidebarCommentInput.value.trim();
+    if (!commentText) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) return alert('يجب تسجيل الدخول أولاً لتتمكن من التعليق.');
+    
+    try {
+        const response = await fetch(`https://my-backend-api-bntd.onrender.com/api/projects/${projectId}/comment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ text: commentText })
+        });
+        
+        if (!response.ok) throw new Error('فشل إضافة التعليق');
+        
+        const updatedComments = await response.json();
+        renderSidebarComments(updatedComments);
+        topCommentsCount.textContent = updatedComments.length;
+        sidebarCommentInput.value = '';
+    } catch (err) {
+        alert("حدث خطأ أثناء إرسال التعليق");
+    }
+});
+
+// 5. تشغيل الجلب فور فتح الصفحة
+fetchProjectData();
+    
+    </script>
+</body>
+</html>
