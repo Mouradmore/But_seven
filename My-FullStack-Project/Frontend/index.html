@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>But_Seven • Create • Share • Discover Amazing Web Projects</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="style/all.min.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="style/codemirror.min.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="style/dracula.min.css" type="text/css" media="all" />
+
+    <style>
+        /* ===== إخفاء واجهة جوجل الافتراضية ===== */
+        .skiptranslate iframe { display: none !important; }
+        body { top: 0 !important; }
+        #google_translate_element { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+
+        /* ===== متغيرات الوضع الليلي ===== */
+        :root {
+            --bg-primary: #f4f6f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8888aa;
+            --border-color: #e8ecf1;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-color: #667eea;
+            --accent-hover: #5a6fd6;
+            --hero-text: #ffffff;
+            --badge-bg: #ffca28;
+            --badge-text: #333;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+            --header-bg: #ffffff;
+            --header-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1e1e36;
+            --text-primary: #e8e8f0;
+            --text-secondary: #b0b0cc;
+            --text-muted: #6a6a8a;
+            --border-color: #2a2a4a;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --gradient-hero: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 100%);
+            --accent-color: #7c8cf5;
+            --accent-hover: #6a7ae0;
+            --hero-text: #e8e8f0;
+            --badge-bg: #ffca28;
+            --badge-text: #1a1a2e;
+            --input-bg: #1a1a2e;
+            --input-border: #333355;
+            --header-bg: #12122a;
+            --header-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        /* ===== CSS العامة ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            direction: rtl;
+            text-align: right;
+            transition: background-color var(--transition), color var(--transition);
+            min-height: 100vh;
+        }
+
+        /* ===== شريط التمرير المخصص ===== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-hover); }
+
+        /* ===== الهيدر ===== */
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--header-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            transition: all var(--transition);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header h1 .logo-text {
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ===== زر الوضع الليلي ===== */
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all var(--transition);
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+            border-color: var(--accent-color);
+        }
+
+        /* ===== Hero Section ===== */
+        .hero-section {
+            background: var(--gradient-hero);
+            padding: 80px 24px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
+            animation: heroGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-20%, -20%) scale(1.2); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-section .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            color: var(--hero-text);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hero-section h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--hero-text);
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .hero-section h1 span {
+            background: rgba(255,255,255,0.2);
+            padding: 0 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-buttons .btn-primary {
+            background: #ffffff;
+            color: #667eea;
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .hero-buttons .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        }
+
+        .hero-buttons .btn-secondary {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            color: var(--hero-text);
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .hero-buttons .btn-secondary:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+
+        /* ===== إحصائيات الموقع ===== */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            margin: -30px auto 40px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow-hover);
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            display: block;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--accent-color);
+        }
+
+        /* ===== أزرار الفلتر ===== */
+        .filter-section {
+            max-width: 1200px;
+            margin: 0 auto 24px;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-section .filter-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        /* ===== أقسام المشاريع ===== */
+        .section-title {
+            max-width: 1200px;
+            margin: 32px auto 16px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .view-all {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+        }
+
+        .section-title .view-all:hover {
+            color: var(--accent-hover);
+            transform: translateX(-4px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        #projects-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        /* ===== بطاقة المشروع المحسّنة ===== */
+        .project-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition);
+            position: relative;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gradient-hero);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px var(--shadow-hover);
+        }
+
+        .project-card .project-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .project-card .project-tags .tag {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+
+        .project-card .project-preview {
+            width: 100%;
+            height: 140px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .project-card .project-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .project-card h4 {
+            margin: 0 0 8px 0;
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            flex-grow: 1;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .project-card .author {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .project-card .author img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .project-card .project-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .project-card .project-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #f5a623;
+        }
+
+        .project-card .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .project-card .actions button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #fff;
+            transition: all var(--transition);
+        }
+
+        .project-card .actions button:hover {
+            transform: scale(1.02);
+        }
+
+        .project-card .actions .view-code-btn {
+            background: var(--accent-color);
+        }
+
+        .project-card .actions .view-code-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .project-card .actions .share-btn {
+            background: #28a745;
+        }
+
+        .project-card .actions .share-btn:hover {
+            background: #218838;
+        }
+
+        /* ===== الترقيم ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 40px 0;
+        }
+
+        .pagination button {
+            padding: 10px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ===== القائمة الجانبية ===== */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 200;
+            top: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            box-shadow: -4px 0 30px rgba(0,0,0,0.2);
+            border-left: 1px solid var(--border-color);
+        }
+
+        .sidebar .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar .sidebar-header h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .sidebar a {
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all var(--transition);
+            border-right: 3px solid transparent;
+        }
+
+        .sidebar a:hover {
+            color: var(--accent-color);
+            background: var(--bg-primary);
+            border-right-color: var(--accent-color);
+        }
+
+        .sidebar a i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .sidebar .closebtn:hover {
+            color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+
+        /* ===== المودال ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 300;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideDown 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content .close-button {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all var(--transition);
+        }
+
+        .modal-content .close-button:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            transition: all var(--transition);
+            font-size: 1rem;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-content button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+
+        .modal-content button[type="submit"]:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* ===== التوثيقات ===== */
+        .auth-buttons button,
+        .auth-buttons a {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-buttons button:hover,
+        .auth-buttons a:hover {
+            background: var(--bg-primary);
+            color: var(--accent-color);
+        }
+
+        #loggedInUserDisplay {
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #loggedInUserDisplay span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* ===== البحث ===== */
+        .search-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input {
+            width: 100%;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--transition);
+        }
+
+        .search-container input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .search-container input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-container button {
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-container button:hover {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        /* ===== استجابة للشاشات الصغيرة ===== */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            .hero-section p {
+                font-size: 1rem;
+            }
+            .hero-buttons .btn-primary,
+            .hero-buttons .btn-secondary {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-top: -20px;
+            }
+            .stat-card .stat-number {
+                font-size: 1.6rem;
+            }
+            #projects-list {
+                grid-template-columns: 1fr;
+            }
+            .filter-section {
+                gap: 6px;
+            }
+            .filter-btn {
+                padding: 6px 14px;
+                font-size: 0.75rem;
+            }
+            header h1 {
+                font-size: 1.1rem;
+            }
+            header h1 .logo-text {
+                font-size: 1rem;
+            }
+            .sidebar a {
+                font-size: 0.9rem;
+                padding: 10px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section h1 {
+                font-size: 1.6rem;
+            }
+            .stats-section {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .stat-card .stat-number {
+                font-size: 1.3rem;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-buttons .btn-primary,
+            .hero-buttons .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* ===== أنماط الإنجازات ===== */
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .achievement-badge i {
+            color: #f5a623;
+        }
+
+        /* ===== زر العودة للأعلى ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all var(--transition);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            z-index: 50;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        /* ===== تنسيق عنصر الترجمة ===== */
+        .sidebar .custom-language-selector {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .sidebar .custom-language-selector select {
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            outline: none;
+            font-family: inherit;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== القائمة الجانبية ===== -->
+    <div id="mySidebar" class="sidebar">
+        <span class="closebtn" onclick="closeSidebar()">
+            <i class="fas fa-times"></i>
+        </span>
+        <div class="sidebar-header">
+            <h3><i class="fas fa-code"></i> But_Seven</h3>
+        </div>
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="#" onclick="checkAndGoToCodes()"><i class="fas fa-edit"></i> محرر الأكواد</a>
+        <a href="profile.html"><i class="fas fa-user"></i> الملف الشخصي</a>
+        <a href="library.html"><i class="fas fa-book"></i> المكتبة</a>
+        <a href="#" onclick="filterProjects('trending')"><i class="fas fa-fire"></i> الرائجة</a>
+        <a href="#" onclick="filterProjects('newest')"><i class="fas fa-clock"></i> الأحدث</a>
+        <a href="#" onclick="filterProjects('favorites')"><i class="fas fa-star"></i> المفضلة</a>
+        
+        <!-- بعد الفلاتر -->
+<div style="display:flex;justify-content:flex-end;padding:0 20px;max-width:1200px;margin:0 auto;">
+    <button onclick="forceSyncProjects();" style="background:var(--accent-color);color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600;">
+        <i class="fas fa-sync"></i> تحديث المشاريع
+    </button>
+</div>
+        <div class="custom-language-selector">
+            <select id="langSelect" onchange="changeLanguage(this.value)">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ===== الهيدر ===== -->
+    <header>
+        <h1>
+            <span onclick="openSidebar()" style="cursor:pointer;">
+                <i class="fas fa-bars" style="color: var(--text-secondary); font-size: 22px;"></i>
+            </span>
+            <span class="logo-text">But_Seven</span>
+        </h1>
+        <div class="header-actions">
+            <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع الليلي">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <div class="auth-buttons">
+                <div id="loggedOutButtons">
+                    <button id="loginBtnHeader"><i class="fas fa-sign-in-alt"></i></button>
+                    <button id="registerBtnHeader"><i class="fas fa-user-plus"></i></button>
+                </div>
+                <div id="loggedInUserDisplay">
+                    <span hidden>مرحباً، <span id="currentUsername"></span></span>
+                    <a href="profile.html" style="border: none; padding: 0; display: inline-flex; align-items: center; text-decoration: none;">
+                        <img id="headerProfilePic" src="" alt="Profile" style="display: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color);">
+                        <i id="defaultProfileIcon" class="fas fa-user-circle" style="font-size: 36px; color: var(--text-muted);"></i>
+                    </a>
+                    <button id="logoutBtnHeader" style="background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== عنصر جوجل ترانسليت (مخفي) ===== -->
+    <div id="google_translate_element" style="display: none;"></div>
+
+    <!-- ===== Hero Section ===== -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-rocket"></i> منصة المطورين العربية الأولى
+            </div>
+            <h1>
+                أنشئ <span>شارك</span> اكتشف
+            </h1>
+            <p>مشاريع ويب مذهلة من مجتمع المطورين. ابدأ مشروعك الآن وانضم إلى آلاف المبدعين.</p>
+            <div class="hero-buttons">
+                <a href="#" onclick="checkAndGoToCodes()" class="btn-primary">
+                    <i class="fas fa-code"></i> ابدأ البرمجة
+                </a>
+                <a href="#projects-section" class="btn-secondary">
+                    <i class="fas fa-compass"></i> استكشف المشاريع
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== إحصائيات الموقع ===== -->
+    <div class="stats-section" id="statsSection">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
+            <span class="stat-number" id="statProjects">0</span>
+            <span class="stat-label">مشروع</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <span class="stat-number" id="statDevelopers">0</span>
+            <span class="stat-label">مطور</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-eye"></i></div>
+            <span class="stat-number" id="statViews">0</span>
+            <span class="stat-label">مشاهدة</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-heart"></i></div>
+            <span class="stat-number" id="statLikes">0</span>
+            <span class="stat-label">إعجاب</span>
+        </div>
+    </div>
+
+    <!-- ===== البحث ===== -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="ابحث عن مشروع، مطور، أو وسم..." oninput="searchProjects()">
+        <button onclick="searchProjects()"><i class="fas fa-search"></i></button>
+    </div>
+
+    <!-- ===== الفلاتر ===== -->
+    <div class="filter-section">
+        <span class="filter-label"><i class="fas fa-filter"></i> الفلاتر:</span>
+        <button class="filter-btn active" data-filter="all" onclick="filterProjects('all')">الكل</button>
+        <button class="filter-btn" data-filter="html" onclick="filterProjects('html')">HTML</button>
+        <button class="filter-btn" data-filter="css" onclick="filterProjects('css')">CSS</button>
+        <button class="filter-btn" data-filter="javascript" onclick="filterProjects('javascript')">JavaScript</button>
+        <button class="filter-btn" data-filter="react" onclick="filterProjects('react')">React</button>
+        <button class="filter-btn" data-filter="python" onclick="filterProjects('python')">Python</button>
+        <button class="filter-btn" data-filter="game" onclick="filterProjects('game')">🎮 ألعاب</button>
+        <button class="filter-btn" data-filter="ai" onclick="filterProjects('ai')">🤖 AI</button>
+    </div>
+
+    <!-- ===== المشاريع ===== -->
+    <div class="section-title" id="projects-section">
+        <h2><i class="fas fa-code" style="color: var(--accent-color);"></i> <span id="sectionTitle">جميع المشاريع</span></h2>
+        <a href="#" class="view-all" onclick="filterProjects('all')">عرض الكل <i class="fas fa-arrow-left"></i></a>
+    </div>
+
+    <div class="container">
+        <div id="projects-list"></div>
+        <div class="pagination">
+            <button id="prevPageBtn"><i class="fas fa-chevron-right"></i> السابق</button>
+            <span id="currentPageDisplay">الصفحة 1 من 1</span>
+            <button id="nextPageBtn">التالي <i class="fas fa-chevron-left"></i></button>
+        </div>
+    </div>
+
+    <!-- ===== مودال تسجيل الدخول ===== -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-modal="loginModal">&times;</span>
+            <h3><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h3>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="اسم المستخدم" required>
+                <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
+                <button type="submit">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== زر العودة للأعلى ===== -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- ===== السكريبتات ===== -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ar',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
+
+    <script>
+        // ==========================================
+        // 1. إدارة الوضع الليلي
+        // ==========================================
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        // تحميل الوضع الليلي المحفوظ
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        // ==========================================
+        // 2. أدوات التحكم الأساسية
+        // ==========================================
+        function openSidebar() { document.getElementById("mySidebar").style.width = "280px"; }
+
+        function closeSidebar() { document.getElementById("mySidebar").style.width = "0"; }
+
+        function checkAndGoToCodes() {
+            if (localStorage.getItem('currentUser')) {
+                window.location.href = "codes.html";
+            } else {
+                alert("يرجى إنشاء حساب أولاً للوصول إلى محرر الأكواد ومشاريعك!");
+                openModal(document.getElementById('loginModal'));
+            }
+        }
+
+        function getCurrentUser() { return localStorage.getItem('currentUser'); }
+
+        function setCurrentUser(username) { localStorage.setItem('currentUser', username); }
+
+        function clearCurrentUser() { localStorage.removeItem('currentUser'); }
+
+        function getUsers() { return JSON.parse(localStorage.getItem('users')) || []; }
+
+        function getCodeProjects() { return JSON.parse(localStorage.getItem('codeProjects')) || []; }
+
+        function saveCodeProjects(projects) { localStorage.setItem('codeProjects', JSON.stringify(projects)); }
+
+        function openModal(modalElement) { modalElement.style.display = 'flex'; }
+
+        function closeModal(modalElement) { modalElement.style.display = 'none'; }
+
+        const loginModal = document.getElementById('loginModal');
+        const loginBtnHeader = document.getElementById('loginBtnHeader');
+        const registerBtnHeader = document.getElementById('registerBtnHeader');
+        const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+        const loggedInUserDisplay = document.getElementById('loggedInUserDisplay');
+        const loggedOutButtons = document.getElementById('loggedOutButtons');
+        const currentUsernameSpan = document.getElementById('currentUsername');
+        const loginForm = document.getElementById('loginForm');
+        const projectsListDiv = document.getElementById('projects-list');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const currentPageDisplay = document.getElementById('currentPageDisplay');
+        const sectionTitle = document.getElementById('sectionTitle');
+
+        let currentPage = 1;
+        const projectsPerPage = 12;
+        let currentFilter = 'all';
+        let allProjectsCache = [];
+
+        // ==========================================
+        // 3. تحديث واجهة المستخدم
+        // ==========================================
+        function updateIndexAuthUI() {
+            const currentUser = getCurrentUser();
+            const headerProfilePic = document.getElementById('headerProfilePic');
+            const defaultProfileIcon = document.getElementById('defaultProfileIcon');
+
+            if (currentUser) {
+                loggedInUserDisplay.style.display = 'flex';
+                loggedOutButtons.style.display = 'none';
+                currentUsernameSpan.textContent = currentUser;
+
+                const serverPic = localStorage.getItem('profilePic');
+                const users = getUsers();
+                const userObj = users.find(u => u.username === currentUser);
+
+                if (serverPic) {
+                    headerProfilePic.src = serverPic;
+                    headerProfilePic.style.display = 'block';
+                    defaultProfileIcon.style.display = 'none';
+                } else if (userObj && userObj.profilePic) {
+                    headerProfilePic.src = userObj.profilePic;
+                    headerProfilePic.style.display = 'block';
+                    defaultProfileIcon.style.display = 'none';
+                } else {
+                    headerProfilePic.style.display = 'none';
+                    defaultProfileIcon.style.display = 'block';
+                }
+            } else {
+                loggedInUserDisplay.style.display = 'none';
+                loggedOutButtons.style.display = 'flex';
+            }
+        }
+
+        function getUserAvatar(username) {
+            if (username === getCurrentUser() && localStorage.getItem('profilePic')) {
+                return localStorage.getItem('profilePic');
+            }
+            const users = getUsers();
+            const user = users.find(u => u.username === username);
+            if (user && user.profilePic) return user.profilePic;
+            return "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+        }
+
+        // ==========================================
+        // 4. استخراج الوسوم من المشروع
+        // ==========================================
+        function detectProjectTags(project) {
+            const tags = [];
+            const html = (project.htmlCode || project.html || '').toLowerCase();
+            const css = (project.cssCode || project.css || '').toLowerCase();
+            const js = (project.jsCode || project.js || '').toLowerCase();
+
+            if (html.includes('<html') || html.includes('<!doctype')) tags.push('HTML');
+            if (css.includes('{') || css.includes('color:') || css.includes('display:')) tags.push('CSS');
+            if (js.includes('function') || js.includes('const ') || js.includes('let ')) tags.push('JavaScript');
+            if (html.includes('react') || js.includes('react')) tags.push('React');
+            if (html.includes('canvas') || html.includes('game')) tags.push('🎮 ألعاب');
+            if (html.includes('openai') || html.includes('ai') || html.includes('chatgpt')) tags.push('🤖 AI');
+            if (html.includes('python') || html.includes('flask') || html.includes('django')) tags.push('Python');
+
+            if (tags.length === 0) tags.push('ويب');
+            return tags.slice(0, 4);
+        }
+
+        // ==========================================
+        // 5. بناء بطاقات المشاريع
+        // ==========================================
+        function createCardHTML(project, isTrending = false) {
+            const authorAvatar = getUserAvatar(project.author);
+            const tags = detectProjectTags(project);
+
+            const badgeHTML = isTrending ?
+                `<div class="trending-badge" style="position:absolute;top:-10px;right:16px;background:var(--badge-bg);color:var(--badge-text);padding:4px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(255,202,40,0.3);z-index:5;">
+                    <i class="fas fa-fire"></i> رائج
+                </div>` :
+                '';
+
+            const currentUser = getCurrentUser();
+            let followBtnHTML = '';
+
+            const users = getUsers();
+            const authorObj = users.find(u => u.username.toLowerCase() === (project.author || '').toLowerCase());
+            const followersCount = authorObj && Array.isArray(authorObj.followers) ? authorObj.followers.length : 0;
+
+            if (!currentUser || currentUser !== project.author) {
+                const isFollowing = currentUser ? checkIsFollowing(currentUser, project.author) : false;
+                const btnText = isFollowing ? 'إلغاء المتابعة' : 'متابعة';
+                const btnBg = isFollowing ? 'var(--bg-primary)' : 'var(--accent-color)';
+                const btnColor = isFollowing ? 'var(--text-secondary)' : '#fff';
+
+                followBtnHTML =
+                    `<button onclick="toggleFollow('${project.author}')" style="margin-right:auto;padding:4px 14px;font-size:0.75rem;font-weight:600;border-radius:20px;border:1px solid ${isFollowing ? 'var(--border-color)' : 'var(--accent-color)'};background:${btnBg};color:${btnColor};cursor:pointer;transition:all 0.3s;">${btnText}</button>`;
+            }
+
+            let rawDescription = project.description ? String(project.description) : "لا يوجد وصف لهذا المشروع.";
+            let safeDescription = rawDescription.length > 80 ? rawDescription.substring(0, 80) + '...' : rawDescription;
+            const likesCount = Array.isArray(project.likes) ? project.likes.length : (Number(project.likes) || 0);
+
+            // تقييم عشوائي (محاكاة)
+            const rating = (3.5 + Math.random() * 1.5).toFixed(1);
+            const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+
+            return `
+                <div class="project-card" style="position:relative;">
+                    ${badgeHTML}
+                    <div class="project-tags">
+                        ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="project-preview">
+                        <i class="fas fa-code" style="font-size:2rem;color:var(--text-muted);"></i>
+                        <span style="position:absolute;font-size:0.7rem;color:var(--text-muted);margin-top:50px;">معاينة المشروع</span>
+                    </div>
+                    <h4>${project.title}</h4>
+                    <p>${safeDescription}</p>
+                    <div class="project-rating">
+                        ${stars}
+                        <span style="color:var(--text-muted);font-size:0.75rem;">(${rating})</span>
+                    </div>
+                    <div class="author">
+                        <img src="${authorAvatar}" alt="${project.author}">
+                        <span style="flex:1;"><strong>${project.author}</strong></span>
+                        <span style="font-size:0.7rem;color:var(--text-muted);">
+                            <i class="fas fa-users"></i> ${followersCount}
+                        </span>
+                        ${followBtnHTML}
+                    </div>
+                    <div class="project-meta">
+                        <span><i class="fas fa-eye"></i> ${project.views || 0}</span>
+                        <span><i class="fas fa-heart" style="color:#dc3545;"></i> ${likesCount}</span>
+                        <span><i class="fas fa-comment"></i> ${(project.comments || []).length}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="view-code-btn" data-project-id="${project.id}">
+                            <i class="fas fa-external-link-alt"></i> عرض
+                        </button>
+                        <button onclick="shareProject('${project.id}', this)" class="share-btn">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkIsFollowing(followerUsername, targetUsername) {
+            const users = getUsers();
+            const follower = users.find(u => u.username === followerUsername);
+            if (follower && follower.following) return follower.following.includes(targetUsername);
+            return false;
+        }
+
+        window.shareProject = function(projectId, btnElement) {
+            const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+            const shareUrl = `${baseUrl}/view.html?id=${projectId}`;
+
+            if (navigator.share) {
+                navigator.share({ title: 'شارك هذا المشروع', url: shareUrl })
+                    .catch(() => {});
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showSuccessMessage(btnElement);
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(shareUrl, btnElement);
+                });
+            } else {
+                fallbackCopyTextToClipboard(shareUrl, btnElement);
+            }
+
+            function showSuccessMessage(btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.style.background = '#20c997';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }
+
+            function fallbackCopyTextToClipboard(text, btn) {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.opacity = "0";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showSuccessMessage(btn);
+                } catch (err) {
+                    prompt("انسخ الرابط للمشاركة:", text);
+                }
+                document.body.removeChild(textArea);
+            }
+        };
+
+        window.toggleFollow = function(targetUsername) {
+            const currentUsername = getCurrentUser();
+
+            if (!currentUsername) {
+                alert("يرجى تسجيل الدخول أولاً لمتابعة المطورين!");
+                openModal(document.getElementById('loginModal'));
+                return;
+            }
+
+            if (currentUsername === targetUsername) {
+                alert("لا يمكنك متابعة نفسك.");
+                return;
+            }
+
+            let users = getUsers();
+
+            let currentUserObj = users.find(u => u.username.toLowerCase() === currentUsername.toLowerCase());
+            if (!currentUserObj) {
+                currentUserObj = { username: currentUsername, following: [], followers: [] };
+                users.push(currentUserObj);
+            }
+
+            let targetUserObj = users.find(u => u.username.toLowerCase() === targetUsername.toLowerCase());
+            if (!targetUserObj) {
+                targetUserObj = { username: targetUsername, following: [], followers: [] };
+                users.push(targetUserObj);
+            }
+
+            if (!currentUserObj.following) currentUserObj.following = [];
+            if (!targetUserObj.followers) targetUserObj.followers = [];
+
+            const isFollowing = currentUserObj.following.includes(targetUsername);
+
+            if (isFollowing) {
+                currentUserObj.following = currentUserObj.following.filter(name => name !== targetUsername);
+                targetUserObj.followers = targetUserObj.followers.filter(name => name !== currentUsername);
+            } else {
+                currentUserObj.following.push(targetUsername);
+                targetUserObj.followers.push(currentUsername);
+            }
+
+            localStorage.setItem('users', JSON.stringify(users));
+            displayCodeProjects();
+        };
+
+        // ==========================================
+        // 6. المزامنة مع السيرفر وعرض المشاريع
+        // ==========================================
+        async function syncProjectsFromBackend() {
+            try {
+                const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects');
+                if (response.ok) {
+                    const data = await response.json();
+                    let serverProjects = data.projects || (Array.isArray(data) ? data : []);
+                    serverProjects = serverProjects.map(p => ({
+                        ...p,
+                        id: p._id || p.id || 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        timestamp: p.timestamp || new Date(p.createdAt).getTime() || Date.now()
+                    }));
+                    localStorage.setItem('codeProjects', JSON.stringify(serverProjects));
+                }
+            } catch (error) {
+                console.error("تعذر جلب المشاريع من السيرفر، سيتم استخدام البيانات المحلية.");
+            } finally {
+                displayCodeProjects();
+                updateStats();
+            }
+        }
+
+        function displayCodeProjects() {
+            let projects = getCodeProjects();
+            projects = projects.map(p => {
+                if (!p.views) p.views = 0;
+                if (!p.likes) p.likes = 0;
+                if (!p.comments) p.comments = [];
+                return p;
+            });
+            saveCodeProjects(projects);
+            allProjectsCache = projects;
+
+            // تطبيق الفلتر
+            let filtered = filterProjectsByTag(allProjectsCache, currentFilter);
+
+            projectsListDiv.innerHTML = '';
+            projectsListDiv.style.display = 'grid';
+
+            if (filtered.length === 0) {
+                projectsListDiv.innerHTML =
+                    `<p style="text-align:center;margin-top:50px;font-size:1.1rem;color:var(--text-muted);grid-column:1/-1;">
+                        <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
+                        لا توجد مشاريع لعرضها. <a href="#" onclick="checkAndGoToCodes()" style="color:var(--accent-color);text-decoration:none;">ابدأ مشروعك الأول!</a>
+                    </p>`;
+                if (prevPageBtn) prevPageBtn.disabled = true;
+                if (nextPageBtn) nextPageBtn.disabled = true;
+                if (currentPageDisplay) currentPageDisplay.textContent = 'الصفحة 0 من 0';
+                return;
+            }
+
+            // ترتيب المشاريع
+            let sorted = [...filtered];
+            if (currentFilter === 'trending') {
+                sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+            } else if (currentFilter === 'newest') {
+                sorted.sort((a, b) => b.timestamp - a.timestamp);
+            } else {
+                sorted.sort((a, b) => b.timestamp - a.timestamp);
+            }
+
+            const startIndex = (currentPage - 1) * projectsPerPage;
+            const endIndex = startIndex + projectsPerPage;
+            const projectsToDisplay = sorted.slice(startIndex, endIndex);
+
+            // عرض المشروع الرائج في الصفحة الأولى
+            if (currentPage === 1 && sorted.length > 0 && currentFilter === 'all') {
+                let topProject = sorted.reduce((a, b) => (a.views || 0) > (b.views || 0) ? a : b);
+                if (topProject && (topProject.views || 0) > 0) {
+                    const topIndex = sorted.indexOf(topProject);
+                    const topDisplay = sorted.splice(topIndex, 1);
+                    projectsListDiv.innerHTML += createCardHTML(topDisplay[0], true);
+                }
+            }
+
+            projectsToDisplay.forEach(project => {
+                projectsListDiv.innerHTML += createCardHTML(project, false);
+            });
+
+            if (prevPageBtn) prevPageBtn.style.display = 'inline-block';
+            if (nextPageBtn) nextPageBtn.style.display = 'inline-block';
+
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = endIndex >= sorted.length;
+            currentPageDisplay.innerHTML = `الصفحة ${currentPage} من ${Math.ceil(sorted.length / projectsPerPage) || 1}`;
+
+            document.querySelectorAll('.view-code-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const projectId = event.currentTarget.dataset.projectId;
+                    window.location.href = `view.html?id=${projectId}`;
+                });
+            });
+        }
+
+        function filterProjectsByTag(projects, filter) {
+            if (filter === 'all' || filter === 'trending' || filter === 'newest' || filter === 'favorites') {
+                return projects;
+            }
+
+            return projects.filter(p => {
+                const tags = detectProjectTags(p);
+                return tags.some(t => t.toLowerCase().includes(filter.toLowerCase()));
+            });
+        }
+
+        // ==========================================
+        // 7. الفلاتر والبحث
+        // ==========================================
+        function filterProjects(filter) {
+            currentFilter = filter;
+            currentPage = 1;
+
+            // تحديث أزرار الفلتر
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // تحديث عنوان القسم
+            const titles = {
+                'all': 'جميع المشاريع',
+                'trending': '🔥 المشاريع الرائجة',
+                'newest': '🆕 أحدث المشاريع',
+                'favorites': '⭐ المفضلة',
+                'html': 'HTML',
+                'css': 'CSS',
+                'javascript': 'JavaScript',
+                'react': 'React',
+                'python': 'Python',
+                'game': '🎮 ألعاب',
+                'ai': '🤖 الذكاء الاصطناعي'
+            };
+            sectionTitle.textContent = titles[filter] || 'جميع المشاريع';
+
+            displayCodeProjects();
+        }
+
+        function searchProjects() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                filterProjects(currentFilter);
+                return;
+            }
+
+            const allProjects = getCodeProjects();
+            const filtered = allProjects.filter(p => {
+                const titleMatch = (p.title || '').toLowerCase().includes(query);
+                const descMatch = (p.description || '').toLowerCase().includes(query);
+                const authorMatch = (p.author || '').toLowerCase().includes(query);
+                const tagsMatch = detectProjectTags(p).some(t => t.toLowerCase().includes(query));
+
+                // بحث داخل الكود
+                const htmlCode = (p.htmlCode || p.html || '').toLowerCase();
+                const codeMatch = htmlCode.includes(query);
+
+                return titleMatch || descMatch || authorMatch || tagsMatch || codeMatch;
+            });
+
+            currentPage = 1;
+            displayFilteredProjects(filtered, `نتائج البحث: "${query}"`);
+        }
+
+        function displayFilteredProjects(projects, title) {
+            projectsListDiv.innerHTML = '';
+            projectsListDiv.style.display = 'grid';
+
+            if (projects.length === 0) {
+                projectsListDiv.innerHTML =
+                    `<p style="text-align:center;margin-top:50px;color:var(--text-muted);grid-column:1/-1;">
+                        <i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
+                        لا توجد نتائج مطابقة للبحث.
+                    </p>`;
+                return;
+            }
+
+            projects.forEach(project => {
+                projectsListDiv.innerHTML += createCardHTML(project, false);
+            });
+
+            document.querySelectorAll('.view-code-btn').forEach(b => b.addEventListener('click', (e) => {
+                window.location.href = `view.html?id=${e.currentTarget.dataset.projectId}`;
+            }));
+        }
+
+        // ==========================================
+        // 8. الإحصائيات
+        // ==========================================
+        function updateStats() {
+            const projects = getCodeProjects();
+            const users = getUsers();
+
+            let totalViews = 0;
+            let totalLikes = 0;
+            projects.forEach(p => {
+                totalViews += p.views || 0;
+                totalLikes += Array.isArray(p.likes) ? p.likes.length : (Number(p.likes) || 0);
+            });
+
+            animateNumber('statProjects', projects.length);
+            animateNumber('statDevelopers', users.length);
+            animateNumber('statViews', totalViews);
+            animateNumber('statLikes', totalLikes);
+        }
+
+        function animateNumber(elementId, target) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const current = parseInt(el.textContent) || 0;
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function update(time) {
+                const progress = Math.min((time - startTime) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const value = Math.round(current + (target - current) * eased);
+                el.textContent = value.toLocaleString();
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.textContent = target.toLocaleString();
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // ==========================================
+        // 9. زر العودة للأعلى
+        // ==========================================
+        window.addEventListener('scroll', function() {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // ==========================================
+        // 10. تشغيل الأحداث
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // تسجيل الدخول
+            if (loginBtnHeader) loginBtnHeader.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(loginModal);
+            });
+            if (registerBtnHeader) registerBtnHeader.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = "register.html";
+            });
+
+            // إغلاق المودال
+            document.querySelectorAll('.close-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    closeModal(document.getElementById(event.target.dataset.modal));
+                });
+            });
+
+            // نموذج تسجيل الدخول
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const response = await fetch('https://my-backend-api-bntd.onrender.com/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        alert(data.msg || data.message || 'بيانات الدخول غير صحيحة');
+                        return;
+                    }
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('currentUser', data.username);
+                    if (data.profilePic) localStorage.setItem('profilePic', data.profilePic);
+
+                    alert(`أهلاً بك مجدداً، ${data.username}!`);
+                    closeModal(loginModal);
+                    loginForm.reset();
+                    updateIndexAuthUI();
+                    syncProjectsFromBackend();
+                } catch (error) {
+                    alert('حدث خطأ في الاتصال بالسيرفر');
+                }
+            });
+
+            // تسجيل الخروج
+            if (logoutBtnHeader) logoutBtnHeader.addEventListener('click', () => {
+                clearCurrentUser();
+                localStorage.removeItem('token');
+                localStorage.removeItem('profilePic');
+                alert('تم تسجيل الخروج بنجاح.');
+                updateIndexAuthUI();
+                displayCodeProjects();
+            });
+
+            // الترقيم
+            if (prevPageBtn) prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCodeProjects();
+                }
+            });
+            if (nextPageBtn) nextPageBtn.addEventListener('click', () => {
+                const projects = getCodeProjects();
+                const filtered = filterProjectsByTag(projects, currentFilter);
+                if (currentPage < Math.ceil(filtered.length / projectsPerPage)) {
+                    currentPage++;
+                    displayCodeProjects();
+                }
+            });
+
+            // تشغيل الصفحة
+            updateIndexAuthUI();
+            syncProjectsFromBackend();
+        });
+
+        // ==========================================
+        // 11. وظائف الترجمة
+        // ==========================================
+        function changeLanguage(langCode) {
+            document.cookie = "googtrans=/ar/" + langCode + "; path=/; domain=" + window.location.hostname;
+            document.cookie = "googtrans=/ar/" + langCode + "; path=/;";
+            window.location.reload();
+        }
+
+        // اكتشاف لغة المتصفح
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasTranslationCookie = document.cookie.includes('googtrans=');
+
+            if (!hasTranslationCookie) {
+                const userLangFull = navigator.language || navigator.userLanguage;
+                const userLangCode = userLangFull.split('-')[0];
+                const supportedLangs = ['ar', 'en', 'fr'];
+
+                if (supportedLangs.includes(userLangCode) && userLangCode !== 'ar') {
+                    changeLanguage(userLangCode);
+                }
+            } else {
+                const match = document.cookie.match(/googtrans=\/ar\/([a-z]{2})/);
+                if (match && match[1]) {
+                    const selectElement = document.getElementById('langSelect');
+                    if (selectElement) selectElement.value = match[1];
+                }
+            }
+        });
+        // ==========================================
+// 12. التحقق من المشاريع الجديدة بعد النشر
+// ==========================================
+// دالة للتأكد من مزامنة المشاريع مع السيرفر
+async function forceSyncProjects() {
+    try {
+        const response = await fetch('https://my-backend-api-bntd.onrender.com/api/projects');
+        if (response.ok) {
+            const data = await response.json();
+            let serverProjects = data.projects || (Array.isArray(data) ? data : []);
+            
+            // تحويل البيانات
+            serverProjects = serverProjects.map(p => ({
+                ...p,
+                id: p._id || p.id || 'proj_' + Date.now(),
+                htmlCode: p.htmlCode || p.html || '',
+                html: p.html || p.htmlCode || '',
+                cssCode: p.cssCode || p.css || '',
+                jsCode: p.jsCode || p.js || '',
+                likes: p.likes || [],
+                comments: p.comments || [],
+                ratings: p.ratings || [],
+                views: p.views || 0,
+                timestamp: p.timestamp || new Date(p.createdAt).getTime() || Date.now()
+            }));
+            
+            localStorage.setItem('codeProjects', JSON.stringify(serverProjects));
+            console.log('✅ تم مزامنة ' + serverProjects.length + ' مشروع من السيرفر');
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('خطأ في مزامنة المشاريع:', error);
+        return false;
+    }
+}
+
+// في DOMContentLoaded، أضف هذا:
+document.addEventListener('DOMContentLoaded', () => {
+    // ... الكود الموجود ...
+    
+    // التحقق من معلمة refresh
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('refresh')) {
+        console.log('🔄 تحديث البيانات من السيرفر...');
+        // مزامنة فورية
+        forceSyncProjects().then(() => {
+            displayCodeProjects();
+            updateStats();
+        });
+    }
+    
+    // الاستماع لتغييرات localStorage
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'codeProjects') {
+            console.log('📦 تغيرت بيانات المشاريع في localStorage');
+            allProjectsCache = JSON.parse(e.newValue) || [];
+            displayCodeProjects();
+            updateStats();
+        }
+    });
+    
+    // ... باقي الكود ...
+});
+    </script>
+</body>
+</html>
