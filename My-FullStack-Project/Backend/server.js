@@ -241,3 +241,23 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
 // تشغيل الخادم
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
+// ==========================================
+// مسار تجديد التوكن
+// ==========================================
+app.post('/api/auth/refresh', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const user = await User.findOne({ username });
+        
+        if (!user) {
+            return res.status(404).json({ msg: 'المستخدم غير موجود' });
+        }
+        
+        const payload = { user: { id: user.id, username: user.username } };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+        
+        res.json({ token });
+    } catch (err) {
+        res.status(500).json({ msg: 'خطأ في تجديد التوكن' });
+    }
+});
