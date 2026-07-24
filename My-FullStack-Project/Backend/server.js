@@ -172,18 +172,27 @@ app.delete('/api/projects/:id', auth, async (req, res) => {
         if (!project) {
             return res.status(404).json({ msg: 'المشروع غير موجود' });
         }
-
-        // إضافة حماية: التأكد أن المستخدم الذي يحذف هو صاحب المشروع
+        
         if (project.author !== req.user.username) {
-            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
+            return res.status(403).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
         }
-
+        
         await Project.findByIdAndDelete(req.params.id);
-        res.json({ msg: 'تم حذف المشروع بنجاح' });
+        
+        // إرجاع معلومات واضحة
+        res.json({
+            msg: 'تم حذف المشروع بنجاح',
+            deletedId: req.params.id,
+            success: true
+        });
         
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'خطأ داخلي في السيرفر' });
+        console.error('خطأ في الحذف:', error);
+        res.status(500).json({
+            msg: 'خطأ داخلي في السيرفر أثناء الحذف',
+            error: error.message,
+            success: false
+        });
     }
 });
 
