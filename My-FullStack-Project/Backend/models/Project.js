@@ -1,21 +1,31 @@
 const mongoose = require('mongoose');
 
-const CommentSchema = new mongoose.Schema({
-  author: { type: String, required: true },
-  text: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
-
 const ProjectSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, default: "" },
-  html: { type: String, default: "" },
-  css: { type: String, default: "" },
-  js: { type: String, default: "" },
-  author: { type: String, required: true },
-  views: { type: Number, default: 0 },
-  likes: { type: [String], default: [] }, // مصفوفة تحتوي على أسماء المستخدمين الذين وضعوا إعجاباً
-  comments: [CommentSchema]
-}, { timestamps: true });
+    title: { type: String, required: true },
+    description: { type: String },
+    html: { type: String },
+    css: { type: String },
+    js: { type: String },
+    author: { type: String, required: true },
+    
+    // ===== الحقول الجديدة لسلة المحذوفات =====
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
+    
+    // الحقول الموجودة مسبقاً
+    views: { type: Number, default: 0 },
+    likes: [{ type: String }],
+    comments: [{
+        author: String,
+        text: String,
+        createdAt: { type: Date, default: Date.now }
+    }],
+    ratings: [{
+        user: String,
+        value: Number
+    }]
+}, {
+    timestamps: true // يضيف createdAt و updatedAt تلقائياً
+});
 
 module.exports = mongoose.model('Project', ProjectSchema);
