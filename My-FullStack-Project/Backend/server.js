@@ -47,8 +47,13 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // تسجيل الدخول (Login) -> متوافق مع indexs.html
+// ==========================================
+// مسار تسجيل الدخول (Login) بعد التعديل
+// ==========================================
+// تسجيل الدخول (Login) 
 app.post('/api/auth/login', async (req, res) => {
     try {
+        // نستقبل اسم المستخدم وليس الإيميل لتتوافق مع الواجهة
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
@@ -58,10 +63,19 @@ app.post('/api/auth/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
         const payload = { user: { id: user.id, username: user.username } };
+
+        // إنشاء التوكن
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        res.json({ token, username: user.username, profilePic: user.profilePic });
+        // التعديل هنا فقط: إضافة profilePic للبيانات المرسلة
+        res.json({ 
+            token, 
+            username: user.username, 
+            profilePic: user.profilePic 
+        });
+
     } catch (err) {
+        console.error(err);
         res.status(500).send('خطأ في السيرفر');
     }
 });
@@ -95,11 +109,11 @@ app.post('/api/projects', auth, async (req, res) => {
 app.put('/api/projects/:id', auth, async (req, res) => {
     try {
         const projectId = req.params.id;
-        
+
         // التحقق من أن المشروع موجود
         let project = await Project.findById(projectId);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
-        
+
         // التأكد أن من يقوم بتحديثه هو صاحبه الفعلي
         if (project.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بتحديث هذا المشروع' });
@@ -109,7 +123,10 @@ app.put('/api/projects/:id', auth, async (req, res) => {
         project.html = req.body.html || project.html;
         project.css = req.body.css || project.css;
         project.js = req.body.js || project.js;
-        
+        project.title = req.body.title || project.title;
+        project.description = req.body.description || project.description;
+        project.updatedAt = new Date();
+
         await project.save();
         res.json({ msg: 'تم التحديث بنجاح', project });
     } catch (err) {
@@ -124,8 +141,8 @@ app.get('/api/projects', async (req, res) => {
         const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
 
-        const projects = await Project.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-        const total = await Project.countDocuments();
+        const projects = await Project.find({ isDeleted: { $ne: true } }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        const total = await Project.countDocuments({ isDeleted: { $ne: true } });
 
         res.json({ projects, totalPages: Math.ceil(total / limit), currentPage: page });
     } catch (err) {
@@ -138,11 +155,12 @@ app.get('/api/projects/:id', async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
-        
+        if (project.isDeleted) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
         // زيادة عدد المشاهدات عند الفتح
         project.views += 1;
         await project.save();
-        
+
         res.json(project);
     } catch (err) {
         res.status(500).send('خطأ في السيرفر');
@@ -150,11 +168,11 @@ app.get('/api/projects/:id', async (req, res) => {
 });
 // ... (الكود السابق في ملفك)
 
-// دالة حذف المشروع (DELETE)
+// دالة حذف المشروع (DELETE) - حذف نهائي
 app.delete('/api/projects/:id', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
-        
+
         if (!project) {
             return res.status(404).json({ msg: 'المشروع غير موجود' });
         }
@@ -166,10 +184,69 @@ app.delete('/api/projects/:id', auth, async (req, res) => {
 
         await Project.findByIdAndDelete(req.params.id);
         res.json({ msg: 'تم حذف المشروع بنجاح' });
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'خطأ داخلي في السيرفر' });
+    }
+});
+
+// ==========================================
+// 3. مسارات سلة المحذوفات (Trash / Soft Delete)
+// ==========================================
+
+// حذف منطقي - نقل إلى سلة المحذوفات
+app.put('/api/projects/:id/soft-delete', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        if (project.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
+        }
+
+        // ملاحظة: يجب إضافة هذين الحقلين إلى مخطط Project:
+        // isDeleted: { type: Boolean, default: false }
+        // deletedAt: { type: Date, default: null }
+        project.isDeleted = true;
+        project.deletedAt = new Date();
+        await project.save();
+        res.json({ msg: 'تم نقل المشروع إلى سلة المحذوفات', project });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// استعادة مشروع من سلة المحذوفات
+app.put('/api/projects/:id/restore', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+        if (project.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك باستعادة هذا المشروع' });
+        }
+
+        project.isDeleted = false;
+        project.deletedAt = null;
+        await project.save();
+        res.json({ msg: 'تم استعادة المشروع بنجاح', project });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// جلب المشاريع المحذوفة
+app.get('/api/projects/deleted/list', auth, async (req, res) => {
+    try {
+        const projects = await Project.find({ 
+            author: req.user.username, 
+            isDeleted: true 
+        }).sort({ deletedAt: -1 });
+        res.json(projects);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
     }
 });
 
