@@ -18,9 +18,6 @@ const app = express();
 app.use(express.json({ limit: '50mb' })); // زيادة الحجم لاستيعاب الـ Base64 للصور والأكواد
 app.use(cors());
 
-// الاتصال بقاعدة بيانات MongoDB
-
-
 // ==========================================
 // 1. مسارات المصادقة (Authentication Routes)
 // ==========================================
@@ -46,14 +43,9 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// تسجيل الدخول (Login) -> متوافق مع indexs.html
-// ==========================================
-// مسار تسجيل الدخول (Login) بعد التعديل
-// ==========================================
-// تسجيل الدخول (Login) 
+// تسجيل الدخول (Login)
 app.post('/api/auth/login', async (req, res) => {
     try {
-        // نستقبل اسم المستخدم وليس الإيميل لتتوافق مع الواجهة
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
@@ -63,11 +55,8 @@ app.post('/api/auth/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
         const payload = { user: { id: user.id, username: user.username } };
-
-        // إنشاء التوكن
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        // التعديل هنا فقط: إضافة profilePic للبيانات المرسلة
         res.json({ 
             token, 
             username: user.username, 
@@ -84,7 +73,7 @@ app.post('/api/auth/login', async (req, res) => {
 // 2. مسارات المشاريع (Projects Routes)
 // ==========================================
 
-// نشر مشروع جديد (Create Project) -> متوافق مع codes.html
+// نشر مشروع جديد (Create Project)
 app.post('/api/projects', auth, async (req, res) => {
     try {
         const { title, description, html, css, js } = req.body;
@@ -105,21 +94,19 @@ app.post('/api/projects', auth, async (req, res) => {
         res.status(500).send('خطأ أثناء حفظ المشروع');
     }
 });
+
 // تحديث مشروع موجود (Update Project)
 app.put('/api/projects/:id', auth, async (req, res) => {
     try {
         const projectId = req.params.id;
 
-        // التحقق من أن المشروع موجود
         let project = await Project.findById(projectId);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
 
-        // التأكد أن من يقوم بتحديثه هو صاحبه الفعلي
         if (project.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بتحديث هذا المشروع' });
         }
 
-        // تحديث الكود
         project.html = req.body.html || project.html;
         project.css = req.body.css || project.css;
         project.js = req.body.js || project.js;
@@ -134,7 +121,8 @@ app.put('/api/projects/:id', auth, async (req, res) => {
         res.status(500).send('خطأ في السيرفر أثناء التحديث');
     }
 });
-// جلب كافة المشاريع مع الترقيم (Get Projects with Pagination) -> متوافق مع indexs.html
+
+// جلب كافة المشاريع مع الترقيم (Get Projects with Pagination)
 app.get('/api/projects', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -150,14 +138,13 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-// جلب مشروع واحد للمعاينة (Get Single Project) -> متوافق مع view.html
+// جلب مشروع واحد للمعاينة (Get Single Project)
 app.get('/api/projects/:id', async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
         if (project.isDeleted) return res.status(404).json({ msg: 'المشروع غير موجود' });
 
-        // زيادة عدد المشاهدات عند الفتح
         project.views += 1;
         await project.save();
 
@@ -166,9 +153,8 @@ app.get('/api/projects/:id', async (req, res) => {
         res.status(500).send('خطأ في السيرفر');
     }
 });
-// ... (الكود السابق في ملفك)
 
-// دالة حذف المشروع (DELETE) - حذف نهائي
+// حذف المشروع (DELETE) - حذف نهائي
 app.delete('/api/projects/:id', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -177,7 +163,6 @@ app.delete('/api/projects/:id', auth, async (req, res) => {
             return res.status(404).json({ msg: 'المشروع غير موجود' });
         }
 
-        // إضافة حماية: التأكد أن المستخدم الذي يحذف هو صاحب المشروع
         if (project.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
         }
@@ -204,9 +189,6 @@ app.put('/api/projects/:id/soft-delete', auth, async (req, res) => {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
         }
 
-        // ملاحظة: يجب إضافة هذين الحقلين إلى مخطط Project:
-        // isDeleted: { type: Boolean, default: false }
-        // deletedAt: { type: Date, default: null }
         project.isDeleted = true;
         project.deletedAt = new Date();
         await project.save();
@@ -250,8 +232,11 @@ app.get('/api/projects/deleted/list', auth, async (req, res) => {
     }
 });
 
-// ... (تكملة الكود الخاص بمسارات الإعجاب والتعليقات)
-// الإعجاب وإلغاء الإعجاب بمشروع (Like / Unlike) -> متوافق مع view.html
+// ==========================================
+// 4. مسارات الإعجاب (Likes)
+// ==========================================
+
+// الإعجاب وإلغاء الإعجاب بمشروع (Like / Unlike)
 app.post('/api/projects/:id/like', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -259,10 +244,8 @@ app.post('/api/projects/:id/like', auth, async (req, res) => {
 
         const username = req.user.username;
         if (project.likes.includes(username)) {
-            // إذا كان مسجلاً في قائمة المعجبين، نقوم بإلغاء الإعجاب
             project.likes = project.likes.filter(user => user !== username);
         } else {
-            // إذا لم يكن معجباً، نضيفه
             project.likes.push(username);
         }
 
@@ -273,12 +256,11 @@ app.post('/api/projects/:id/like', auth, async (req, res) => {
     }
 });
 
-
 // ==========================================
-// 4. مسارات التعليقات والردود
+// 5. مسارات التعليقات والردود (Comments & Replies)
 // ==========================================
 
-// ✅ إضافة تعليق (مع إرجاع المشروع كاملاً)
+// ✅ إضافة تعليق (تم التعديل ليرجع المشروع كاملاً)
 app.post('/api/projects/:id/comment', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -307,7 +289,6 @@ app.post('/api/projects/:id/comment/:commentId/reply', auth, async (req, res) =>
         const project = await Project.findById(req.params.id);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
 
-        // البحث عن التعليق باستخدام _id
         const comment = project.comments.id(req.params.commentId);
         if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
 
@@ -336,7 +317,6 @@ app.put('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
         const comment = project.comments.id(req.params.commentId);
         if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
 
-        // التحقق من صاحب التعليق
         if (comment.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بتعديل هذا التعليق' });
         }
@@ -360,12 +340,10 @@ app.delete('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
         const comment = project.comments.id(req.params.commentId);
         if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
 
-        // التحقق من صاحب التعليق
         if (comment.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا التعليق' });
         }
 
-        // حذف التعليق باستخدام pull
         project.comments.pull(req.params.commentId);
         await project.save();
 
@@ -388,7 +366,6 @@ app.put('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req,
         const reply = comment.replies.id(req.params.replyId);
         if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
 
-        // التحقق من صاحب الرد
         if (reply.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بتعديل هذا الرد' });
         }
@@ -415,12 +392,10 @@ app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (r
         const reply = comment.replies.id(req.params.replyId);
         if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
 
-        // التحقق من صاحب الرد
         if (reply.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا الرد' });
         }
 
-        // حذف الرد
         comment.replies.pull(req.params.replyId);
         await project.save();
 
@@ -432,7 +407,7 @@ app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (r
 });
 
 // ==========================================
-// 5. مسار التقييم (Rating)
+// 6. مسار التقييم (Rating)
 // ==========================================
 
 // ✅ إضافة أو تحديث تقييم المشروع
@@ -448,14 +423,11 @@ app.post('/api/projects/:id/rating', auth, async (req, res) => {
 
         const username = req.user.username;
 
-        // البحث عن تقييم سابق للمستخدم
         const existingRating = project.ratings.find(r => r.user === username);
 
         if (existingRating) {
-            // تحديث التقييم الموجود
             existingRating.value = rating;
         } else {
-            // إضافة تقييم جديد
             project.ratings.push({ user: username, value: rating });
         }
 
@@ -487,6 +459,10 @@ app.get('/api/projects/:id/ratings', async (req, res) => {
         res.status(500).send('خطأ في السيرفر');
     }
 });
-// تشغيل الخادم
+
+// ==========================================
+// 7. تشغيل الخادم
+// ==========================================
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
