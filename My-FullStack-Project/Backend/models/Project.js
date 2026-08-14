@@ -1,5 +1,29 @@
 const mongoose = require('mongoose');
 
+const ReplySchema = new mongoose.Schema({
+    author: { type: String, required: true },
+    text: { type: String, required: true, trim: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: null },
+    edited: { type: Boolean, default: false }
+}, { _id: true });
+
+const CommentSchema = new mongoose.Schema({
+    author: { type: String, required: true },
+    text: { type: String, required: true, trim: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: null },
+    edited: { type: Boolean, default: false },
+    replies: { type: [ReplySchema], default: [] }
+}, { _id: true });
+
+const RatingSchema = new mongoose.Schema({
+    user: { type: String, required: true },
+    value: { type: Number, required: true, min: 1, max: 5 },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: null }
+}, { _id: true });
+
 const ProjectSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, default: '' },
@@ -8,32 +32,14 @@ const ProjectSchema = new mongoose.Schema({
     js: { type: String, default: '' },
     author: { type: String, required: true },
     views: { type: Number, default: 0 },
+    likes: { type: [String], default: [] },
+    comments: { type: [CommentSchema], default: [] },
+    ratings: { type: [RatingSchema], default: [] },
     isDeleted: { type: Boolean, default: false },
-    deletedAt: { type: Date, default: null },
-    likes: [{ type: String }], // أسماء المستخدمين الذين أعجبهم المشروع
-    
-    // نظام التعليقات مع الردود
-    comments: [{
-        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
-        author: { type: String, required: true },
-        text: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now },
-        replies: [{
-            _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
-            author: { type: String, required: true },
-            text: { type: String, required: true },
-            createdAt: { type: Date, default: Date.now }
-        }]
-    }],
-    
-    // نظام التقييم بالنجوم
-    ratings: [{
-        user: { type: String, required: true },
-        value: { type: Number, required: true, min: 1, max: 5 },
-        createdAt: { type: Date, default: Date.now }
-    }]
+    deletedAt: { type: Date, default: null }
 }, {
-    timestamps: true
+    timestamps: true,
+    strict: false
 });
 
-module.exports = mongoose.model('Project', ProjectSchema);
+module.exports = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
