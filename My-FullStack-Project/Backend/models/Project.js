@@ -2,30 +2,38 @@ const mongoose = require('mongoose');
 
 const ProjectSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    description: { type: String },
-    html: { type: String },
-    css: { type: String },
-    js: { type: String },
+    description: { type: String, default: '' },
+    html: { type: String, default: '' },
+    css: { type: String, default: '' },
+    js: { type: String, default: '' },
     author: { type: String, required: true },
-    
-    // ===== الحقول الجديدة لسلة المحذوفات =====
+    views: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
+    likes: [{ type: String }], // أسماء المستخدمين الذين أعجبهم المشروع
     
-    // الحقول الموجودة مسبقاً
-    views: { type: Number, default: 0 },
-    likes: [{ type: String }],
+    // نظام التعليقات مع الردود
     comments: [{
-        author: String,
-        text: String,
-        createdAt: { type: Date, default: Date.now }
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+        author: { type: String, required: true },
+        text: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+        replies: [{
+            _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            author: { type: String, required: true },
+            text: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now }
+        }]
     }],
+    
+    // نظام التقييم بالنجوم
     ratings: [{
-        user: String,
-        value: Number
+        user: { type: String, required: true },
+        value: { type: Number, required: true, min: 1, max: 5 },
+        createdAt: { type: Date, default: Date.now }
     }]
 }, {
-    timestamps: true // يضيف createdAt و updatedAt تلقائياً
+    timestamps: true
 });
 
 module.exports = mongoose.model('Project', ProjectSchema);
