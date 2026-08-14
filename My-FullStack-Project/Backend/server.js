@@ -15,17 +15,14 @@ const auth = require('./middleware/auth');
 const app = express();
 
 // Middleware لتمكين استقبال بيانات JSON وضمان عدم حظر الطلبات (CORS)
-app.use(express.json({ limit: '50mb' })); // زيادة الحجم لاستيعاب الـ Base64 للصور والأكواد
+app.use(express.json({ limit: '50mb' }));
 app.use(cors());
-
-// الاتصال بقاعدة بيانات MongoDB
-
 
 // ==========================================
 // 1. مسارات المصادقة (Authentication Routes)
 // ==========================================
 
-// التسجيل (Register) -> متوافق مع register.html
+// التسجيل (Register)
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, email, password, profilePic } = req.body;
@@ -36,7 +33,6 @@ app.post('/api/auth/register', async (req, res) => {
         const newUser = new User({ username, email, password, profilePic });
         await newUser.save();
 
-        // إنشاء التوكن الخاص بالمستخدم لتسجيل دخوله فوراً
         const payload = { user: { id: newUser.id, username: newUser.username } };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -46,14 +42,9 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// تسجيل الدخول (Login) -> متوافق مع indexs.html
-// ==========================================
-// مسار تسجيل الدخول (Login) بعد التعديل
-// ==========================================
-// تسجيل الدخول (Login) 
+// تسجيل الدخول (Login)
 app.post('/api/auth/login', async (req, res) => {
     try {
-        // نستقبل اسم المستخدم وليس الإيميل لتتوافق مع الواجهة
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
@@ -63,11 +54,8 @@ app.post('/api/auth/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
 
         const payload = { user: { id: user.id, username: user.username } };
-
-        // إنشاء التوكن
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        // التعديل هنا فقط: إضافة profilePic للبيانات المرسلة
         res.json({ 
             token, 
             username: user.username, 
@@ -84,7 +72,7 @@ app.post('/api/auth/login', async (req, res) => {
 // 2. مسارات المشاريع (Projects Routes)
 // ==========================================
 
-// نشر مشروع جديد (Create Project) -> متوافق مع codes.html
+// نشر مشروع جديد
 app.post('/api/projects', auth, async (req, res) => {
     try {
         const { title, description, html, css, js } = req.body;
@@ -105,21 +93,19 @@ app.post('/api/projects', auth, async (req, res) => {
         res.status(500).send('خطأ أثناء حفظ المشروع');
     }
 });
-// تحديث مشروع موجود (Update Project)
+
+// تحديث مشروع موجود
 app.put('/api/projects/:id', auth, async (req, res) => {
     try {
         const projectId = req.params.id;
 
-        // التحقق من أن المشروع موجود
         let project = await Project.findById(projectId);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
 
-        // التأكد أن من يقوم بتحديثه هو صاحبه الفعلي
         if (project.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بتحديث هذا المشروع' });
         }
 
-        // تحديث الكود
         project.html = req.body.html || project.html;
         project.css = req.body.css || project.css;
         project.js = req.body.js || project.js;
@@ -134,7 +120,8 @@ app.put('/api/projects/:id', auth, async (req, res) => {
         res.status(500).send('خطأ في السيرفر أثناء التحديث');
     }
 });
-// جلب كافة المشاريع مع الترقيم (Get Projects with Pagination) -> متوافق مع indexs.html
+
+// جلب كافة المشاريع مع الترقيم
 app.get('/api/projects', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -150,14 +137,13 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-// جلب مشروع واحد للمعاينة (Get Single Project) -> متوافق مع view.html
+// جلب مشروع واحد للمعاينة
 app.get('/api/projects/:id', async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
         if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
         if (project.isDeleted) return res.status(404).json({ msg: 'المشروع غير موجود' });
 
-        // زيادة عدد المشاهدات عند الفتح
         project.views += 1;
         await project.save();
 
@@ -166,9 +152,8 @@ app.get('/api/projects/:id', async (req, res) => {
         res.status(500).send('خطأ في السيرفر');
     }
 });
-// ... (الكود السابق في ملفك)
 
-// دالة حذف المشروع (DELETE) - حذف نهائي
+// حذف المشروع (حذف نهائي)
 app.delete('/api/projects/:id', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -177,7 +162,6 @@ app.delete('/api/projects/:id', auth, async (req, res) => {
             return res.status(404).json({ msg: 'المشروع غير موجود' });
         }
 
-        // إضافة حماية: التأكد أن المستخدم الذي يحذف هو صاحب المشروع
         if (project.author !== req.user.username) {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
         }
@@ -192,7 +176,7 @@ app.delete('/api/projects/:id', auth, async (req, res) => {
 });
 
 // ==========================================
-// 3. مسارات سلة المحذوفات (Trash / Soft Delete)
+// 3. مسارات سلة المحذوفات (Soft Delete)
 // ==========================================
 
 // حذف منطقي - نقل إلى سلة المحذوفات
@@ -204,9 +188,6 @@ app.put('/api/projects/:id/soft-delete', auth, async (req, res) => {
             return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا المشروع' });
         }
 
-        // ملاحظة: يجب إضافة هذين الحقلين إلى مخطط Project:
-        // isDeleted: { type: Boolean, default: false }
-        // deletedAt: { type: Date, default: null }
         project.isDeleted = true;
         project.deletedAt = new Date();
         await project.save();
@@ -250,8 +231,11 @@ app.get('/api/projects/deleted/list', auth, async (req, res) => {
     }
 });
 
-// ... (تكملة الكود الخاص بمسارات الإعجاب والتعليقات)
-// الإعجاب وإلغاء الإعجاب بمشروع (Like / Unlike) -> متوافق مع view.html
+// ==========================================
+// 4. مسارات الإعجاب (Likes)
+// ==========================================
+
+// الإعجاب وإلغاء الإعجاب بمشروع
 app.post('/api/projects/:id/like', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -259,10 +243,8 @@ app.post('/api/projects/:id/like', auth, async (req, res) => {
 
         const username = req.user.username;
         if (project.likes.includes(username)) {
-            // إذا كان مسجلاً في قائمة المعجبين، نقوم بإلغاء الإعجاب
             project.likes = project.likes.filter(user => user !== username);
         } else {
-            // إذا لم يكن معجباً، نضيفه
             project.likes.push(username);
         }
 
@@ -274,10 +256,10 @@ app.post('/api/projects/:id/like', auth, async (req, res) => {
 });
 
 // ==========================================
-// 4. مسارات التعليقات والردود والتقييمات
+// 5. مسارات التعليقات والردود (Comments & Replies)
 // ==========================================
 
-// إضافة تعليق
+// ✅ إضافة تعليق
 app.post('/api/projects/:id/comment', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -294,6 +276,8 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
             replies: []
         });
 
+        project.markModified('comments'); // 🔴 إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -302,7 +286,7 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
     }
 });
 
-// إضافة رد على تعليق
+// ✅ إضافة رد على تعليق
 app.post('/api/projects/:id/comment/:commentId/reply', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -321,6 +305,8 @@ app.post('/api/projects/:id/comment/:commentId/reply', auth, async (req, res) =>
             createdAt: new Date()
         });
 
+        project.markModified('comments'); // 🔴 إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -329,7 +315,7 @@ app.post('/api/projects/:id/comment/:commentId/reply', auth, async (req, res) =>
     }
 });
 
-// تعديل تعليق - المالك فقط
+// ✅ تعديل تعليق - المالك فقط
 app.put('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -346,6 +332,11 @@ app.put('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
         }
 
         comment.text = text;
+        comment.edited = true; // 🔴 إضافة حالة التعديل
+        comment.updatedAt = new Date(); // 🔴 تحديث الوقت
+
+        project.markModified('comments'); // 🔴 هام جداً: إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -354,7 +345,7 @@ app.put('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
     }
 });
 
-// حذف تعليق - المالك فقط
+// ✅ حذف تعليق - المالك فقط
 app.delete('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -368,6 +359,9 @@ app.delete('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
         }
 
         project.comments.pull(req.params.commentId);
+        
+        project.markModified('comments'); // 🔴 إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -376,7 +370,7 @@ app.delete('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
     }
 });
 
-// تعديل رد - صاحب الرد فقط
+// ✅ تعديل رد - صاحب الرد فقط
 app.put('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -396,6 +390,11 @@ app.put('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req,
         }
 
         reply.text = text;
+        reply.edited = true; // 🔴 إضافة حالة التعديل
+        reply.updatedAt = new Date(); // 🔴 تحديث الوقت
+
+        project.markModified('comments'); // 🔴 هام جداً
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -404,7 +403,7 @@ app.put('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req,
     }
 });
 
-// حذف رد - صاحب الرد فقط
+// ✅ حذف رد - صاحب الرد فقط
 app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -421,6 +420,9 @@ app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (r
         }
 
         comment.replies.pull(req.params.replyId);
+        
+        project.markModified('comments'); // 🔴 إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -429,7 +431,11 @@ app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (r
     }
 });
 
-// إضافة أو تحديث تقييم المشروع - تقييم واحد لكل مستخدم
+// ==========================================
+// 6. مسار التقييم (Rating)
+// ==========================================
+
+// ✅ إضافة أو تحديث تقييم المشروع
 app.post('/api/projects/:id/rating', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -455,6 +461,8 @@ app.post('/api/projects/:id/rating', auth, async (req, res) => {
             });
         }
 
+        project.markModified('ratings'); // 🔴 إجبار Mongoose على حفظ التعديل
+
         await project.save();
         res.json(project);
     } catch (err) {
@@ -463,7 +471,7 @@ app.post('/api/projects/:id/rating', auth, async (req, res) => {
     }
 });
 
-// جلب إحصائيات التقييمات
+// ✅ جلب إحصائيات التقييمات
 app.get('/api/projects/:id/ratings', async (req, res) => {
     try {
         const project = await Project.findById(req.params.id).select('ratings');
@@ -482,6 +490,9 @@ app.get('/api/projects/:id/ratings', async (req, res) => {
     }
 });
 
-// تشغيل الخادم
+// ==========================================
+// 7. تشغيل الخادم
+// ==========================================
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
