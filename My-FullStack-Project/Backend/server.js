@@ -273,7 +273,12 @@ app.post('/api/projects/:id/like', auth, async (req, res) => {
     }
 });
 
-// إضافة تعليق (Add Comment) -> متوافق مع view.html
+
+// ==========================================
+// 4. مسارات التعليقات والردود
+// ==========================================
+
+// ✅ إضافة تعليق (مع إرجاع المشروع كاملاً)
 app.post('/api/projects/:id/comment', auth, async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -281,17 +286,207 @@ app.post('/api/projects/:id/comment', auth, async (req, res) => {
 
         const newComment = {
             author: req.user.username,
-            text: req.body.text
+            text: req.body.text,
+            createdAt: new Date()
         };
 
         project.comments.push(newComment);
         await project.save();
-        res.json(project.comments);
+        
+        // ✅ إرجاع المشروع كاملاً، وليس التعليقات فقط
+        res.json(project);
     } catch (err) {
+        console.error(err);
         res.status(500).send('خطأ في السيرفر');
     }
 });
 
+// ✅ إضافة رد على تعليق
+app.post('/api/projects/:id/comment/:commentId/reply', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        // البحث عن التعليق باستخدام _id
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+
+        const newReply = {
+            author: req.user.username,
+            text: req.body.text,
+            createdAt: new Date()
+        };
+
+        comment.replies.push(newReply);
+        await project.save();
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ✅ تعديل تعليق
+app.put('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+
+        // التحقق من صاحب التعليق
+        if (comment.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بتعديل هذا التعليق' });
+        }
+
+        comment.text = req.body.text;
+        await project.save();
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ✅ حذف تعليق
+app.delete('/api/projects/:id/comment/:commentId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+
+        // التحقق من صاحب التعليق
+        if (comment.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا التعليق' });
+        }
+
+        // حذف التعليق باستخدام pull
+        project.comments.pull(req.params.commentId);
+        await project.save();
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ✅ تعديل رد
+app.put('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+
+        const reply = comment.replies.id(req.params.replyId);
+        if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
+
+        // التحقق من صاحب الرد
+        if (reply.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بتعديل هذا الرد' });
+        }
+
+        reply.text = req.body.text;
+        await project.save();
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ✅ حذف رد
+app.delete('/api/projects/:id/comment/:commentId/reply/:replyId', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const comment = project.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ msg: 'التعليق غير موجود' });
+
+        const reply = comment.replies.id(req.params.replyId);
+        if (!reply) return res.status(404).json({ msg: 'الرد غير موجود' });
+
+        // التحقق من صاحب الرد
+        if (reply.author !== req.user.username) {
+            return res.status(401).json({ msg: 'غير مصرح لك بحذف هذا الرد' });
+        }
+
+        // حذف الرد
+        comment.replies.pull(req.params.replyId);
+        await project.save();
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ==========================================
+// 5. مسار التقييم (Rating)
+// ==========================================
+
+// ✅ إضافة أو تحديث تقييم المشروع
+app.post('/api/projects/:id/rating', auth, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const { rating } = req.body;
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ msg: 'يجب أن يكون التقييم بين 1 و 5' });
+        }
+
+        const username = req.user.username;
+
+        // البحث عن تقييم سابق للمستخدم
+        const existingRating = project.ratings.find(r => r.user === username);
+
+        if (existingRating) {
+            // تحديث التقييم الموجود
+            existingRating.value = rating;
+        } else {
+            // إضافة تقييم جديد
+            project.ratings.push({ user: username, value: rating });
+        }
+
+        await project.save();
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
+
+// ✅ جلب تقييمات المشروع (للحصول على متوسط التقييم)
+app.get('/api/projects/:id/ratings', async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ msg: 'المشروع غير موجود' });
+
+        const ratings = project.ratings || [];
+        const total = ratings.length;
+        const average = total > 0 ? ratings.reduce((sum, r) => sum + r.value, 0) / total : 0;
+
+        res.json({
+            ratings,
+            total,
+            average: parseFloat(average.toFixed(1))
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('خطأ في السيرفر');
+    }
+});
 // تشغيل الخادم
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على المنفذ: ${PORT}`));
