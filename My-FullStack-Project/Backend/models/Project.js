@@ -1,45 +1,39 @@
 const mongoose = require('mongoose');
 
-const ReplySchema = new mongoose.Schema({
-    author: { type: String, required: true },
-    text: { type: String, required: true, trim: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: null },
-    edited: { type: Boolean, default: false }
-}, { _id: true });
-
-const CommentSchema = new mongoose.Schema({
-    author: { type: String, required: true },
-    text: { type: String, required: true, trim: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: null },
-    edited: { type: Boolean, default: false },
-    replies: { type: [ReplySchema], default: [] }
-}, { _id: true });
-
-const RatingSchema = new mongoose.Schema({
-    user: { type: String, required: true },
-    value: { type: Number, required: true, min: 1, max: 5 },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: null }
-}, { _id: true });
-
 const ProjectSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    description: { type: String, default: '' },
-    html: { type: String, default: '' },
-    css: { type: String, default: '' },
-    js: { type: String, default: '' },
+    description: { type: String },
+    html: { type: String },
+    css: { type: String },
+    js: { type: String },
     author: { type: String, required: true },
-    views: { type: Number, default: 0 },
-    likes: { type: [String], default: [] },
-    comments: { type: [CommentSchema], default: [] },
-    ratings: { type: [RatingSchema], default: [] },
+
+    // ===== الحقول الجديدة لسلة المحذوفات =====
     isDeleted: { type: Boolean, default: false },
-    deletedAt: { type: Date, default: null }
+    deletedAt: { type: Date, default: null },
+
+    // الحقول الموجودة مسبقاً
+    views: { type: Number, default: 0 },
+    likes: [{ type: String }],
+    comments: [{
+        author: String,
+        text: String,
+        createdAt: { type: Date, default: Date.now },
+        edited: { type: Boolean, default: false },
+        // ===== الردود داخل كل تعليق =====
+        replies: [{
+            author: String,
+            text: String,
+            createdAt: { type: Date, default: Date.now },
+            edited: { type: Boolean, default: false }
+        }]
+    }],
+    ratings: [{
+        user: String,
+        value: Number
+    }]
 }, {
-    timestamps: true,
-    strict: false
+    timestamps: true // يضيف createdAt و updatedAt تلقائياً
 });
 
-module.exports = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
+module.exports = mongoose.model('Project', ProjectSchema);
